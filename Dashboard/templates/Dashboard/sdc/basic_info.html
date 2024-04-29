@@ -1,0 +1,58 @@
+{% load static %}
+
+<div class="container">
+    <h2>Welcome to the ELN-File-Transfer-Manager</h2>
+    <p>Full documentation <a target="_blank" href="https://www.chemotion.net/chemotionsaurus/docs/eln/devices/device_configuration">here</a></p>
+    <p>This application works in complete dependence on the ELN. User management and data storage are completely managed by ELN and used by the ELN file transfer manager only as a salve system.</p>
+    <img src="{% static 'ELN_file_transfer.drawio.png' %}" alt="Diagram: Networg description">
+
+    <p>The physical separation of the laboratory PCs from the public networks for security reasons has a great obvious influence on the requirements of the file transfer process.
+        Therefore, the data stored locally on the lab device must be forwarded to the ELN via an intermediary system.
+        This server-side application can be used as such an intermediary system. It allows you to monitor and organise the data transmission of devices integrated in
+        your ELN Chemotion instance (for more infos click ELN-File-Transfer-Manager, <a
+                href="https://www.chemotion.net/chemotionsaurus/docs/category/device-integration"
+                target="_blank">here</a> ). With the <a href="https://github.com/ComPlat/ELN_file_watcher"
+                                                        target="_blank">EFW (ELN File Watcher)</a>
+        instances adapted to the requirements can be generated quickly and simply. These instances can then be installed
+        on the target lab system in just a few steps. In addition, this server provides a data storage proxy with an
+        interface to receive data from your target systems. These data are then automatically entered in the ELN.</p>
+    <h3>How to install EFW</h3>
+    <p>The following section introduces the installation of the EFW. Note that the installation is <b>only</b> intended for Windows x64 and i386 devices and Linux x64 devices.</p>
+    <ol>
+        <li><b>Generate EFW instance:</b> <p>AIn the lower right corner of the EFW list you will find a green button. With this button you can create a <a class="navigation-links" href="{% url 'sdc_index' %}~main-view~efw-list~efw-new~&type=instance">new EFW</a> instance adapted to an external WebDAV or SFTP server.</p></li>
+        <li><b>Download EFW instance:</b> <p>After you have created a new Instance you can download the executable in the EFW list.</p>
+        <li><b>Install EFW instance:</b> <p>The installation is simple but require administration rights.</p>
+        <ol>
+            <li>Make a directory "C:\Program Files\eln_exporter"</li>
+            <li>Copy the (on this server generated) <b>efw.exe</b> into "C:\Program Files\file_exporter"</li>
+            <li>Copy the <a target="_blank" href="{% url 'file_exporter_task.vbs' %}">file_exporter_task.vbs</a> into the startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and type <b>shell:startup</b>. This will open startup directory</p></li>
+        </ol></li>
+        <li><b>(SPECIAL CASE) Install EFW with SFTP on Windows XP:</b> <p> As above the installation requires administration rights. The "Download" button leads to a zip file and not only to an executable file. This zipped file contains the executable file and WinSCP. </p>
+            <ol>
+                <li>Make a directory "C:\Program Files\eln_exporter"</li>
+                <li>Unzip the downloaded file <b>efw_sftp_winxp.zip</b></li>
+                <li>Copy the <b>efw.exe</b>, <b>WinSCP.exe</b> andt <b>WinSCP.com</b> into "C:\Program Files\file_exporter"</li>
+                <li>Copy the <a target="_blank" href="{% url 'file_exporter_task.vbs' %}">file_exporter_task.vbs</a> into the startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and type <b>shell:startup</b>. This will open startup directory</p></li>
+            </ol>
+        </li>
+        <li><b>Install EFW on LINUX:</b> <p> As above the installation requires administration rights. This installation description works only for <b>systemd</b></p>
+            <ol>
+                <li>Make a directory "/opt/file_exporter"</li>
+                <li>Copy the <b>efw</b> into "/opt/file_exporter/"</li>
+                <li>Download <a target="_blank" href="{% url 'file_efw.service' %}">efw.service</a>. Edit the file and enter the correct username. Copy it into /etc/systemd/system/efw.service. Run <b>systemctl start efw</b> to start it and <b>systemctl enable efw</b> to automatically get it to start on boot.</li>
+            </ol>
+        </li>
+    </ol>
+    <h3>Set up Firewale</h3>
+
+
+    <code>sudo ufw deny in on eth0</code>
+    <code>sudo ufw allow in on eth0 sudo ufw allow from 203.0.113.103 proto tcp to any port 22<</code>
+    <code>sudo ufw allow from 203.0.113.103 proto tcp to any port 22</code>
+    <code>*filter
+        :INPUT ACCEPT [0:0]
+        iptables -A INPUT -i eth0 -p tcp -m tcp -m state --state RELATED,ESTABLISHED -j ACCEPT
+        COMMIT
+    </code>
+    File: /etc/ufw/before.rules
+</div>
