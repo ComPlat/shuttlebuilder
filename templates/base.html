@@ -27,8 +27,10 @@
 </head>
 <body>
 {% block content %}{% endblock %}
+{% if debug %}
 <div class="site-footer">
-    <p>By: Martin Starman {% if debug %} DEBUG_MODE {% endif %}</p>
+    <p>By: Martin Starman  DEBUG_MODE </p>
 </div>
+{% endif %}
 </body>
 </html>

@@ -71,15 +71,15 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
             else:
                 zip_path = os.path.join(os.path.dirname(file_location), "shuttle_sftp_winxp.zip")
                 zf = zipfile.ZipFile(zip_path, "w")
-                zf.write(file_location, 'efw.exe')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'Utils/files/license.txt'), 'license.txt')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'Utils/files/WinSCP.com'), 'WinSCP.com')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'Utils/files/WinSCP.exe'), 'WinSCP.exe')
+                zf.write(file_location, 'shuttle.exe')
+                zf.write(os.path.join(settings.STATIC_ROOT, 'files/license.txt'), 'license.txt')
+                zf.write(os.path.join(settings.STATIC_ROOT, 'files/WinSCP.com'), 'WinSCP.com')
+                zf.write(os.path.join(settings.STATIC_ROOT, 'files/WinSCP.exe'), 'WinSCP.exe')
                 zf.close()
                 with open(zip_path, 'rb') as f:
                     file_data = f.read()
                     response = HttpResponse(file_data, content_type='application/octet-stream')
-                    response['Content-Disposition'] = 'attachment; filename="efw_sftp_winxp.zip"'
+                    response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
 
         except IOError:
             # handle file not exist case here
