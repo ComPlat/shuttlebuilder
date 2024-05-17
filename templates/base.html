@@ -17,19 +17,13 @@
         window.VERSION = '{{VERSION}}';
     </script>
 
-    <link href="{% static 'favicon.ico' %}" rel="shortcut icon">
+    <link href="{% static '/img/favicon.png' %}" rel="shortcut icon">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}"/>
-    <script type="text/javascript" src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.bundle.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}"/>
+    <link rel="stylesheet" href="{% static 'bootstrap-icons/font/bootstrap-icons.min.css'%}">
 
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
     {% block scripts %}{% endblock %}
-
-
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
 </head>
 <body>
 {% block content %}{% endblock %}

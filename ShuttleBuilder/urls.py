@@ -1,7 +1,8 @@
-"""ShuttleBuilder URL Configuration
+"""
+URL configuration for ShuttleBuilder project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.0/topics/http/urls/
+    https://docs.djangoproject.com/en/5.0/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -19,36 +20,20 @@ from django.shortcuts import render
 from django.conf import settings
 from django.views.i18n import JavaScriptCatalog
 
-from WebDAV.view import DavDownloadView, DavView
-
 urlpatterns = [
     re_path('sdc_view/sdc_tools/', include('sdc_tools.sdc_urls')),
     re_path('sdc_view/sdc_user/', include('sdc_user.sdc_urls')),
     # scd view below
-    path('sdc_view/dashboard/', include('Dashboard.sdc_urls')),
-    path('sdc_view/utils/', include('Utils.sdc_urls')),
-    path('sdc_view/adminview/', include('Adminview.sdc_urls')),
-    path('sdc_view/logedout/', include('Logedout.sdc_urls')),
+    path('sdc_view/main_app/', include('main_app.sdc_urls')),
+    path('sdc_view/main_app/', include('file_handler.urls')),
 
     path('admin/', admin.site.urls),
-    re_path('download/webdav(?P<path>.*)', DavDownloadView.as_view(), name="download_webdav"),
-    re_path('webdav/(?P<name>[^/]*)/(?P<path>.*)', DavView.as_view(), name="webdav"),
 ]
-
-def main_index(request):
-    if request.user.is_authenticated:
-        return render(request, 'ShuttleBuilder/main.html', {'VERSION': settings.VERSION})
-    return render(request, 'ShuttleBuilder/index.html', {'VERSION': settings.VERSION})
-
+def index(request):
+    return render(request, 'index.html', {'VERSION': settings.VERSION})
 
 urlpatterns += [
     re_path(r'^jsi18n/$', JavaScriptCatalog.as_view(), name='javascript-catalog'),
-    path('', main_index, name='index'),
-    path('main', main_index, name='sdc_index'),
-    re_path('^main/.*', main_index, name='sdc_index'),
+    path('', index, name='sdc_index'),
+    re_path('~.*', index, name='sdc_index_2'),
 ]
-
-handler404 = 'Utils.views.my_custom_page_not_found_view'
-handler500 = 'Utils.views.my_custom_error_view'
-handler403 = 'Utils.views.my_custom_permission_denied_view'
-handler400 = 'Utils.views.my_custom_bad_request_view'

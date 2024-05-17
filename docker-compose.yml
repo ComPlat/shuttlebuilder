@@ -1,46 +1,33 @@
-version: "3.9"
-
+version: '3'
 services:
-  redis:
-    image: redis:5.0.10
-    ports:
-      - "6381:6379"
-    volumes:
-      - redisdata:/data
   db:
-    image: postgres
+    image: postgres:13
+    restart: unless-stopped
+    hostname: db
+    expose:
+      - 5432
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - ${DJANGO_POSTGRES_PORT:-65432}:5432
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-  web:
-    build: .
-    volumes:
-      - .:/code
+      - POSTGRES_USER=${DJANGO_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DJANGO_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DJANGO_POSTGRES_NAME}
     env_file:
-      .env
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - ./.env
+    volumes:
+      - bridge_db:/var/lib/postgresql/data/
+  web:
+    build:
+      context: .
+    image: mstarman/shuttlebuilder:0.2.0
     depends_on:
       - db
-      - redis
-  nginx:
-    build: ./build_config/nginx
-    restart: always
+    environment:
+      - DJANGO_POSTGRES_PORT=5432
+      - DJANGO_POSTGRES_HOST=db
     env_file:
-      .env
-    volumes:
-      - ./www:/static
+      - ./.env
     ports:
-      - "${PORT}:80"
-    depends_on:
-      - web
+      - 3222:80
 volumes:
-  postgres_data:
-  redisdata:
+  bridge_db:

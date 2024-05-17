@@ -1,0 +1,65 @@
+{% load sdc_filter %}
+{% load i18n %}
+
+<div class="search-view-container">
+    <sdc-search-view
+            data-range-size="{{ range_size }}"
+            data-range-start="{{ range|indexfilter:0 }}"
+            data-range-end="{{ range|indexfilter:1 }}"
+            data-total-count="{{ total_count }}"
+            data-remove-labels="true">
+        {% csrf_token %}
+        {% include "elements/inline_form.html" with form=search_form %}
+    </sdc-search-view>
+</div>
+
+<table class="table">
+    <tbody>
+    {% for instance in instances %}
+    {% if forloop.first %}
+    <tr>
+        <th>Identifier</th>
+        <th>Type</th>
+        <th>Protocol</th>
+        <th>Architecture</th>
+        <th>Control</th>
+    </tr>
+    {% endif %}
+    <tr>
+        <th class="item-row-name" scope="row">{{ instance.name }}</th>
+        <td>{{ instance.get_shuttle_type_display }}</td>
+        <td>{{ instance.get_transfer_display }}</td>
+        <td>{{ instance.get_architecture_display }}</td>
+        <td>
+            <a target="_blank" href="{% url 'scd_view_shuttle_download' pk=instance.pk %}" class="btn btn-info" data-toggle="tooltip" data-placement="left" title="{% trans 'Download Executable!' %}">
+                <i class="bi bi-download"></i>
+            </a>
+            <a class="btn btn-dark navigation-links" href="/~shuttle-instance-edit&pk={{instance.pk}}">
+                <i class="bi bi-wrench-adjustable-circle"></i>
+            </a>
+
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-model-modal-{{instance.pk}}">
+                <i class="bi bi-trash"></i>
+            </button>
+            <div class="modal fade" id="delete-model-modal-{{instance.pk}}" tabindex="-1" aria-label="Delete model {{instance.pk}}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="delete-model-modal-{{instance.pk}}-label">Are you sure</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Do you want to delete {{instance}}?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button sdc_click="removeInstance" data-instance-pk="{{instance.pk}}" type="button" class="btn btn-danger" data-bs-dismiss="modal">Remove {{instance}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+    {% endfor %}
+</table>

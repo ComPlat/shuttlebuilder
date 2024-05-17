@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "shuttlebuilder"
+version = "0.1.0"
+description = ""
+authors = ["martin <m.starman@live.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+simpledomcontrol = "^0.4.20"
+chemotion-api = "^0.3.16"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

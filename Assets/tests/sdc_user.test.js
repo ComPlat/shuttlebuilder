@@ -1,0 +1,1 @@
+../../../../../../.cache/pypoetry/virtualenvs/shuttlebuilder-pban9hUB-py3.10/lib/python3.10/site-packages/sdc_user/Assets/tests/sdc_user.test.js

@@ -1,0 +1,1 @@
+../../main_app/Assets/tests/main_app.test.js

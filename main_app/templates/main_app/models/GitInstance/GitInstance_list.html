@@ -1,0 +1,75 @@
+{% load sdc_filter %}
+
+<div class="search-view-container">
+    <sdc-search-view
+            data-range-size="{{ range_size }}"
+            data-range-start="{{ range|indexfilter:0 }}"
+            data-range-end="{{ range|indexfilter:1 }}"
+            data-total-count="{{ total_count }}"
+            data-remove-labels="true">
+        {% csrf_token %}
+        {% include "elements/inline_form.html" with form=search_form %}
+    </sdc-search-view>
+</div>
+
+<table class="table">
+    <tbody>
+    {% for instance in instances %}
+    {% if forloop.first %}
+    <tr>
+        <th>Identifier</th>
+        <th>Url</th>
+        <th>Branch</th>
+        <th>Control</th>
+    </tr>
+    {% endif %}
+    <tr>
+        <td>
+
+            {% if instance.is_active %}
+            <div class="btn btn-success disabled">ACTIVE</div>
+            {% endif %}
+            {{instance.name}}
+        </td>
+        <td>
+            {{instance.url}}
+        </td>
+        <td>
+            {{instance.branch}}
+        </td>
+        <td>
+            {% if not instance.is_active %}
+            <this.activate_form data-pk="{{instance.pk}}"></this.activate_form>
+            {% else %}
+            <this.reload_form data-pk="{{instance.pk}}"></this.reload_form>
+            {% endif %}
+            <a class="btn btn-dark navigation-links" href="/*/git-insatnce-edit&pk={{instance.pk}}">
+                <i class="bi bi-wrench-adjustable-circle"></i>
+            </a>
+
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-model-modal-{{instance.pk}}">
+                <i class="bi bi-trash"></i>
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="delete-model-modal-{{instance.pk}}" tabindex="-1" aria-label="Delete model {{instance.pk}}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="delete-model-modal-{{instance.pk}}-label">Are you sure</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Do you want to delete {{instance}}?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button sdc_click="removeInstance" data-instance-pk="{{instance.pk}}" type="button" class="btn btn-danger" data-bs-dismiss="modal">Remove {{instance}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
