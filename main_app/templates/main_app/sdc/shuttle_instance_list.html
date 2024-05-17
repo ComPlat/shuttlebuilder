@@ -1,9 +1,14 @@
 <div class="container">
     <h3 class="page-header">List Shuttle Instances</h3>
+    {% if gitInstance != None %}
+    <p>Git: {{ gitInstance }}</p>
     <div class="list-container">
     </div>
     <div class="main-loading-screen"><h1>Loading...</h1></div>
     <a class="create-new btn btn-success navigation-links" href="/*/shuttle-instance-edit">
         NEW
     </a>
+    {% else %}
+    <h1>Not GIT Repo is linked!!</h1>
+    {% endif %}
 </div>

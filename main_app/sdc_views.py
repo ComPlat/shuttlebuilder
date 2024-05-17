@@ -40,13 +40,15 @@ class ShuttleInstanceList(SDCView):
     template_name='main_app/sdc/shuttle_instance_list.html'
 
     def get_content(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        gitInstance = GitInstance.get_active()
+        return render(request, self.template_name, {'gitInstance': gitInstance})
 
 class ShuttleInstanceEdit(SDCView):
     template_name='main_app/sdc/shuttle_instance_edit.html'
 
     def get_content(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+        gitInstance = GitInstance.get_active()
+        return render(request, self.template_name, {'gitInstance': gitInstance})
 
 
 class ShuttleDownload(LoginRequiredMixin, SDCView):

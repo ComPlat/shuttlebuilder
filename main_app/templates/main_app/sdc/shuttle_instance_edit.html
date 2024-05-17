@@ -1,8 +1,12 @@
 <div class="container">
     <h2 class="page-header"><this.form_header></this.form_header></h2>
-
+    {% if gitInstance != None %}
+    <p>Git: {{ gitInstance }}</p>
     <form >
         <div class="form-container"></div>
         <this.form_btn></this.form_btn>
     </form>
+    {% else %}
+    <h1>Not GIT Repo is linked!!</h1>
+    {% endif %}
 </div>

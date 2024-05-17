@@ -111,6 +111,15 @@ class GitInstance(models.Model, SdcModel):
             new_repo = None
 
         return (file_paths, new_repo)
+    @classmethod
+    def get_active(self):
+        try:
+            return GitInstance.objects.get(is_active=True)
+        except GitInstance.MultipleObjectsReturned:
+            GitInstance.objects.filter(is_active=True).update(is_active=False)
+            return None
+        except:
+            return None
 
     def set_active(self):
         GitInstance.objects.filter(is_active=True).update(is_active=False)
