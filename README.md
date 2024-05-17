@@ -5,7 +5,7 @@ Full documentation [here](https://chemotion.net/docs/eln/devices/configurations/
 
 This application works independently of Electronic Lab Notebook (ELN) Chemotion. However, it is designed to operate as a service for Chemotion. The user administration of the Chemotion can also be mirrored. New users can be created by the admin or Chemotion users can log in with their Chemotion password and abbreviation.
 
-![Diagram: Networg description](img/shuttle_builder.drawio.png)
+![Diagram: Networg description](https://github.com/ComPlat/shuttlebuilder/blob/master/Assets/static/img/shuttle_builder.drawio.png)
 
 The physical separation of laboratory PCs from public networks for security reasons significantly impacts the file transfer process requirements. Consequently, data stored locally on lab devices must be forwarded to the ELN via an intermediary system. The Shuttle is one part of such an intermediary system. It can facilitate this by sending device data to an intermediary data storage. It allows you to monitor and organize the data transmission of devices integrated with your ELN Chemotion instance (for more information, click [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer) ). [Shuttle](https://github.com/ComPlat/shuttle) instances can be quickly and easily adapted to specific requirements. These instances can then be installed on the target lab system in just a few steps.
 
