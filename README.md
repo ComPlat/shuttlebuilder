@@ -3,7 +3,7 @@ Welcome to the ShuttleBuilder
 
 Full documentation [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer)
 
-This application works independently of Electronic Lab Notebook (ELN) Chemotion. However, it is designed to operate as a service for Chemotion. The user administration of the Chemotion can also be mirrored. New users can be created by the admin or Chemotion users can log in with their Chemotion password and abbreviation.
+This application works independently of the Electronic Lab Notebook (ELN) Chemotion. However, it is designed to operate as a service for Chemotion. The user can log in with his/her Chemotion password and abbreviation. However, the superuser can also create Locel users.
 
 ![Diagram: Networg description](https://github.com/ComPlat/shuttlebuilder/blob/master/Assets/static/img/shuttle_builder.drawio.png)
 
