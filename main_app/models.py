@@ -102,7 +102,7 @@ class GitInstance(models.Model, SdcModel):
         return self.name
 
     def get_path(self):
-        folder_name = re.sub(r'[^a-zA-Z0-9]', '_',self.name)
+        folder_name = re.sub(r'[^a-zA-Z0-9]', '_', self.name)
         file_paths = os.path.join('./projects/git_repos/', folder_name)
         new_repo = glob.glob(os.path.join(file_paths, '*'))
         if len(new_repo) > 0:
@@ -111,6 +111,7 @@ class GitInstance(models.Model, SdcModel):
             new_repo = None
 
         return (file_paths, new_repo)
+
     @classmethod
     def get_active(self):
         try:
@@ -179,7 +180,8 @@ class ShuttleInstanceSearchForm(AbstractSearchForm):
 TYPE_CHOISES = (
     ('file', _('File')),
     ('folder', _('Folder')),
-    ('zip', _('ZIP'))
+    ('zip', _('ZIP')),
+    ('tar', _('TAR'))
 )
 
 SYSTEM_CHOISES = (
@@ -199,7 +201,8 @@ class ShuttleInstance(models.Model, SdcModel):
     html_list_template = "main_app/models/ShuttleInstance/ShuttleInstance_list.html"
     html_detail_template = "main_app/models/ShuttleInstance/ShuttleInstance_details.html"
 
-    name = models.CharField(help_text=_('Unique name of the Shuttle instance. This name cannot be changed!'), max_length=50,
+    name = models.CharField(help_text=_('Unique name of the Shuttle instance. This name cannot be changed!'),
+                            max_length=50,
                             unique=True)
     user = models.CharField(help_text=_("WebDAV or STFP User"), max_length=50, default="")
     password = models.CharField(help_text=_("WebDAV or STFP Password"), max_length=100)
@@ -219,7 +222,7 @@ class ShuttleInstance(models.Model, SdcModel):
                     <span style="margin-left: 30px;">[PROJECT_PATH]-Path (directory) within the LSDF</span>"""),
                            max_length=255)
     shuttle_type = models.CharField(_('Type'), help_text=_(
-        "Type must be 'file', 'folder' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The option 'zip' sends a folder zipped, only when all files in a folder are ready."),
+        "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
                                     max_length=255, choices=TYPE_CHOISES)
     duration = models.IntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
@@ -232,7 +235,6 @@ class ShuttleInstance(models.Model, SdcModel):
     last_update = models.DateTimeField(default=timezone.now)
     last_build = models.DateTimeField(null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
 
     def __str__(self):
         return self.name

@@ -1,4 +1,20 @@
-version: '3'
+version: '3.7'
+
+x-postgress-variables: &postgress-variables
+  POSTGRES_NAME: "${POSTGRES_NAME:-postgres}"
+  POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-q3opc3123§§!'urbn$5(#6}"
+
+x-envs: &envs
+  MODE: prod
+  ALLOWED_HOST: "${ALLOWED_HOST}"
+  ELN_URL: "${ELN_URL}"
+  DJANGO_SUPERUSER_USERNAME: "${DJANGO_SUPERUSER_USERNAME}"
+  DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
+  DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
+  POSTGRES_PORT: 5432
+  POSTGRES_HOST: db
+
 services:
   db:
     image: postgres:13
@@ -7,27 +23,19 @@ services:
     expose:
       - 5432
     ports:
-      - ${DJANGO_POSTGRES_PORT:-65432}:5432
+      - ${PROJECT_POSTGRES_PORT:-65432}:5432
     environment:
-      - POSTGRES_USER=${DJANGO_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${DJANGO_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${DJANGO_POSTGRES_NAME}
-    env_file:
-      - ./.env
+      <<: *postgress-variables
     volumes:
       - bridge_db:/var/lib/postgresql/data/
   web:
-    build:
-      context: .
-    image: mstarman/shuttlebuilder:0.2.1
+    image: mstarman/shuttlebuilder:0.2.3
+    restart: unless-stopped
     depends_on:
       - db
     environment:
-      - DJANGO_POSTGRES_PORT=5432
-      - DJANGO_POSTGRES_HOST=db
-    env_file:
-      - ./.env
+      <<: [*envs, *postgress-variables]
     ports:
-      - 3222:80
+      - ${PROJECT_WEB_PORT:-80}:80
 volumes:
   bridge_db:
