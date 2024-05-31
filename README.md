@@ -7,7 +7,13 @@ This application works independently of the Electronic Lab Notebook (ELN) Chemot
 
 ![Diagram: Networg description](https://github.com/ComPlat/shuttlebuilder/blob/master/Assets/static/img/shuttle_builder.drawio.png)
 
-The physical separation of laboratory PCs from public networks for security reasons significantly impacts the file transfer process requirements. Consequently, data stored locally on lab devices must be forwarded to the ELN via an intermediary system. The Shuttle is one part of such an intermediary system. It can facilitate this by sending device data to an intermediary data storage. It allows you to monitor and organize the data transmission of devices integrated with your ELN Chemotion instance (for more information, click [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer) ). [Shuttle](https://github.com/ComPlat/shuttle) instances can be quickly and easily adapted to specific requirements. These instances can then be installed on the target lab system in just a few steps.
+The physical separation of laboratory PCs from public networks for security reasons significantly
+impacts the file transfer process requirements. Consequently, data stored locally 
+on lab devices must be forwarded to the ELN via an intermediary system. The Shuttle 
+is one part of such an intermediary system. It can facilitate this by sending device data 
+to an intermediary data storage. It allows you to monitor and organize the data transmission of 
+devices integrated with your ELN Chemotion instance (for more information, click [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer) ). [Shuttle](https://github.com/ComPlat/shuttle) 
+instances can be quickly and easily adapted to specific requirements. These instances can then be installed on the target lab system in just a few steps.
 
 ### How to set up a Shuttle Builder
 
@@ -24,11 +30,11 @@ DJANGO_SUPERUSER_USERNAME=Tom Riple
 DJANGO_SUPERUSER_EMAIL=taent.riple@kit.edu
 DJANGO_SUPERUSER_PASSWORD=QWer!1234
 # Database information
-DJANGO_POSTGRES_NAME=bridge
-DJANGO_POSTGRES_USER=postgres
-DJANGO_POSTGRES_PASSWORD=QWer!1234        
-DJANGO_POSTGRES_PORT=5432
-DJANGO_POSTGRES_HOST=db
+POSTGRES_DB=builder
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=QWer!1234        
+POSTGRES_PORT=5432
+POSTGRES_HOST=db
 ```
 
 ### How to install Shuttle

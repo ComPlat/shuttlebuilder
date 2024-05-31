@@ -1,7 +1,7 @@
 version: '3.7'
 
 x-postgress-variables: &postgress-variables
-  POSTGRES_NAME: "${POSTGRES_NAME:-postgres}"
+  POSTGRES_DB: "${POSTGRES_DB:-postgres}"
   POSTGRES_USER: "${POSTGRES_USER:-postgres}"
   POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-q3opc3123§§!'urbn$5(#6}"
 
