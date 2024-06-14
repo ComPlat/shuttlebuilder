@@ -54,6 +54,9 @@ class ElnConnection(models.Model, SdcModel):
     token = models.CharField(default=None, null=True, blank=True, max_length=255)
     device = models.IntegerField(default=0)
 
+    def identifier(self):
+        return f'URL: {self.url}'
+
     @classmethod
     def render(cls, template_name, context=None, request=None, using=None):
         if template_name == cls.html_list_template:

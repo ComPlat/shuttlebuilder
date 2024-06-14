@@ -5,6 +5,7 @@ class ShuttleInstanceListController extends AbstractSDC {
 
     constructor() {
         super();
+        this.contentReload = true;
         this.contentUrl = "/sdc_view/main_app/shuttle_instance_list"; //<shuttle-instance-list></shuttle-instance-list>
 
         /**
