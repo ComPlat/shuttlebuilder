@@ -13,7 +13,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
          * The pattern is {'event': {'dom_selector': handler}}
          * Uncommend the following line to add events;
          */
-        // this.events.unshift({'click': {'.header-sample': (ev, $elem)=> $elem.css('border', '2px solid black')}}});
+        this.events.unshift({'change': {'#id_shuttle_type': this.onTypeChange}});
     }
 
     //-------------------------------------------------//
@@ -38,6 +38,11 @@ class ShuttleInstanceEditController extends AbstractSDC {
     }
 
     onRefresh() {
+        console.log(this)
+        let $typeSelect = this.find('#id_shuttle_type')
+        if($typeSelect.length > 0){
+            this.onTypeChange($typeSelect)
+        }
         return super.onRefresh();
     }
 
@@ -58,6 +63,14 @@ class ShuttleInstanceEditController extends AbstractSDC {
     on_update() {
         if(this.type !== 'edit') {
             trigger('goTo', '..');
+        }
+    }
+
+    onTypeChange($dom) {
+        if($dom.val() === 'flat_tar') {
+            this.find('.id_common_prefix').show("slow");
+        } else {
+            this.find('.id_common_prefix').hide("slow");
         }
     }
 

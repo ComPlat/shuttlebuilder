@@ -1,5 +1,3 @@
-from django.utils import timezone
-
 from main_app.models import ShuttleInstance
 from main_app.models import GitInstance
 from main_app.models import ElnConnection
@@ -61,4 +59,4 @@ class ShuttleInstanceForm(ModelForm):
 
     class Meta:
         model = ShuttleInstance
-        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'duration', 'architecture']
+        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_prefix', 'duration', 'architecture']

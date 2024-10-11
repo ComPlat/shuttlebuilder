@@ -1,15 +1,12 @@
 [tool.poetry]
-name = "shuttlebuilder"
+name = "untitled"
 version = "0.1.0"
 description = ""
-authors = ["martin <m.starman@live.com>"]
+authors = ["Martin <m.starman@live.comdd>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-simpledomcontrol = "^0.56.1"
-chemotion-api = "^0.3.41"
-
+python = "^3.12"
 
 
 [build-system]

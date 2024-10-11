@@ -184,7 +184,8 @@ TYPE_CHOISES = (
     ('file', _('File')),
     ('folder', _('Folder')),
     ('zip', _('ZIP')),
-    ('tar', _('TAR'))
+    ('tar', _('TAR')),
+    ('flat_tar', _('Flat TAR'))
 )
 
 SYSTEM_CHOISES = (
@@ -227,7 +228,9 @@ class ShuttleInstance(models.Model, SdcModel):
     shuttle_type = models.CharField(_('Type'), help_text=_(
         "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
                                     max_length=255, choices=TYPE_CHOISES)
-    duration = models.IntegerField(
+    common_prefix = models.PositiveIntegerField(_('Common prefix'), default=0, help_text=_(
+        "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."))
+    duration = models.PositiveIntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
         default=300)
     # cert = models.CharField(help_text=_("Path to server TLS certificate. Only needed if the server has a self signed certificate."), max_length=255, blank=True, null=True)
@@ -262,6 +265,7 @@ class ShuttleInstance(models.Model, SdcModel):
                         "user": self.user,
                         "password": self.password,
                         "duration": self.duration,
+                        "cpf": self.common_prefix,
                         "tType": self.transfer,
                         "name": self.name,
                         "crt": "None",
