@@ -228,8 +228,8 @@ class ShuttleInstance(models.Model, SdcModel):
     shuttle_type = models.CharField(_('Type'), help_text=_(
         "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
                                     max_length=255, choices=TYPE_CHOISES)
-    common_prefix = models.PositiveIntegerField(_('Common prefix'), default=0, help_text=_(
-        "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."))
+    common_prefix = models.PositiveIntegerField(_('Common prefix length'), default=0, help_text=_(
+        "The common prefix length is only required if the type is flat_tar. This value specifies the number of leading characters that must be the same in order for files to be packed together."))
     duration = models.PositiveIntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
         default=300)

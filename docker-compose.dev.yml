@@ -18,7 +18,7 @@ services:
   web:
     build:
       context: .
-    image: mstarman/shuttlebuilder:0.2.6
+    image: mstarman/shuttlebuilder:0.2.7
     depends_on:
       - db
     environment:
