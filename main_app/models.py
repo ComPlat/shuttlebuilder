@@ -15,8 +15,6 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.db.models import signals
 from django.template import Template, Context
-from distutils.dir_util import copy_tree
-
 
 def create_user(sender, instance, created, **kwargs):
     """Create ElnUser for every new User."""
@@ -228,8 +226,8 @@ class ShuttleInstance(models.Model, SdcModel):
     shuttle_type = models.CharField(_('Type'), help_text=_(
         "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
                                     max_length=255, choices=TYPE_CHOISES)
-    common_prefix = models.PositiveIntegerField(_('Common prefix length'), default=0, help_text=_(
-        "The common prefix length is only required if the type is flat_tar. This value specifies the number of leading characters that must be the same in order for files to be packed together."))
+    common_name_parts = models.CharField(_('Common name regex'), blank=True, max_length=255, default="^[A-Za-z]{1,4}", help_text=_(
+        "The regex for the common name is used to collect all files that belong to the same data set. This value is only used if the type is flat tar. All files that either have the same regex group resolutions or (if you do not use groups) have the same global result are archived together<this.render_help></this.render_help>"))
     duration = models.PositiveIntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
         default=300)
@@ -265,7 +263,7 @@ class ShuttleInstance(models.Model, SdcModel):
                         "user": self.user,
                         "password": self.password,
                         "duration": self.duration,
-                        "cpf": self.common_prefix,
+                        "common_regex": self.common_name_parts,
                         "tType": self.transfer,
                         "name": self.name,
                         "crt": "None",
@@ -292,7 +290,7 @@ class ShuttleInstance(models.Model, SdcModel):
         if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build:
             shutil.rmtree(tp, ignore_errors=True)
             os.makedirs(tp_src, exist_ok=True)
-            copy_tree(repo_path, tp_src)
+            shutil.copytree(repo_path, tp_src, dirs_exist_ok=True)
 
             for root, dirs, files in os.walk(tp_src, topdown=False):
                 for name in files:

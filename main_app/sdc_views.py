@@ -20,8 +20,7 @@ class BasicInfo(SDCView):
 class GitInstanceList(SdcGroupRequiredMixin, SDCView):
     template_name='main_app/sdc/git_instance_list.html'
 
-    def activate_git(self, channel, *args, **kwargs):
-        user = channel.scope.get('user')
+    def activate_git(self, request, *args, **kwargs):
         gi = GitInstance.objects.get(pk=kwargs.get('pk'))
         gi.git_reload()
         gi.set_active()

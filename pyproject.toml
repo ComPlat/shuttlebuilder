@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-simpledomcontrol = "^0.56.5"
+simpledomcontrol = "^0.57.5"
 chemotion-api = "^0.3.41"
 
 

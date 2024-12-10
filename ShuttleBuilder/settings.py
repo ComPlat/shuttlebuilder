@@ -28,6 +28,7 @@ DEBUG = os.environ.get('MODE') != 'prod'
 
 
 # ALLOWED_HOSTS = []
+SERVER_CALL_VIA_WEB_SOCKET = False
 
 
 # Application definition

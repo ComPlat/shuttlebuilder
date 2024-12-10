@@ -1,3 +1,24 @@
 [shuttle-instance-edit] {
+  .regex-ast-entry {
+    margin-left: 10px;
+    background-color: #6f94c633;
+    border-radius: 5px;
+  }
 
+  .regex-test-container {
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px;
+    background-color: #33333333;
+    label {
+      font-weight: bold;
+    }
+    .row {
+      margin-top: 5px;
+      .re-result {
+        background-color: white;
+        border-radius: 5px;
+      }
+    }
+  }
 }

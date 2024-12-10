@@ -2,44 +2,95 @@
 
 <div class="container">
     <h2>Welcome to the ShuttleBuilder</h2>
-    <p>Full documentation <a target="_blank" href="https://chemotion.net/docs/eln/devices/configurations/data_transfer">here</a></p>
-    <p>This application works independently of the Electronic Lab Notebook (ELN) Chemotion. However, it is designed to operate as a service for Chemotion. The user can log in with his/her Chemotion password and abbreviation. However, the superuser can also create Locel users <a href="/admin/">here</a>.</p>
+    <p>Full documentation <a target="_blank" href="https://chemotion.net/docs/eln/devices/configurations/data_transfer">here</a>
+    </p>
+    <p>This application works independently of the Electronic Lab Notebook (ELN) Chemotion. However, it is designed to
+        operate as a service for Chemotion. The user can log in with his/her Chemotion password and abbreviation.
+        However, the superuser can also create local users <a href="/admin/">here</a>.</p>
     <img src="{% static 'img/shuttle_builder.drawio.png' %}" alt="Diagram: Networg description">
 
     <p>
-        The physical separation of laboratory PCs from public networks for security reasons significantly impacts the file transfer process requirements.
+        The physical separation of laboratory PCs from public networks for security reasons significantly impacts the
+        file transfer process requirements.
         Consequently, data stored locally on lab devices must be forwarded to the ELN via an intermediary system.
-        The Shuttle is one part of such an intermediary system. It can facilitate this by sending device data to an intermediary data storage.
-        It allows you to monitor and organize the data transmission of devices integrated with your ELN Chemotion instance
+        The Shuttle is one part of such an intermediary system. It can facilitate this by sending device data to an
+        intermediary data storage.
+        It allows you to monitor and organize the data transmission of devices integrated with your ELN Chemotion
+        instance
         (for more information, click <a
-                href="https://chemotion.net/docs/eln/devices/configurations/data_transfer"
-                target="_blank">here</a> ). <a href="https://github.com/ComPlat/shuttle"
-                                                        target="_blank">Shuttle</a> instances can be quickly and easily adapted to specific requirements. These instances can then be installed on the target lab system in just a few steps.</p>
+            href="https://chemotion.net/docs/eln/devices/configurations/data_transfer"
+            target="_blank">here</a> ). <a href="https://github.com/ComPlat/shuttle"
+                                           target="_blank">Shuttle</a> instances can be quickly and easily adapted to
+        specific requirements. These instances can then be installed on the target lab system in just a few steps.</p>
     <h3>How to install Shuttle</h3>
-    <p>The following section introduces the installation of the Shuttle. Note that the installation is <b>only</b> intended for Windows x64 and i386 devices and Linux x64 devices.</p>
+    <p>The following section introduces the installation of the Shuttle. Note that the installation is <b>only</b>
+        intended for Windows x64 and i386 devices and Linux x64 devices.</p>
     <ol>
-        <li><b>Generate Shuttle instance:</b> <p> In Shuttle list you will find a new button. With this button you can create a <a class="navigation-links" href="/shuttle-instance-list/shuttle-instance-edit">new Shuttle</a> instance adapted to an external WebDAV or SFTP server.</p></li>
-        <li><b>Download Shuttle instance:</b> <p>After you have created a new Instance you can download the executable in the Shuttle list.</p>
-        <li><b>Install Shuttle instance:</b> <p>The installation is simple but require administration rights.</p>
+        <li><b>Generate Shuttle instance:</b>
+            <p> In Shuttle list you will find a new button. With this button you can create a <a
+                    class="navigation-links" href="/shuttle-instance-list/shuttle-instance-edit">new Shuttle</a>
+                instance adapted to an external WebDAV or SFTP server.</p></li>
+        <li><b>Download Shuttle instance:</b>
+            <p>After you have created a new Instance you can download the executable in the Shuttle list.</p>
+        <li><b>Install Shuttle instance:</b>
+            <p>The installation is simple but require administration rights.</p>
             <ol>
                 <li>Make a directory "C:\Program Files\eln_exporter"</li>
                 <li>Copy the (on this server generated) <b>shuttle.exe</b> into "C:\Program Files\file_exporter"</li>
-                <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into the startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and type <b>shell:startup</b>. This will open startup directory</p></li>
-            </ol></li>
-        <li><b>(SPECIAL CASE) Install Shuttle with SFTP on Windows XP:</b> <p> As above the installation requires administration rights. The "Download" button leads to a zip file and not only to an executable file. This zipped file contains the executable file and WinSCP. </p>
+                <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into the
+                    startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and
+                        type <b>shell:startup</b>. This will open startup directory</p></li>
+            </ol>
+        </li>
+        <li><b>(SPECIAL CASE) Install Shuttle with SFTP on Windows XP:</b>
+            <p> As above the installation requires administration rights. The "Download" button leads to a zip file and
+                not only to an executable file. This zipped file contains the executable file and WinSCP. </p>
             <ol>
                 <li>Make a directory "C:\Program Files\eln_exporter"</li>
                 <li>Unzip the downloaded file <b>shuttle_sftp_winxp.zip</b></li>
-                <li>Copy the <b>shuttle.exe</b>, <b>WinSCP.exe</b> andt <b>WinSCP.com</b> into "C:\Program Files\file_exporter"</li>
-                <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into the startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and type <b>shell:startup</b>. This will open startup directory</p></li>
+                <li>Copy the <b>shuttle.exe</b>, <b>WinSCP.exe</b> andt <b>WinSCP.com</b> into "C:\Program
+                    Files\file_exporter"
+                </li>
+                <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into the
+                    startup directory.<p style="margin-left: 5px">Hint: Press <b>Windows Key + R</b> to open run and
+                        type <b>shell:startup</b>. This will open startup directory</p></li>
             </ol>
         </li>
-        <li><b>Install Shuttle on LINUX:</b> <p> As above the installation requires administration rights. This installation description works only for <b>systemd</b></p>
+        <li><b>Install Shuttle on LINUX:</b>
+            <p> As above the installation requires administration rights. This installation description works only for
+                <b>systemd</b></p>
             <ol>
                 <li>Make a directory "/opt/file_exporter"</li>
                 <li>Copy the <b>shuttle</b> into "/opt/file_exporter/"</li>
-                <li>Download <a target="_blank" href="{% url 'file_shuttle.service' %}">shuttle.service</a>. Edit the file and enter the correct username. Copy it into /etc/systemd/system/shuttle.service. Run <b>systemctl start shuttle</b> to start it and <b>systemctl enable shuttle</b> to automatically get it to start on boot.</li>
+                <li>Download <a target="_blank" href="{% url 'file_shuttle.service' %}">shuttle.service</a>. Edit the
+                    file and enter the correct username. Copy it into /etc/systemd/system/shuttle.service. Run <b>systemctl
+                        start shuttle</b> to start it and <b>systemctl enable shuttle</b> to automatically get it to
+                    start on boot.
+                </li>
             </ol>
         </li>
     </ol>
+
+
+    <h3> Preprocess Scripts</h3>
+
+    <p>Shuttle supports preprocess scripts, which allow you to execute custom scripts before transferring files.</p>
+    <ul>
+        <li> Windows: Scripts must be .exe files.</li>
+        <li> Linux: All executable file types are supported.</li>
+    </ul>
+    <h4>Preprocess Script Requirements:</h4>
+    <p>The script files must be located in the directory:</p>
+    <code>
+        ~/shuttle/scripts
+    </code>
+    <p>If the shuttle has already been executed, the folder has already been created.</p>
+
+    <p>Such a script can manipulate the file before it is sent. The script is called for each file that will be sent.
+        The
+        script gets one argument with the absolute path to the file. The script should either overwrite the file or
+        write a
+        new copy of the file in the same folder</p>
+    <br><br>
+
 </div>
