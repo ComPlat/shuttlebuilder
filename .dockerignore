@@ -1,0 +1,12 @@
+.env.sample
+.env
+static
+node_modules
+README.md
+db.sqlite3
+Dockerfile
+docker-compose.yml
+.gitignore
+poetry.lock
+.tool-versions
+.idea
