@@ -20,16 +20,17 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install poetry
 
-RUN poetry install
+RUN poetry install --no-root
+RUN poetry self add poetry-plugin-export
 RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir -r requirements.txt
 
 RUN npm install
 
-RUN python manage.py sdc_update_links
+RUN poetry run python manage.py sdc_update_links
 RUN npm run build
-RUN python manage.py collectstatic  --no-input
+RUN poetry run python manage.py collectstatic  --no-input
 
 FROM python:3.12 AS shuttlebuilder
 LABEL authors="martin"

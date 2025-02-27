@@ -245,6 +245,8 @@ class ShuttleInstance(models.Model, SdcModel):
 
     def save(self, *args, **kwargs):
         self.last_update = timezone.now()
+        if not self.owner:
+            self.owner = self.scope['user']
         super().save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):
