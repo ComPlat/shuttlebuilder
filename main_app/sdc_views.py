@@ -80,7 +80,7 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
                     response = HttpResponse(file_data, content_type='application/octet-stream')
                     response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
 
-        except IOError:
+        except IOError as e:
             # handle file not exist case here
             response = HttpResponseNotFound('<h1>File not exist</h1>')
         except Exception as e:

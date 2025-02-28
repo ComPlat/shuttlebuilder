@@ -189,7 +189,10 @@ TYPE_CHOISES = (
 SYSTEM_CHOISES = (
     ('win_i386', _('Windows i386')),
     ('win_64', _('Windows 64 Bit')),
-    ('ubuntu_64', _('Ubuntu 64 Bit'))
+    ('ubuntu_64', _('Ubuntu 64 Bit')),
+    ('raspberry_pi_6', _('Raspberry Pi ARMv6')),
+    ('raspberry_pi_7', _('Raspberry Pi ARMv7')),
+    ('raspberry_pi_64', _('Raspberry Pi ARM 64 Bit')),
 )
 TRANSFER_CHOISES = (
     ('webdav', _('WebDAV')),
@@ -212,7 +215,7 @@ class ShuttleInstance(models.Model, SdcModel):
                                 help_text=_("You can either use the WebDAV protocol or the SFTP protocol"),
                                 max_length=255, choices=TRANSFER_CHOISES, default=TRANSFER_CHOISES[0][0])
     src = models.CharField(help_text=_(
-        "Source directory to monitor. Note: If you use only single \\ in the path, the build will fail. Therefore, make sure that you always use \\\\."),
+        "Source directory to monitor."),
         max_length=255)
     dst = models.CharField(help_text=_("""WebDAV or SFTP destination URL. If the destination is on the lsdf, the URL should be as follows:<br>
         <span style="margin-left: 20px; font-weight: 800;">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
@@ -233,7 +236,7 @@ class ShuttleInstance(models.Model, SdcModel):
         default=300)
     # cert = models.CharField(help_text=_("Path to server TLS certificate. Only needed if the server has a self signed certificate."), max_length=255, blank=True, null=True)
     architecture = models.CharField(_('System architecture'),
-                                    help_text=_("Your computer architecture : either 64 bit or 32 bit (i386) "),
+                                    help_text=_("Your computer architecture : either 64 bit, i386 or ARM And your OS: Linux or Windows"),
                                     max_length=255, choices=SYSTEM_CHOISES, default=SYSTEM_CHOISES[0][0])
 
     last_update = models.DateTimeField(default=timezone.now)
@@ -259,15 +262,23 @@ class ShuttleInstance(models.Model, SdcModel):
         os.makedirs(file_paths, exist_ok=True)
         return file_paths
 
+    @staticmethod
+    def replace_single_backslashes(s):
+        return re.sub(r'(?<!\\)\\(?!\\)', r'\\\\', s)
+
+    @staticmethod
+    def replace_all_single_backslashes(s):
+        return re.sub(r'\\', r'\\\\', s)
+
     def _get_build_config(self):
-        return Context({"src": self.src,
-                        "dst": self.dst,
-                        "user": self.user,
-                        "password": self.password,
+        return Context({"src": self.replace_single_backslashes(self.src),
+                        "dst": self.replace_single_backslashes(self.dst),
+                        "user": self.replace_single_backslashes(self.user),
+                        "password": self.replace_single_backslashes(self.password),
                         "duration": self.duration,
-                        "common_regex": self.common_name_parts,
+                        "common_regex": self.replace_all_single_backslashes(self.common_name_parts),
                         "tType": self.transfer,
-                        "name": self.name,
+                        "name": self.replace_single_backslashes(self.name),
                         "crt": "None",
                         "type": self.shuttle_type})
 
@@ -284,12 +295,12 @@ class ShuttleInstance(models.Model, SdcModel):
         tp_bin = os.path.abspath(os.path.join(tp, 'bin'))
         tp_src = os.path.abspath(os.path.join(tp, 'src'))
 
-        if self.architecture != 'ubuntu_64':
+        if self.architecture.startswith('win'):
             filename = 'shuttle.exe'
         else:
             filename = 'shuttle'
 
-        if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build:
+        if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build or not os.path.exists(os.path.join(tp_bin, filename)):
             shutil.rmtree(tp, ignore_errors=True)
             os.makedirs(tp_src, exist_ok=True)
             shutil.copytree(repo_path, tp_src, dirs_exist_ok=True)
@@ -311,8 +322,18 @@ class ShuttleInstance(models.Model, SdcModel):
             my_env = os.environ.copy()
             my_env["GOROOT"] = settings.GOROOT
             my_env["GOPATH"] = settings.GOPATH
-            if self.architecture != 'ubuntu_64':
-                my_env["GOOS"] = settings.GOOS
+            if self.architecture.startswith('win'):
+                my_env["GOOS"] = "windows"
+            else:
+                my_env["GOOS"] = "linux"
+            if self.architecture == 'raspberry_pi_6':
+                my_env["GOARCH"] = "arm"
+                my_env["GOARM"] = "6"
+            if self.architecture == 'raspberry_pi_7':
+                my_env["GOARCH"] = "arm"
+                my_env["GOARM"] = "7"
+            if self.architecture == 'raspberry_pi_64':
+                my_env["GOARCH"] = "arm64"
 
             if self.architecture == 'win_i386':
                 my_env['GOARCH'] = '386'
@@ -321,7 +342,6 @@ class ShuttleInstance(models.Model, SdcModel):
                 go_tool = os.path.join(settings.GOROOT, "bin/go")
                 p = subprocess.Popen([go_tool, "mod", "download"], env=my_env, cwd=tp_src)
                 p_status = p.wait()
-                print(p, p_status)
                 if p_status != 0:
                     raise Exception(_("Download mod failed"))
 
@@ -329,7 +349,6 @@ class ShuttleInstance(models.Model, SdcModel):
                 [go_tool, "build", "-o", os.path.join(tp_bin, filename)], env=my_env,
                 cwd=tp_src)
             p_status = p.wait()
-            print(p, p_status)
             if p_status != 0:
                 raise Exception(_("Compiling failed"))
 

@@ -27,7 +27,7 @@ services:
     volumes:
       - bridge_db:/var/lib/postgresql/data/
   web:
-    image: mstarman/shuttlebuilder:0.2.10
+    image: mstarman/shuttlebuilder:0.2.11
     restart: unless-stopped
     depends_on:
       - db

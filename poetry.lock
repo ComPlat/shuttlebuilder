@@ -309,13 +309,13 @@ files = [
 
 [[package]]
 name = "chemotion-api"
-version = "0.3.51"
+version = "0.3.53"
 description = "A Chemotion python API"
 optional = false
 python-versions = "<4.0,>=3.09"
 files = [
-    {file = "chemotion_api-0.3.51-py3-none-any.whl", hash = "sha256:7f356aeaf05b787250afd42160dbde7bc3a070c38f2af49a393fb50ac62c6d5e"},
-    {file = "chemotion_api-0.3.51.tar.gz", hash = "sha256:399d695eb75e788eae79ff30c1bf215c4bcf1b40aa0c4e7935ff832b6f01c6d5"},
+    {file = "chemotion_api-0.3.53-py3-none-any.whl", hash = "sha256:f3c1b2dfc4a0f468fd9bf8264d7a4bc2661f1a3787d01d221f95742dd4726202"},
+    {file = "chemotion_api-0.3.53.tar.gz", hash = "sha256:7298447753b0758551674f208a122b0ce448c20c4eca335c5592407f02e11b4d"},
 ]
 
 [package.dependencies]
