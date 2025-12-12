@@ -14,6 +14,7 @@
         window.LANGUAGE_CODE = "{{ LANGUAGE_CODE | default:'de' }}";
         window.CSRF_TOKEN = '{{ csrf_token }}';
         window.DEBUG = {% if debug %} true {% else %} false {% endif %};
+        window.SERVER_CALL_VIA_WEB_SOCKET = {% if server_call_via_web_socket %} true {% else %} false {% endif %};
         window.VERSION = '{{VERSION}}';
     </script>
 
@@ -27,10 +28,8 @@
 </head>
 <body>
 {% block content %}{% endblock %}
-{% if debug %}
 <div class="site-footer">
-    <p>By: Martin Starman  DEBUG_MODE </p>
+    <p>By: Martin Starman {% if debug %} DEBUG_MODE {% endif %}</p>
 </div>
-{% endif %}
 </body>
 </html>

@@ -1,9 +1,10 @@
 'use strict'
 
 const {src, dest, series, parallel} = require('gulp');
-const path = require("path");
 const webpack = require('webpack-stream');
 const copy = require('gulp-copy');
+
+process.env.JS_CILENT_FILE_EXTENTIONS = ['.js', '.json'];
 
 const {
     sdc_scss,
@@ -31,18 +32,18 @@ function copy_statics() {
 
 exports.webpack = webpack_javascript;
 exports.scss = sdc_scss;
-exports.copy_statics = copy_statics;
 exports.link_files = sdc_link_files;
 exports.clean = sdc_clean;
+exports.copy_statics = copy_statics;
 exports.default = series(copy_statics, sdc_default_build_factory(webpack_javascript));
 exports.watch_scss = sdc_watch_scss;
 exports.watch_webpack = sdc_watch_webpack_factory(webpack_javascript);
 
-exports.develop = series(copy_statics, function (done) {
+exports.develop = series(function (done) {
     process.env.NODE_ENV = 'development';
     process.env.BABEL_ENV = 'development';
     done();
-}, sdc_default_build_factory(webpack_javascript), parallel(
+}, copy_statics, sdc_default_build_factory(webpack_javascript), parallel(
     sdc_watch_scss,
     sdc_watch_webpack_factory(webpack_javascript)
 ));
