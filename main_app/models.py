@@ -5,6 +5,7 @@ import shutil
 import subprocess
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from sdc_core.sdc_extentions.models import SdcModel
 from sdc_core.sdc_extentions.forms import AbstractSearchForm
@@ -12,9 +13,10 @@ from django.template.loader import render_to_string
 from sdc_core.sdc_extentions.search import handle_search_form
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 from django.db.models import signals
 from django.template import Template, Context
+
+User = get_user_model()
 
 def create_user(sender, instance, created, **kwargs):
     """Create ElnUser for every new User."""
@@ -170,12 +172,12 @@ class GitInstance(models.Model, SdcModel):
 
 class ShuttleInstanceSearchForm(AbstractSearchForm):
     CHOICES = (
-        ('name', _('Name')), ('user', _('User')), ('efw_type', _('Type')), ('src', _('Source')),
+        ('name', _('Name')), ('user', _('User')), ('shuttle_type', _('Type')), ('src', _('Source')),
         ('dst', _('Destination')),
         ('architecture', _('Architecture')))
     PLACEHOLDER = _('Name, Type, Source, Destination')
     DEFAULT_CHOICES = CHOICES[0][0]
-    SEARCH_FIELDS = ('name', 'user', 'efw_type', 'src', 'dst', 'architecture')
+    SEARCH_FIELDS = ('name', 'user', 'shuttle_type', 'src', 'dst', 'architecture')
 
 
 TYPE_CHOISES = (

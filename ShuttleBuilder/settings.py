@@ -86,7 +86,7 @@ LOGIN_CONTROLLER = 'sdc-login'
 LOGIN_SUCCESS = '/'
 
 JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256'}
-# AUTH_USER_MODEL = "sdc_user.SdcUser"
+AUTH_USER_MODEL = "sdc_user.SdcUser"
 
 # EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST =''
