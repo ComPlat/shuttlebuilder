@@ -6,6 +6,7 @@ import subprocess
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.validators import FileExtensionValidator
 from django.utils import timezone
 from sdc_core.sdc_extentions.models import SdcModel
 from sdc_core.sdc_extentions.forms import AbstractSearchForm
@@ -17,6 +18,7 @@ from django.db.models import signals
 from django.template import Template, Context
 
 User = get_user_model()
+
 
 def create_user(sender, instance, created, **kwargs):
     """Create ElnUser for every new User."""
@@ -231,15 +233,37 @@ class ShuttleInstance(models.Model, SdcModel):
     shuttle_type = models.CharField(_('Type'), help_text=_(
         "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
                                     max_length=255, choices=TYPE_CHOISES)
-    common_name_parts = models.CharField(_('Common name regex'), blank=True, max_length=255, default="^[A-Za-z]{1,4}", help_text=_(
-        "The regex for the common name is used to collect all files that belong to the same data set. This value is only used if the type is flat tar. All files that either have the same regex group resolutions or (if you do not use groups) have the same global result are archived together<this.render_help></this.render_help>"))
+    common_name_parts = models.CharField(_('Common name regex'), blank=True, max_length=255, default="^[A-Za-z]{1,4}",
+                                         help_text=_(
+                                             "The regex for the common name is used to collect all files that belong to the same data set. This value is only used if the type is flat tar. All files that either have the same regex group resolutions or (if you do not use groups) have the same global result are archived together<this.render_help></this.render_help>"))
     duration = models.PositiveIntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
         default=300)
     # cert = models.CharField(help_text=_("Path to server TLS certificate. Only needed if the server has a self signed certificate."), max_length=255, blank=True, null=True)
     architecture = models.CharField(_('System architecture'),
-                                    help_text=_("Your computer architecture : either 64 bit, i386 or ARM And your OS: Linux or Windows"),
+                                    help_text=_(
+                                        "Your computer architecture : either 64 bit, i386 or ARM And your OS: Linux or Windows"),
                                     max_length=255, choices=SYSTEM_CHOISES, default=SYSTEM_CHOISES[0][0])
+
+    with_converter = models.BooleanField(_('With converter'), default=False, help_text=_(
+        "Check whether the raw file needs to be stored in Chomtion, or if storing only the converted BagIt archive is sufficient. If checked, you must specify two destinations: the already configured destination is used for the raw data file, and the additional input below is used for the BagIt archive (Chemotion)."))
+
+    user_bagit = models.CharField(help_text=_("WebDAV or STFP User for converted Bagit"), max_length=50, null=True,
+                                  blank=True)
+    passwort_bagit = models.CharField(help_text=_("WebDAV or STFP Password for converted Bagit"), max_length=100,
+                                      null=True, blank=True)
+    dst_bagit = models.CharField(help_text=_("""WebDAV or SFTP destination URL. If the destination is on the lsdf, the URL should be as follows:<br>
+            <span style="margin-left: 20px; font-weight: 800;">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
+            <span style="margin-left: 20px; font-weight: 800;">WebDAV</span>: https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
+
+                        <span style="margin-left: 30px;">[OE]-Organisationseinheit, z.B. kit.</span><br>
+                        <span style="margin-left: 30px;">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>
+                        <span style="margin-left: 30px;">[USERNAME]-User-Name z.B. xy1234, bs_abcd etc.</span><br>
+                        <span style="margin-left: 30px;">[PROJECT_PATH]-Path (directory) within the LSDF</span>"""),
+                                 max_length=255, null=True, blank=True)
+    public_link = models.URLField(blank=True, null=True, help_text=_("The prefix of the publicly accessible link to the raw files. It must include the scheme, domain, and path (e.g. https://your-file-storage-example.eu/data/raw/). Only the file name is appended."))
+    profile = models.FileField(upload_to="profiles/", validators=[FileExtensionValidator(allowed_extensions=["json"])],
+                               null=True, blank=True)
 
     last_update = models.DateTimeField(default=timezone.now)
     last_build = models.DateTimeField(null=True, blank=True)
@@ -282,10 +306,18 @@ class ShuttleInstance(models.Model, SdcModel):
                         "tType": self.transfer,
                         "name": self.replace_single_backslashes(self.name),
                         "crt": "None",
-                        "type": self.shuttle_type})
+                        "type": self.shuttle_type,
+                        "preconvert": "T" if self.with_converter else "N",
+                        "dst_converter": self.replace_single_backslashes(self.dst_bagit),
+                        "user_converter": self.replace_single_backslashes(self.user_bagit),
+                        "password_converter": self.replace_single_backslashes(self.passwort_bagit),
+                        "public": self.public_link
+        })
 
     def only_exe(self):
-        return self.architecture != 'win_i386' or self.transfer != 'sftp'
+        if self.architecture == 'win_i386' and self.transfer == 'sftp':
+            return False
+        return not self.with_converter
 
     def build(self):
         git = GitInstance.objects.get(is_active=True)
@@ -302,7 +334,8 @@ class ShuttleInstance(models.Model, SdcModel):
         else:
             filename = 'shuttle'
 
-        if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build or not os.path.exists(os.path.join(tp_bin, filename)):
+        if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build or not os.path.exists(
+                os.path.join(tp_bin, filename)):
             shutil.rmtree(tp, ignore_errors=True)
             os.makedirs(tp_src, exist_ok=True)
             shutil.copytree(repo_path, tp_src, dirs_exist_ok=True)
@@ -331,10 +364,10 @@ class ShuttleInstance(models.Model, SdcModel):
             if self.architecture == 'raspberry_pi_6':
                 my_env["GOARCH"] = "arm"
                 my_env["GOARM"] = "6"
-            if self.architecture == 'raspberry_pi_7':
+            elif self.architecture == 'raspberry_pi_7':
                 my_env["GOARCH"] = "arm"
                 my_env["GOARM"] = "7"
-            if self.architecture == 'raspberry_pi_64':
+            elif self.architecture == 'raspberry_pi_64':
                 my_env["GOARCH"] = "arm64"
 
             if self.architecture == 'win_i386':

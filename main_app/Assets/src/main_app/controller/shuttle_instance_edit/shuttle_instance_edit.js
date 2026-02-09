@@ -18,7 +18,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
      * The pattern is {'event': {'dom_selector': handler}}
      * Uncommend the following line to add events;
      */
-    this.events.unshift({'change': {'#id_shuttle_type': this.onTypeChange}});
+    this.events.unshift({'change': {'#id_shuttle_type': this.onTypeChange, '#id_with_converter': this.onConverterChange}});
   }
 
   //-------------------------------------------------//
@@ -37,6 +37,9 @@ class ShuttleInstanceEditController extends AbstractSDC {
 
   set isAutoChange(x) {
     this._saveOnChange = x;
+    if(x) {
+      this.next = null;
+    }
   }
 
   onInit() {
@@ -54,6 +57,10 @@ class ShuttleInstanceEditController extends AbstractSDC {
     let $typeSelect = this.find('#id_shuttle_type');
     if ($typeSelect.length > 0) {
       this.onTypeChange($typeSelect);
+    }
+    let $withConverter = this.find('#id_with_converter');
+    if ($withConverter.length > 0) {
+      this.onConverterChange($withConverter);
     }
     return super.onRefresh();
   }
@@ -213,6 +220,19 @@ class ShuttleInstanceEditController extends AbstractSDC {
       this.find('.id_common_name_parts').show("slow");
     } else {
       this.find('.id_common_name_parts').hide("slow");
+    }
+  }
+
+  onConverterChange($dom) {
+    const convFields = ['dst_bagit', 'passwort_bagit', 'user_bagit', 'profile'];
+    if ($dom[0].checked) {
+      convFields.forEach(field => {
+        this.find(`.id_${field}`).show("slow");
+      });
+    } else {
+      convFields.forEach(field => {
+        this.find(`.id_${field}`).hide("slow");
+      });
     }
   }
 

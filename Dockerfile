@@ -1,7 +1,7 @@
-FROM python:3.12 AS client_build
+FROM python:3.13-slim AS client_build
 RUN apt-get update
 
-ENV NODE_VERSION=22.8.0
+ENV NODE_VERSION=22.14.0
 RUN apt install -y curl
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 ENV NVM_DIR=/root/.nvm
@@ -32,7 +32,7 @@ RUN poetry run python manage.py sdc_update_links
 RUN npm run build
 RUN poetry run python manage.py collectstatic  --no-input
 
-FROM python:3.12 AS shuttlebuilder
+FROM python:3.13-slim AS shuttlebuilder
 LABEL authors="martin"
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -41,12 +41,12 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir -p /srv/app
 RUN mkdir -p /srv/app/private_libs
 WORKDIR /srv/app
-RUN apt-get update && apt-get --assume-yes upgrade && apt-get install -y git nginx nodejs npm zip gzip tar
+RUN apt-get update && apt-get --assume-yes upgrade && apt-get install -y git nginx nodejs npm zip gzip tar wget libmagic1
 
 WORKDIR /opt
-RUN wget "https://go.dev/dl/go1.19.3.linux-amd64.tar.gz"
+RUN wget "https://go.dev/dl/go1.24.13.linux-amd64.tar.gz"
 RUN rm -rf /usr/local/go
-RUN tar -C /usr/local -xzf go1.19.3.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.24.13.linux-amd64.tar.gz
 RUN mkdir "/usr/local/gopath"
 
 ENV GOROOT="/usr/local/go"
@@ -58,6 +58,8 @@ RUN go install golang.org/dl/go1.10@latest
 RUN go1.10 download
 RUN go1.10 get github.com/StarmanMartin/gowebdav
 
+COPY . .
+
 # install dependencies
 COPY --from=client_build /srv/app/requirements.txt .
 RUN pip install --upgrade pip
@@ -68,7 +70,7 @@ ARG SUPERUSER_NAME
 ARG SUPERUSER_EMAIL
 ARG SUPERUSER_PASS
 
-COPY . .
+
 
 COPY etc_config/default.conf /etc/nginx/sites-enabled/default
 COPY --from=client_build /srv/app/www /usr/share/nginx/static
@@ -76,7 +78,5 @@ COPY --from=client_build /srv/app/www /usr/share/nginx/static
 
 EXPOSE 80
 
-RUN ./manage.py sdc_db_tools --update_to_sdc_user || echo "some-command failed, continuing anyway"
-
 #CMD python ./manage.py runserver 0.0.0.0:8000
-CMD service nginx start && ./manage.py migrate && ./manage.py initsuperuser && daphne -b 0.0.0.0 -p 8000 ShuttleBuilder.asgi:application
+CMD service nginx start && ./manage.py sdc_db_tools --update_to_sdc_user || echo "some-command failed, continuing anyway" && ./manage.py migrate && ./manage.py initsuperuser && daphne -b 0.0.0.0 -p 8000 ShuttleBuilder.asgi:application

@@ -1,18 +1,32 @@
 import {AbstractSDC, app} from 'sdc_client';
 
 
-class BasicInfoController extends AbstractSDC {
+class ShuttleScriptsController extends AbstractSDC {
 
     constructor() {
         super();
-        this.contentUrl = "/sdc_view/main_app/basic_info"; //<basic-info></basic-info>
+        this.contentUrl = "/sdc_view/main_app/shuttle_scripts"; //<shuttle-scripts></shuttle-scripts>
+
+        /**
+         * Uncomment the following line to make sure the HTML template
+         * of this controller is not cached and reloaded for every instance
+         * of this controller.
+         */
+        // this.contentReload = true;
+
+        /**
+         * Uncomment the following line to make this controller asynchronous.
+         * This means that the parent controller finishes loading without
+         * waiting for this controller
+         */
+        // this.load_async = true;
 
         /**
          * Events is an array of dom events.
          * The pattern is {'event': {'dom_selector': handler}}
-         * Uncommend the following line to add events;
+         * Uncomment the following line to add events;
          */
-        // this.events.unshift({'click': {'.header-sample': (ev, $elem)=> $elem.css('border', '2px solid black')}}});
+        // this.events.unshift({'click': {'.header-sample': (ev, $elem)=> $elem.css('border', '2px solid black')}});
     }
 
     //-------------------------------------------------//
@@ -42,4 +56,4 @@ class BasicInfoController extends AbstractSDC {
 
 }
 
-app.register(BasicInfoController);
+app.register(ShuttleScriptsController, false);

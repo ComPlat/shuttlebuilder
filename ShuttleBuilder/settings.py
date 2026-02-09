@@ -87,11 +87,27 @@ LOGIN_SUCCESS = '/'
 
 JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256'}
 AUTH_USER_MODEL = "sdc_user.SdcUser"
+DEFAULT_FROM_EMAIL = "chemotion@martin-starman.com"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-# EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST =''
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = ''
-# DEFAULT_FROM_EMAIL = ''
-# EMAIL_HOST_PASSWORD = ''
-# EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_TIMEOUT = 10
+
+GOOS =  "windows"
+GOROOT = os.environ.get('GOROOT')
+GOPATH = os.environ.get('GOPATH')
+
+if DEBUG:
+    ELN_URL=os.environ.get('ELN_URL', 'http://127.0.0.1:3000')
+    MAX_UPLOAD_SIZE=os.environ.get('MAX_UPLOAD_SIZE', 250000)
+
+else:
+    ELN_URL=os.environ.get('ELN_URL')
+    MAX_UPLOAD_SIZE=os.environ.get('MAX_UPLOAD_SIZE', 5e+7)

@@ -6,6 +6,8 @@ README.md
 db.sqlite3
 Dockerfile
 docker-compose.yml
+docker-compose.db.yml
+docker-compose.dev.yml
 .gitignore
 poetry.lock
 .tool-versions

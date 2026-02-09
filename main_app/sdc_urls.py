@@ -5,6 +5,7 @@ from . import sdc_views
 
 urlpatterns = [
     # scd view below
+    path('shuttle_scripts', sdc_views.ShuttleScripts.as_view(), name='scd_view_main_app_shuttle_scripts'),
     path('shuttle_instance_edit', sdc_views.ShuttleInstanceEdit.as_view(), name='scd_view_shuttle_instance_edit'),
     path('shuttle_instance_list', sdc_views.ShuttleInstanceList.as_view(), name='scd_view_shuttle_instance_list'),
     path('git_insatnce_edit', sdc_views.GitInsatnceEdit.as_view(), name='scd_view_git_insatnce_edit'),

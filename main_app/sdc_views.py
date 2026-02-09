@@ -67,7 +67,7 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
                     file_data = f.read()
                     response = HttpResponse(file_data, content_type='application/octet-stream')
                     response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(file_location)
-            else:
+            elif instance.architecture == 'win_i386':
                 zip_path = os.path.join(os.path.dirname(file_location), "shuttle_sftp_winxp.zip")
                 zf = zipfile.ZipFile(zip_path, "w")
                 zf.write(file_location, 'shuttle.exe')
@@ -79,6 +79,23 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
                     file_data = f.read()
                     response = HttpResponse(file_data, content_type='application/octet-stream')
                     response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
+            else:
+                zip_path = os.path.join(os.path.dirname(file_location), "shuttle.zip")
+                with zipfile.ZipFile(zip_path, "w") as zf:
+                    zf.write(file_location, os.path.basename(file_location))
+                    if instance.architecture == 'win_64':
+                        zf.write(os.path.join(settings.STATIC_ROOT, 'files/ChemConverterApp.exe'), 'ChemConverterApp.exe')
+                    else:
+                        zf.write(os.path.join(settings.STATIC_ROOT, 'files/ChemConverterApp'), 'ChemConverterApp')
+                    instance.profile.open('r')
+                    zf.writestr(instance.profile.name, instance.profile.read())
+                    instance.profile.close()
+
+                with open(zip_path, 'rb') as f:
+                    file_data = f.read()
+                    response = HttpResponse(file_data, content_type='application/octet-stream')
+                    response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
+
 
         except IOError as e:
             # handle file not exist case here
@@ -88,3 +105,9 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
                 '<h1>%s</h1>' % _('There was en compilation error. Maybe you have used \\ in the src instead of \\\\.'))
 
         return response
+
+class ShuttleScripts(SDCView):
+    template_name='main_app/sdc/shuttle_scripts.html'
+
+    def get_content(self, request, *args, **kwargs):
+        return render(request, self.template_name)

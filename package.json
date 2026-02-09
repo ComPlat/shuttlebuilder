@@ -19,7 +19,7 @@
       "\\.[jt]sx?$": [
         "babel-jest",
         {
-          "configFile": "./Assets/.babelrc"
+          "configFile": "./Assets/babel.config.json"
         }
       ]
     },
@@ -78,9 +78,9 @@
     "bootstrap-icons": "^1.11.3",
     "esm": "^3.2.25",
     "jquery": "^3.7.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "regexp-tree": "^0.1.27",
     "regexper": "^1.0.2",
-    "sdc_client": "^0.57.18"
+    "sdc_client": "^0.57.22"
   }
 }

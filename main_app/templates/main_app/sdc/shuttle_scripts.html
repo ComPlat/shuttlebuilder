@@ -1,0 +1,111 @@
+{% load static %}
+
+<div class="flex-container justify-content-center">
+    <div class="main-container">
+        <h1>Shuttle scripts</h1>
+        <p>
+            Files can be edited before sending. To use this logic, simply place the necessary executable file (in the
+            following script) in a folder reserved for this purpose.
+        </p>
+        <ul>
+            <li><b>Linux</b>: ~/shuttle/scripts</li>
+            <li><b>Windows</b>: %USERPROFILE%\shuttle\scripts</li>
+        </ul>
+
+        <p>
+            This folder can be created manually or is automatically generated when the shuttle is started for the first
+            time.
+        </p>
+        <p>
+            All executable files within this folder (Windows: .exe; Linux: any executable file) are executed in
+            alphabetical order.
+        </p>
+        <p>
+            When a script is executed, it receives the path of the file to be sent as an argument. <b>After all scripts
+            have completed, all files from the folder where the original file was located are uploaded to the
+            server.</b>
+            This means that the original file can be edited and overwritten, or new files can be created in the same
+            folder.
+        </p>
+
+
+        <div class="card mx-auto" style="width: 80%;">
+            <div class="card-body">
+                <h5 class="card-title">File from content renamer</h5>
+                <p class="card-text">
+                    This Script reads a file and renames it based on its content. To use it you need to add a <b>.env</b> file into the script directory with the following keys.
+                </p>
+                <p>The .env file</p>
+                <pre class="m-0 p-3 bg-light flex-grow-0">
+SFC_FILE_FILTER_RE=\.txt$
+SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
+                <p> <b>SFC_FILE_FILTER_RE</b> is used as a filter. If this regexp matches the file will be renamend</p>
+                <p> <b>SFC_NEW_NAME_RE</b> is used to find the new name. This regex must have at least one group. The new name is the match of the first group</p>
+                <a href="{% static 'files/ShuttleFromContentRenamer' %}" download>
+                    ShuttleFromContentRenamer (Linux)
+                </a> or <a href="{% static 'files/ShuttleFromContentRenamer.exe' %}" download>
+                ShuttleFromContentRenamer (Win)
+            </a>
+            </div>
+        </div>
+
+
+        <div class="card mx-auto" style="width: 80%;">
+            <div class="card-body">
+                <h5 class="card-title">File renamer</h5>
+                <p class="card-text">
+                    This Script reads a file and renames it based on its content. To use it you need to add a <b>.env</b> file into the script directory with the following keys.
+                </p>
+                <p>The .env file</p>
+                <pre class="m-0 p-3 bg-light flex-grow-0">
+SFC_FILE_FILTER_RE=\.txt$
+SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
+                <p> <b>SFC_FILE_FILTER_RE</b> is used as a filter. If this regexp matches the file will be renamend</p>
+                <p> <b>SFC_NEW_NAME_RE</b> is used to find the new name. This regex must have at least one group. The new name is the match of the first group</p>
+                <a href="{% static 'files/ShuttleFromContentRenamer' %}" download>
+                    ShuttleFromContentRenamer (Linux)
+                </a> or <a href="{% static 'files/ShuttleFromContentRenamer.exe' %}" download>
+                ShuttleFromContentRenamer (Win)
+            </a>
+            </div>
+        </div>
+
+        <p>The following ChemConverter is not a Script. It must not be used in the script directory. However, it can be
+            set up as part of the shuttle in the instance edit/create form</p>
+
+
+        <div class="card mx-auto" style="width: 80%;">
+            <img class="card-img-top" style="margin: 10px 120px; width: auto"
+                 src="{% static 'img/chemotion_converter.png' %}" alt="ChemConverter Logo">
+            <div class="card-body">
+                <h5 class="card-title">ChemConverter</h5>
+                <p class="card-text">
+                    ChemConverter is a file-format conversion service used in conjunction with the <a
+                        href="https://chemotion.net/">Chemotion</a> Electronic Lab Notebook (ELN).
+                    Its main purpose is to standardize analytical data files — converting them into formats that
+                    Chemotion (and related tools like ChemSpectra) can display and work with.
+                </p>
+                <h6>How It Works Technically</h6>
+
+                <p>ChemConverter has a three-layer architecture:<br>
+
+                    <b>Reader layer:</b><br>
+                    Code that reads the incoming file format (TXT, CSV, DTA, etc.) and parses columns and
+                    values.<br><br>
+
+                    <b>Admin profile layer:</b><br>
+                    Rules defined (by admins) for how to recognize and transform different input formats — based on file
+                    extension, header lines, column titles, or other identifiers.<br><br>
+
+                    <b>Processing & Output:</b><br>
+                    The converter applies the selected profile, outputs standardized formats, and stores metadata and
+                    data in structures Chemotion understands.</p>
+                <a href="{% static 'files/ChemConverterApp' %}" download>
+                    ChemConverterApp (Linux)
+                </a> or <a href="{% static 'files/ChemConverterApp.exe' %}" download>
+                ChemConverterApp (Win)
+            </a>
+            </div>
+        </div>
+    </div>
+</div>

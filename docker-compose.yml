@@ -15,7 +15,7 @@ x-envs: &envs
 
 services:
   db:
-    image: postgres:13
+    image: postgres:16
     restart: unless-stopped
     hostname: db
     expose:
@@ -27,7 +27,8 @@ services:
     volumes:
       - bridge_db:/var/lib/postgresql/data/
   web:
-    image: mstarman/shuttlebuilder:0.2.11
+    image: mstarman/shuttlebuilder:0.2.12
+    build: .
     restart: unless-stopped
     depends_on:
       - db

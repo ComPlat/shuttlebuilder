@@ -61,8 +61,24 @@ class ShuttleInstanceForm(ModelForm):
         else:
             return self.cleaned_data['name']
 
+    def clean_public_link(self):
+        val = self.cleaned_data['public_link']
+        if len(val) > 0 and val[-1] != '/':
+            val += '/'
+        return val
+
     def clean(self):
         cleaned_data = super().clean()
+        if cleaned_data['with_converter']:
+            if cleaned_data['architecture'] not in ['win_64', 'ubuntu_64']:
+                self.add_error('with_converter', ValidationError('Converter can only be used for Architecture Windows 64 Bit and Ubuntu 64 Bit'))
+            needed_fields_for_converter = ['dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile']
+            for field in needed_fields_for_converter:
+                field_val = cleaned_data.get(field)
+                if not field_val:
+                    self.add_error(field, ValidationError(
+                        f'If "with converter" is checked then {field} must be set'))
+
         if cleaned_data['shuttle_type'] == 'flat_tar':
             common_name_parts = cleaned_data.get('common_name_parts', '')
             if len(common_name_parts) == 0:
@@ -76,4 +92,4 @@ class ShuttleInstanceForm(ModelForm):
 
     class Meta:
         model = ShuttleInstance
-        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture']
+        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture', 'with_converter', 'dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile']
