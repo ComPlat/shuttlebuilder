@@ -31,3 +31,6 @@
 /main_app/Assets/src/main_app/controller/shuttle_scripts/shuttle_scripts.html
 /Assets/_build/
 /media/
+/Assets/bin/main_app
+/Assets/bin/sdc_tools
+/Assets/bin/sdc_user

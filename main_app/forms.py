@@ -63,7 +63,7 @@ class ShuttleInstanceForm(ModelForm):
 
     def clean_public_link(self):
         val = self.cleaned_data['public_link']
-        if len(val) > 0 and val[-1] != '/':
+        if val and len(val) > 0 and val[-1] != '/':
             val += '/'
         return val
 

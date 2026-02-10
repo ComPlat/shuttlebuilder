@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:13
+    image: postgres:16
     restart: unless-stopped
     hostname: db
     expose:
@@ -14,6 +14,6 @@ services:
     env_file:
       - ./.env
     volumes:
-      - bridge_dev_db:/var/lib/postgresql/data/
+      - bridge_db:/var/lib/postgresql/data/
 volumes:
-  bridge_dev_db:
+  bridge_db:

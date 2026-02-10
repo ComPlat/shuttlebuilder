@@ -290,6 +290,8 @@ class ShuttleInstance(models.Model, SdcModel):
 
     @staticmethod
     def replace_single_backslashes(s):
+        if not s:
+            s = ""
         return re.sub(r'(?<!\\)\\(?!\\)', r'\\\\', s)
 
     @staticmethod

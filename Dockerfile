@@ -1,7 +1,7 @@
 FROM python:3.13-slim AS client_build
 RUN apt-get update
 
-ENV NODE_VERSION=22.14.0
+ENV NODE_VERSION=22.16.0
 RUN apt install -y curl
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 ENV NVM_DIR=/root/.nvm

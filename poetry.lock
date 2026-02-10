@@ -450,24 +450,24 @@ tests = ["black", "django", "flake8", "flake8-bugbear", "hypothesis", "mypy", "p
 
 [[package]]
 name = "django"
-version = "5.2.11"
+version = "6.0.2"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "django-5.2.11-py3-none-any.whl", hash = "sha256:e7130df33ada9ab5e5e929bc19346a20fe383f5454acb2cc004508f242ee92c0"},
-    {file = "django-5.2.11.tar.gz", hash = "sha256:7f2d292ad8b9ee35e405d965fbbad293758b858c34bbf7f3df551aeeac6f02d3"},
+    {file = "django-6.0.2-py3-none-any.whl", hash = "sha256:610dd3b13d15ec3f1e1d257caedd751db8033c5ad8ea0e2d1219a8acf446ecc6"},
+    {file = "django-6.0.2.tar.gz", hash = "sha256:3046a53b0e40d4b676c3b774c73411d7184ae2745fe8ce5e45c0f33d3ddb71a7"},
 ]
 
 [package.dependencies]
-asgiref = ">=3.8.1"
-sqlparse = ">=0.3.1"
+asgiref = ">=3.9.1"
+sqlparse = ">=0.5.0"
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-argon2 = ["argon2-cffi (>=19.1.0)"]
-bcrypt = ["bcrypt"]
+argon2 = ["argon2-cffi (>=23.1.0)"]
+bcrypt = ["bcrypt (>=4.1.1)"]
 
 [[package]]
 name = "hyperlink"
@@ -1427,14 +1427,14 @@ type = ["importlib_metadata (>=7.0.2) ; python_version < \"3.10\"", "jaraco.deve
 
 [[package]]
 name = "simpledomcontrol"
-version = "0.57.22"
+version = "0.58.1"
 description = "Simple DOM control -> a django MVC framework"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "simpledomcontrol-0.57.22-py3-none-any.whl", hash = "sha256:baaad696a98e869fce5d85678ad86a1a76e12400efad212d034edf0d90983af7"},
-    {file = "simpledomcontrol-0.57.22.tar.gz", hash = "sha256:2371e77190364cc21f48a211356cce454ee543c11670dc0beb869ff33621031f"},
+    {file = "simpledomcontrol-0.58.1-py3-none-any.whl", hash = "sha256:2c7680d63f6ecda69b26a196b0cb90b611737b9147fa5633ef73e24c720b2a31"},
+    {file = "simpledomcontrol-0.58.1.tar.gz", hash = "sha256:ad0358c1a52f3dbadc8cfc1db3de8adc4023fbd1b224d17438631a968fe14557"},
 ]
 
 [package.dependencies]
@@ -1443,7 +1443,7 @@ channels = ">=4.3.2,<5.0.0"
 channels-redis = ">=4.3.0,<5.0.0"
 click = ">=8.1.0"
 daphne = ">=4.2.1,<5.0.0"
-django = ">=5.2.10,<6.0.0"
+django = ">=6.0.2,<7.0.0"
 inquirerpy = ">=0.3.4,<0.4.0"
 poetry-core = ">=2.3.0,<3.0.0"
 psycopg2-binary = ">=2.9.11,<3.0.0"
@@ -1647,4 +1647,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "d32e42fb99805d7b28b5f1b7c2e4dac0f429b3a7b20c6fafd20156ad480fb9af"
+content-hash = "ecc3e12db652df7530e418421032d73963c8f05ef26be819129928edd3c43de7"

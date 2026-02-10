@@ -224,7 +224,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
   }
 
   onConverterChange($dom) {
-    const convFields = ['dst_bagit', 'passwort_bagit', 'user_bagit', 'profile'];
+    const convFields = ['dst_bagit', 'passwort_bagit', 'user_bagit', 'profile', 'public_link'];
     if ($dom[0].checked) {
       convFields.forEach(field => {
         this.find(`.id_${field}`).show("slow");
