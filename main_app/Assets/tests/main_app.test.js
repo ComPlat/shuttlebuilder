@@ -108,3 +108,20 @@ describe('ShuttleScripts', () => {
     });
 
 });
+
+describe('ShuttleLogin', () => {
+    let controller;
+
+    beforeEach(async () => {
+        // Create new controller instance based on the standard process.
+        controller = await test_utils.get_controller('shuttle-login',
+                                                  {},
+                                                  '<div><h1>Controller Loaded</h1></div>');
+    });
+
+    test('Load Content', async () => {
+        const $div = $('body').find('shuttle-login');
+        expect($div.length).toBeGreaterThan(0);
+    });
+
+});

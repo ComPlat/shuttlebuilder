@@ -78,5 +78,10 @@ COPY --from=client_build /srv/app/www /usr/share/nginx/static
 
 EXPOSE 80
 
+RUN mv ./etc_config/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+
+
 #CMD python ./manage.py runserver 0.0.0.0:8000
-CMD service nginx start && ./manage.py sdc_db_tools --update_to_sdc_user || echo "some-command failed, continuing anyway" && ./manage.py migrate && ./manage.py initsuperuser && daphne -b 0.0.0.0 -p 8000 ShuttleBuilder.asgi:application
+ENTRYPOINT ./entrypoint.sh

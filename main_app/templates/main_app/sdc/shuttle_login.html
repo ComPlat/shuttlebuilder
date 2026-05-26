@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="flex-container justify-content-center">
+    <div class="main-container">
+        <p></p>
+        <h4>{% trans 'Login' %}</h4>
+        {% if connection %}
+        <p>{% trans 'You can log in using either a local account or your Chemotion account.' %}</p>
+        <p>{% trans 'Link to Chemotion:'%} <a href="{{ connection.url }}" target="_blank">{{ connection.url }}</a></p>
+        {% else %}
+        {% endif %}
+        <sdc-login></sdc-login>
+    </div>
+</div>

@@ -31,15 +31,28 @@ services:
     volumes:
       - bridge_db:/var/lib/postgresql/data/
   web:
-    image: mstarman/shuttlebuilder:0.2.12
+    image: mstarman/shuttlebuilder:0.2.17
     build: .
     restart: unless-stopped
     depends_on:
       - db
     environment:
-      <<: [*envs, *postgress-variables]
+      <<:
+        - *envs
+        - *postgress-variables
     ports:
       - ${PROJECT_WEB_PORT:-80}:80
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: asetvbj!nm345vawectr32
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
 
   redis:
     image: redis:7-alpine

@@ -11,7 +11,7 @@ class Command(BaseCommand):
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
-        if not User.objects.filter(username=username).exists():
+        if len(User.objects.filter(username=username)) == 0:
             print(f'Creating account for {username}n ({email})')
             User.objects.create_superuser(
                 email=email, username=username, password=password)

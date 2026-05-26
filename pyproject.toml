@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ShuttleBuilder"
-version = "0.2.11"
+version = "0.2.14"
 description = ""
 authors = ["martin <m.starman@live.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.13,<4.0"
-simpledomcontrol = "^0.58.1"
+simpledomcontrol = "^0.58.6"
 chemotion-api = "^211.0.1"
 
 

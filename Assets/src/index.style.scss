@@ -29,4 +29,10 @@ body {
   .page-header {
     margin: 22px;
   }
+
+  [sdc-search-view] .page-number-control {
+    position: relative;
+    bottom: 0;
+    left: 0;
+  }
 }

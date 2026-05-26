@@ -49,27 +49,6 @@ SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
             </div>
         </div>
 
-
-        <div class="card mx-auto" style="width: 80%;">
-            <div class="card-body">
-                <h5 class="card-title">File renamer</h5>
-                <p class="card-text">
-                    This Script reads a file and renames it based on its content. To use it you need to add a <b>.env</b> file into the script directory with the following keys.
-                </p>
-                <p>The .env file</p>
-                <pre class="m-0 p-3 bg-light flex-grow-0">
-SFC_FILE_FILTER_RE=\.txt$
-SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
-                <p> <b>SFC_FILE_FILTER_RE</b> is used as a filter. If this regexp matches the file will be renamend</p>
-                <p> <b>SFC_NEW_NAME_RE</b> is used to find the new name. This regex must have at least one group. The new name is the match of the first group</p>
-                <a href="{% static 'files/ShuttleFromContentRenamer' %}" download>
-                    ShuttleFromContentRenamer (Linux)
-                </a> or <a href="{% static 'files/ShuttleFromContentRenamer.exe' %}" download>
-                ShuttleFromContentRenamer (Win)
-            </a>
-            </div>
-        </div>
-
         <p>The following ChemConverter is not a Script. It must not be used in the script directory. However, it can be
             set up as part of the shuttle in the instance edit/create form</p>
 

@@ -12,3 +12,6 @@ docker-compose.dev.yml
 poetry.lock
 .tool-versions
 .idea
+media
+.devcontainer
+backup

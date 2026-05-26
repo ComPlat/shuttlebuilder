@@ -25,7 +25,7 @@ if 'VERSION' not in locals():
 # Add daphne amd SDC packages to installed apps
 # (https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/daphne/)
 
-INSTALLED_APPS = ['daphne'] + INSTALLED_APPS + ['channels', 'sdc_tools', 'sdc_user']
+INSTALLED_APPS = ['daphne'] + INSTALLED_APPS + ['channels', 'sdc_tools']
 
 if 'INTERNAL_IPS' not in locals():
     INTERNAL_IPS = (
@@ -82,7 +82,7 @@ if 'MEDIA_ROOT' not in locals():
 
 SERVER_CALL_VIA_WEB_SOCKET = False
 MODEL_FORM_TEMPLATE = "elements/form.html"
-LOGIN_CONTROLLER = 'sdc-login'
+LOGIN_CONTROLLER = 'shuttle-login'
 LOGIN_SUCCESS = '/'
 
 JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256'}

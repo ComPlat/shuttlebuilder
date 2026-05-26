@@ -76,11 +76,14 @@ class ElnConnection(models.Model, SdcModel):
 
     @classmethod
     def get_active(cls):
-        (instance, c) = ElnConnection.objects.get_or_create(active=True)
-        if c:
-            instance.url = settings.ELN_URL
-            instance.save()
-        return instance
+        try:
+            return ElnConnection.objects.get(active=True)
+        except ElnConnection.MultipleObjectsReturned:
+            ElnConnection.objects.filter(active=True).update(is_active=False)
+        except ElnConnection.DoesNotExist:
+            if hasattr(settings, 'ELN_URL'):
+                return ElnConnection.objects.create(active=True, url=settings.ELN_URL)
+        return None
 
 
 class GitInstanceSearchForm(AbstractSearchForm):
@@ -123,9 +126,16 @@ class GitInstance(models.Model, SdcModel):
             return GitInstance.objects.get(is_active=True)
         except GitInstance.MultipleObjectsReturned:
             GitInstance.objects.filter(is_active=True).update(is_active=False)
-            return None
-        except:
-            return None
+        except GitInstance.DoesNotExist:
+            pass
+        main_instance, c = GitInstance.objects.get_or_create(name='ComPlat/shuttle/Main')
+        if c:
+            main_instance.url = 'https://github.com/ComPlat/shuttle.git'
+            main_instance.branch = 'main'
+        main_instance.is_active = True
+        main_instance.last_reload = None
+        main_instance.save()
+        return main_instance
 
     def set_active(self):
         GitInstance.objects.filter(is_active=True).update(is_active=False)

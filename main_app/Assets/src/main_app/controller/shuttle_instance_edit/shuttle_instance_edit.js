@@ -18,7 +18,12 @@ class ShuttleInstanceEditController extends AbstractSDC {
      * The pattern is {'event': {'dom_selector': handler}}
      * Uncommend the following line to add events;
      */
-    this.events.unshift({'change': {'#id_shuttle_type': this.onTypeChange, '#id_with_converter': this.onConverterChange}});
+    this.events.unshift({
+      'change': {
+        '#id_shuttle_type': this.onTypeChange,
+        '#id_with_converter': this.onConverterChange
+      }
+    });
   }
 
   //-------------------------------------------------//
@@ -37,12 +42,15 @@ class ShuttleInstanceEditController extends AbstractSDC {
 
   set isAutoChange(x) {
     this._saveOnChange = x;
-    if(x) {
+    if (x) {
       this.next = null;
     }
   }
 
-  onInit() {
+  async onInit(copypk) {
+    if (copypk) {
+      this._toCopy = await this._copy(copypk);
+    }
   }
 
   onLoad($html) {
@@ -56,11 +64,11 @@ class ShuttleInstanceEditController extends AbstractSDC {
   onRefresh() {
     let $typeSelect = this.find('#id_shuttle_type');
     if ($typeSelect.length > 0) {
-      this.onTypeChange($typeSelect);
+      this.onTypeChange($typeSelect, null, true);
     }
     let $withConverter = this.find('#id_with_converter');
     if ($withConverter.length > 0) {
-      this.onConverterChange($withConverter);
+      this.onConverterChange($withConverter, null, true);
     }
     return super.onRefresh();
   }
@@ -94,6 +102,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
     }
     return '';
   }
+
   render_help() {
     if (this._is_init) {
       return;
@@ -215,23 +224,25 @@ class ShuttleInstanceEditController extends AbstractSDC {
     </div>;
   }
 
-  onTypeChange($dom) {
+  onTypeChange($dom, ev, fast) {
+    const dur = fast ? 0 : 600;
     if ($dom.val() === 'flat_tar') {
-      this.find('.id_common_name_parts').show("slow");
+      this.find('.id_common_name_parts').show(dur);
     } else {
-      this.find('.id_common_name_parts').hide("slow");
+      this.find('.id_common_name_parts').hide(dur);
     }
   }
 
-  onConverterChange($dom) {
+  onConverterChange($dom, ev, fast) {
     const convFields = ['dst_bagit', 'passwort_bagit', 'user_bagit', 'profile', 'public_link'];
+    const dur = fast ? 0 : 600;
     if ($dom[0].checked) {
       convFields.forEach(field => {
-        this.find(`.id_${field}`).show("slow");
+        this.find(`.id_${field}`).show(dur);
       });
     } else {
       convFields.forEach(field => {
-        this.find(`.id_${field}`).hide("slow");
+        this.find(`.id_${field}`).hide(dur);
       });
     }
   }
@@ -252,9 +263,29 @@ class ShuttleInstanceEditController extends AbstractSDC {
       return;
     }
 
-    if(this._saveOnChange) {
+    if (this._saveOnChange) {
       this._mixins.SdcModelFormController.onChange.call(this, $elm);
     }
+  }
+
+  _onFormLoaded() {
+    this.mixins.SdcModelFormController._onFormLoaded.call(this);
+    if (this._toCopy) {
+      Object.entries(this._toCopy).forEach(([key, value]) => {
+        this.model.values[key] = value;
+      });
+      this.model.syncModelToForm();
+    }
+
+  }
+
+  async _copy(pk) {
+    const tempModel = this.newModel('ShuttleInstance', {pk: pk});
+    await tempModel.load();
+    const values = {...tempModel.values, pk: undefined}
+    delete values.owner;
+    values.name += ' (COPY)';
+    return values;
   }
 }
 

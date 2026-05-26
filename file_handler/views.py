@@ -12,7 +12,7 @@ class DownloadVbs(View):
     filename = 'shuttle_task.vbs'
     file_content = b'''Dim WinScriptHost
 Set WinScriptHost = CreateObject("WScript.Shell")
-WinScriptHost.Run Chr(34) & "C:\\Program Files\\file_exporter\\shuttle.exe" & Chr(34), 0
+WinScriptHost.Run Chr(34) & "C:\\Program Files\\Shuttle\\shuttle.exe" & Chr(34), 0
 Set WinScriptHost = Nothing
 '''
 
@@ -41,7 +41,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=!!!!
-ExecStart=/opt/file_exporter/shuttle
+ExecStart=/opt/Shuttle/shuttle
 
 [Install]
 WantedBy=multi-user.target

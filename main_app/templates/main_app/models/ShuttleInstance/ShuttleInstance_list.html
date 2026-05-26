@@ -41,6 +41,10 @@
             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-model-modal-{{instance.pk}}">
                 <i class="bi bi-trash"></i>
             </button>
+
+            <button type="button" class="btn btn-success  navigation-links"  href="/*/shuttle-instance-edit?copypk={{instance.pk}}">
+                Copy
+            </button>
             <div class="modal fade" id="delete-model-modal-{{instance.pk}}" tabindex="-1" aria-label="Delete model {{instance.pk}}" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">

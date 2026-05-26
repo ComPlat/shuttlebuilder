@@ -1,3 +1,4 @@
+import {} from "./controller/shuttle_login/shuttle_login.js";
 import {} from "./controller/shuttle_scripts/shuttle_scripts.js";
 import {} from "./controller/shuttle_instance_edit/shuttle_instance_edit.js";
 import {} from "./controller/shuttle_instance_list/shuttle_instance_list.js";

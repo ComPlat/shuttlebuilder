@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sdc_core',
+    'sdc_user',
     'file_handler',
     'main_app'
 ]
@@ -110,7 +111,7 @@ if not DEBUG:
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('POSTGRES_DB', 'ShuttleBuilder'),
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
@@ -177,5 +178,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 MODEL_FORM_TEMPLATE = "elements/form.html"
-LOGIN_CONTROLLER = 'sdc-login'
-LOGIN_SUCCESS = '/'
+

@@ -1,0 +1,16 @@
+[shuttle-login] {
+  .flex-container {
+    display: flex;
+    flex-direction: row;
+    .main-container {
+      flex: 0 1 1000px
+    }
+
+    [sdc-login] {
+      h4 {
+        display: none;
+      }
+    }
+  }
+
+}

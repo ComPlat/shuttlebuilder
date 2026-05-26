@@ -2,13 +2,12 @@ import os
 import zipfile
 
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
-from sdc_core.sdc_extentions.views import SDCView, SdcGroupRequiredMixin
+from sdc_core.sdc_extentions.views import SDCView, SdcLoginRequiredMixin
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
-from main_app.models import GitInstance, ShuttleInstance
+from main_app.models import GitInstance, ShuttleInstance, ElnConnection
 
 
 class BasicInfo(SDCView):
@@ -17,7 +16,7 @@ class BasicInfo(SDCView):
     def get_content(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
-class GitInstanceList(SdcGroupRequiredMixin, SDCView):
+class GitInstanceList(SdcLoginRequiredMixin, SDCView):
     template_name='main_app/sdc/git_instance_list.html'
 
     def activate_git(self, request, *args, **kwargs):
@@ -28,21 +27,21 @@ class GitInstanceList(SdcGroupRequiredMixin, SDCView):
     def get_content(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
-class GitInsatnceEdit(SdcGroupRequiredMixin, SDCView):
+class GitInsatnceEdit(SdcLoginRequiredMixin, SDCView):
     template_name='main_app/sdc/git_insatnce_edit.html'
 
 
     def get_content(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
-class ShuttleInstanceList(SDCView):
+class ShuttleInstanceList(SdcLoginRequiredMixin, SDCView):
     template_name='main_app/sdc/shuttle_instance_list.html'
 
     def get_content(self, request, *args, **kwargs):
         gitInstance = GitInstance.get_active()
         return render(request, self.template_name, {'gitInstance': gitInstance})
 
-class ShuttleInstanceEdit(SDCView):
+class ShuttleInstanceEdit(SdcLoginRequiredMixin, SDCView):
     template_name='main_app/sdc/shuttle_instance_edit.html'
 
     def get_content(self, request, *args, **kwargs):
@@ -50,7 +49,7 @@ class ShuttleInstanceEdit(SDCView):
         return render(request, self.template_name, {'gitInstance': gitInstance})
 
 
-class ShuttleDownload(LoginRequiredMixin, SDCView):
+class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
     raise_exception = True
 
     def get(self, request, pk, *args, **kwargs):
@@ -94,7 +93,7 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
                 with open(zip_path, 'rb') as f:
                     file_data = f.read()
                     response = HttpResponse(file_data, content_type='application/octet-stream')
-                    response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
+                    response['Content-Disposition'] = 'attachment; filename="shuttle_with_converter.zip"'
 
 
         except IOError as e:
@@ -106,8 +105,14 @@ class ShuttleDownload(LoginRequiredMixin, SDCView):
 
         return response
 
-class ShuttleScripts(SDCView):
+class ShuttleScripts(SdcLoginRequiredMixin, SDCView):
     template_name='main_app/sdc/shuttle_scripts.html'
 
     def get_content(self, request, *args, **kwargs):
         return render(request, self.template_name)
+
+class ShuttleLogin(SDCView):
+    template_name='main_app/sdc/shuttle_login.html'
+
+    def get_content(self, request, *args, **kwargs):
+        return render(request, self.template_name, {'connection': ElnConnection.get_active()})
