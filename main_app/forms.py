@@ -1,3 +1,4 @@
+from main_app.models import ElnUser
 import re
 
 from jsonschema.exceptions import ValidationError
@@ -93,3 +94,12 @@ class ShuttleInstanceForm(ModelForm):
     class Meta:
         model = ShuttleInstance
         fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture', 'with_converter', 'dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile']
+
+
+
+# Form Model ElnUser
+
+class ElnUserForm(ModelForm):
+    class Meta:
+        model = ElnUser
+        fields = "__all__"

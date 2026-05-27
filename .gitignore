@@ -35,3 +35,5 @@
 /Assets/bin/sdc_tools
 /Assets/bin/sdc_user
 /main_app/Assets/src/main_app/controller/shuttle_login/shuttle_login.html
+/main_app/Assets/src/main_app/models/ElnUser/ElnUser_details.html
+/main_app/Assets/src/main_app/models/ElnUser/ElnUser_list.html

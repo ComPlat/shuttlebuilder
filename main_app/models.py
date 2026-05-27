@@ -30,10 +30,42 @@ signals.post_save.connect(create_user, sender=User, weak=False,
                           dispatch_uid='models.create_eln_user_profile')
 
 
-class ElnUser(models.Model):
+
+
+
+class ElnUser(models.Model, SdcModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, default='')
     is_eln_user = models.BooleanField(default=False)
+
+    class SearchForm(AbstractSearchForm):
+        """A default search form used in the list view. You can delete it if you dont need it"""
+        CHOICES = (("id", "Id"),)
+        PLACEHOLDER = ""
+        DEFAULT_CHOICES = CHOICES[0][0]
+        SEARCH_FIELDS = ("id",)
+
+    class _SdcMeta:
+        """Meta data information needed to manage all SDC operations."""
+        edit_form = "main_app.forms.ElnUserForm"
+        create_form = "main_app.forms.ElnUserForm"
+        html_list_template = "main_app/models/ElnUser/ElnUser_list.html"
+        html_detail_template = "main_app/models/ElnUser/ElnUser_details.html"
+
+    @classmethod
+    def render(cls, template_name, context=None, request=None, using=None):
+        if template_name == getattr(cls.SdcMeta, 'html_list_template'):
+            sf = cls.SearchForm(data=context.get("filter", {}))
+            context = context | handle_search_form(context["instances"], sf,  range=10)
+        return render_to_string(template_name=template_name, context=context, request=request, using=using)
+
+    @classmethod
+    def is_authorised(cls, user, action, obj):
+        return True
+
+    @classmethod
+    def get_queryset(cls, user, action, obj):
+        return cls.objects.filter(user=user)
 
 
 # Create your models here.
@@ -61,7 +93,7 @@ class ElnConnection(models.Model, SdcModel):
 
     @classmethod
     def render(cls, template_name, context=None, request=None, using=None):
-        if template_name == cls.html_list_template:
+        if template_name == getattr(cls.SdcMeta, 'html_list_template'):
             sf = ElnConnectionSearchForm(data=context.get("filter", {}))
             context = context | handle_search_form(context["instances"], sf, range=10)
         return render_to_string(template_name=template_name, context=context, request=request, using=using)
@@ -168,7 +200,7 @@ class GitInstance(models.Model, SdcModel):
 
     @classmethod
     def render(cls, template_name, context=None, request=None, using=None):
-        if template_name == cls.html_list_template:
+        if template_name == getattr(cls.SdcMeta, 'html_list_template'):
             sf = GitInstanceSearchForm(data=context.get("filter", {}))
             context = context | handle_search_form(context["instances"], sf, range=10)
         return render_to_string(template_name=template_name, context=context, request=request, using=using)
@@ -406,7 +438,7 @@ class ShuttleInstance(models.Model, SdcModel):
 
     @classmethod
     def render(cls, template_name, context=None, request=None, using=None):
-        if template_name == cls.html_list_template:
+        if template_name == getattr(cls.SdcMeta, 'html_list_template'):
             sf = ShuttleInstanceSearchForm(data=context.get("filter", {}))
             context = context | handle_search_form(context["instances"], sf, range=10)
         return render_to_string(template_name=template_name, context=context, request=request, using=using)
