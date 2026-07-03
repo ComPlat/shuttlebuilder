@@ -37,3 +37,6 @@
 /main_app/Assets/src/main_app/controller/shuttle_login/shuttle_login.html
 /main_app/Assets/src/main_app/models/ElnUser/ElnUser_details.html
 /main_app/Assets/src/main_app/models/ElnUser/ElnUser_list.html
+# Large converter binaries (kept local, not tracked)
+Assets/static/files/ChemConverterApp
+Assets/static/files/ChemConverterApp.exe
