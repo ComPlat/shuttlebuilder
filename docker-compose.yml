@@ -30,7 +30,16 @@ services:
       <<: *postgress-variables
     volumes:
       - bridge_db:/var/lib/postgresql/data/
-  web:
+  broadcaster:
+    image: mstarman/shuttlebuilder_broadcaster:0.1.0
+    build:
+      context: .
+      dockerfile: ./broadcaster.Dockerfile
+    network_mode: host
+    restart: unless-stopped
+    environment:
+       PUBLIC_IP_URL: ${PUBLIC_IP_URL}
+  messenger:
     image: mstarman/shuttlebuilder:0.2.17
     build: .
     restart: unless-stopped

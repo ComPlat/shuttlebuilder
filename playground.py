@@ -1,40 +1,64 @@
-import socket
-import ipaddress
-import concurrent.futures
+import json
 
-SUBNET = "192.168.178.0/24"
+import requests
 
-def check_host(ip):
-    ip = str(ip)
+if __name__ == '__main__':
+    res = requests.post('http://0.0.0.0:8000/sdc_api/login/', json={'username': 'Martin', 'password': '1234qweR!'})
+    ers_json = res.json()
+    refresh = ers_json['refresh_token']
+    headers = {
+        "Authorization": f"Bearer {refresh}",
+    }
 
-    ports = [5985, 5986]  # WinRM HTTP/HTTPS
+    res = requests.get('http://0.0.0.0:8000/sdc_api/login', headers=headers)
 
-    for port in ports:
-        try:
-            sock = socket.create_connection(
-                (ip, port),
-                timeout=0.5
-            )
-            sock.close()
+    token = res.json()['access_token']
+    refresh = res.json()['refresh_token']
+    print(token)
 
-            return f"{ip} -> WinRM port {port} open"
-
-        except:
-            pass
-
-    return None
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
 
 
-def main():
-    network = ipaddress.ip_network(SUBNET)
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        results = executor.map(check_host, network.hosts())
-
-    for result in results:
-        if result:
-            print(result)
 
 
-if __name__ == "__main__":
-    main()
+    data = {
+        "name": "Test Upload",
+        "url": "http://localhost:8000/sdc_api/GitInstance",
+        "branch": "XXX",
+    }
+
+    response = requests.get(
+        "http://localhost:8000/sdc_api/GitInstance",
+        headers=headers
+    )
+
+    data['branch'] += 'y'
+
+    res_post = requests.post(
+        f"http://localhost:8000/sdc_api/GitInstance/{response.json()['data'][-1]['pk']}",
+        data={'name': 'xx'},
+        headers=headers
+    )
+
+    res_put = requests.put(
+        f"http://localhost:8000/sdc_api/GitInstance/{response.json()['data'][-1]['pk']}",
+        data=data,
+        headers=headers
+    )
+
+
+    res_patch = requests.patch(
+        f"http://localhost:8000/sdc_api/GitInstance/{response.json()['data'][-1]['pk']}",
+        data={'url': 'PATCH'},
+        headers=headers
+    )
+
+    res_list = requests.get(
+        f"http://localhost:8000/sdc_api/GitInstance/{response.json()['data'][-1]['pk']}",
+        headers=headers
+    )
+
+    a = res_list.json()
+    print(a)

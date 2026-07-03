@@ -1,0 +1,1361 @@
+openapi: 3.0.3
+info:
+  title: Auto Generated API
+  version: 1.0.0
+paths:
+  /sdc_api/login/:
+    get:
+      summary: Refresh JWT token
+      responses:
+        '200':
+          description: JWT tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+        '401':
+          description: Invalid credentials
+    post:
+      summary: Login and receive JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - username
+              - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: JWT tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+        '401':
+          description: Invalid credentials
+  /sdc_api/sdcuser/:
+    get:
+      summary: Get list of SdcUser
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SdcUser'
+    post:
+      summary: Create SdcUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SdcUserCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SdcUser'
+  /sdc_api/sdcuser/{id}/:
+    get:
+      summary: Get instance SdcUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SdcUser'
+    put:
+      summary: Replace SdcUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SdcUserEdit'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SdcUser'
+    patch:
+      summary: Partial update SdcUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SdcUserPatch'
+      responses:
+        '200':
+          description: Patched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SdcUser'
+  /sdc_api/elnuser/:
+    get:
+      summary: Get list of ElnUser
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ElnUser'
+    post:
+      summary: Create ElnUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnUserCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnUser'
+  /sdc_api/elnuser/{id}/:
+    get:
+      summary: Get instance ElnUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnUser'
+    put:
+      summary: Replace ElnUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnUserEdit'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnUser'
+    patch:
+      summary: Partial update ElnUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnUserPatch'
+      responses:
+        '200':
+          description: Patched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnUser'
+  /sdc_api/elnconnection/:
+    get:
+      summary: Get list of ElnConnection
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ElnConnection'
+    post:
+      summary: Create ElnConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnConnectionCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnConnection'
+  /sdc_api/elnconnection/{id}/:
+    get:
+      summary: Get instance ElnConnection
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnConnection'
+    put:
+      summary: Replace ElnConnection
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnConnectionEdit'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnConnection'
+    patch:
+      summary: Partial update ElnConnection
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElnConnectionPatch'
+      responses:
+        '200':
+          description: Patched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ElnConnection'
+  /sdc_api/gitinstance/:
+    get:
+      summary: Get list of GitInstance
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GitInstance'
+    post:
+      summary: Create GitInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitInstanceCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GitInstance'
+  /sdc_api/gitinstance/{id}/:
+    get:
+      summary: Get instance GitInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GitInstance'
+    put:
+      summary: Replace GitInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitInstanceEdit'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GitInstance'
+    patch:
+      summary: Partial update GitInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitInstancePatch'
+      responses:
+        '200':
+          description: Patched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/GitInstance'
+  /sdc_api/shuttleinstance/:
+    get:
+      summary: Get list of ShuttleInstance
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShuttleInstance'
+    post:
+      summary: Create ShuttleInstance
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShuttleInstanceCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ShuttleInstance'
+  /sdc_api/shuttleinstance/{id}/:
+    get:
+      summary: Get instance ShuttleInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ShuttleInstance'
+    put:
+      summary: Replace ShuttleInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShuttleInstanceEdit'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ShuttleInstance'
+    patch:
+      summary: Partial update ShuttleInstance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShuttleInstancePatch'
+      responses:
+        '200':
+          description: Patched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/ShuttleInstance'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SdcUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        password:
+          type: string
+          maxLength: 128
+        last_login:
+          type: string
+          format: date
+        is_superuser:
+          type: boolean
+        username:
+          type: string
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          maxLength: 254
+        is_staff:
+          type: boolean
+        is_active:
+          type: boolean
+        date_joined:
+          type: string
+          format: date
+        email_confirmed:
+          type: boolean
+      required:
+      - password
+      - is_superuser
+      - username
+      - is_staff
+      - is_active
+      - date_joined
+      - email_confirmed
+    SdcUserCreate:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          maxLength: 254
+        password1:
+          type: string
+          description: !!python/object/new:django.utils.safestring.SafeString
+          - "<ul><li>Your password can\u2019t be too similar to your other personal\
+            \ information.</li><li>Your password must contain at least 8 characters.</li><li>Your\
+            \ password can\u2019t be a commonly used password.</li><li>Your password\
+            \ can\u2019t be entirely numeric.</li></ul>"
+        password2:
+          type: string
+      required:
+      - username
+      - password1
+      - password2
+    SdcUserEdit:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          maxLength: 254
+        password:
+          type: string
+      required:
+      - username
+    SdcUserPatch:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          maxLength: 254
+        password:
+          type: string
+    ElnUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: integer
+        token:
+          type: string
+          maxLength: 255
+        is_eln_user:
+          type: boolean
+      required:
+      - user
+      - token
+      - is_eln_user
+    ElnUserCreate:
+      type: object
+      properties:
+        user:
+          type: integer
+          description: 'A SdcUser id. '
+        token:
+          type: string
+          maxLength: 255
+        is_eln_user:
+          type: boolean
+      required:
+      - user
+      - token
+    ElnUserEdit:
+      type: object
+      properties:
+        user:
+          type: integer
+          description: 'A SdcUser id. '
+        token:
+          type: string
+          maxLength: 255
+        is_eln_user:
+          type: boolean
+      required:
+      - user
+      - token
+    ElnUserPatch:
+      type: object
+      properties:
+        user:
+          type: integer
+          description: 'A SdcUser id. '
+        token:
+          type: string
+          maxLength: 255
+        is_eln_user:
+          type: boolean
+    ElnConnection:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+          maxLength: 200
+        active:
+          type: boolean
+        token:
+          type: string
+          maxLength: 255
+        device:
+          type: integer
+      required:
+      - url
+      - active
+      - device
+    ElnConnectionCreate:
+      type: object
+      properties:
+        url:
+          type: string
+          maxLength: 200
+        active:
+          type: boolean
+        token:
+          type: string
+          maxLength: 255
+        device:
+          type: integer
+      required:
+      - url
+      - device
+    ElnConnectionEdit:
+      type: object
+      properties:
+        url:
+          type: string
+          maxLength: 200
+        active:
+          type: boolean
+        token:
+          type: string
+          maxLength: 255
+        device:
+          type: integer
+      required:
+      - url
+      - device
+    ElnConnectionPatch:
+      type: object
+      properties:
+        url:
+          type: string
+          maxLength: 200
+        active:
+          type: boolean
+        token:
+          type: string
+          maxLength: 255
+        device:
+          type: integer
+    GitInstance:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          maxLength: 50
+        url:
+          type: string
+          maxLength: 255
+        branch:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        last_reload:
+          type: string
+          format: date
+      required:
+      - name
+      - url
+      - branch
+      - is_active
+    GitInstanceCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the git repo. This name cannot be changed!
+        url:
+          type: string
+          maxLength: 255
+          description: URL to the git repo.
+        branch:
+          type: string
+          maxLength: 255
+          description: Enter the branch name or commit ID.
+      required:
+      - name
+      - url
+      - branch
+    GitInstanceEdit:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the git repo. This name cannot be changed!
+        url:
+          type: string
+          maxLength: 255
+          description: URL to the git repo.
+        branch:
+          type: string
+          maxLength: 255
+          description: Enter the branch name or commit ID.
+      required:
+      - name
+      - url
+      - branch
+    GitInstancePatch:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the git repo. This name cannot be changed!
+        url:
+          type: string
+          maxLength: 255
+          description: URL to the git repo.
+        branch:
+          type: string
+          maxLength: 255
+          description: Enter the branch name or commit ID.
+    ShuttleInstance:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          maxLength: 50
+        user:
+          type: string
+          maxLength: 50
+        password:
+          type: string
+          maxLength: 100
+        transfer:
+          type: string
+          maxLength: 255
+        src:
+          type: string
+          maxLength: 255
+        dst:
+          type: string
+          maxLength: 255
+        shuttle_type:
+          type: string
+          maxLength: 255
+        common_name_parts:
+          type: string
+          maxLength: 255
+        duration:
+          type: integer
+        architecture:
+          type: string
+          maxLength: 255
+        with_converter:
+          type: boolean
+        user_bagit:
+          type: string
+          maxLength: 50
+        passwort_bagit:
+          type: string
+          maxLength: 100
+        dst_bagit:
+          type: string
+          maxLength: 255
+        public_link:
+          type: string
+          maxLength: 200
+        profile:
+          type: object
+          maxLength: 100
+        last_update:
+          type: string
+          format: date
+        last_build:
+          type: string
+          format: date
+        owner:
+          type: integer
+      required:
+      - name
+      - user
+      - password
+      - transfer
+      - src
+      - dst
+      - shuttle_type
+      - duration
+      - architecture
+      - with_converter
+      - last_update
+    ShuttleInstanceCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the Shuttle instance. This name cannot be changed!
+        transfer:
+          type: string
+          description: You can either use the WebDAV protocol or the SFTP protocol
+          enum:
+          - webdav
+          - sftp
+        user:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User
+        password:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password
+        src:
+          type: string
+          maxLength: 255
+          description: Source directory to monitor.
+        dst:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n        <span style=\"margin-left:\
+            \ 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \        <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                    <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                    <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                    <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                    <span style=\"\
+            margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within the LSDF</span>"
+        shuttle_type:
+          type: string
+          description: Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option
+            means that each file is handled individually, the 'folder' option means
+            that entire folders are transmitted only when all files in them are ready.
+            The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as
+            tar archieve), only when all files in a folder are ready.
+          enum:
+          - file
+          - folder
+          - zip
+          - tar
+          - flat_tar
+        common_name_parts:
+          type: string
+          maxLength: 255
+          description: The regex for the common name is used to collect all files
+            that belong to the same data set. This value is only used if the type
+            is flat tar. All files that either have the same regex group resolutions
+            or (if you do not use groups) have the same global result are archived
+            together<this.render_help></this.render_help>
+        duration:
+          type: integer
+          description: Duration in seconds, i.e., how long a file must not be changed
+            before sent. (default 300 sec.)
+        architecture:
+          type: string
+          description: 'Your computer architecture : either 64 bit, i386 or ARM And
+            your OS: Linux or Windows'
+          enum:
+          - win_i386
+          - win_64
+          - ubuntu_64
+          - raspberry_pi_6
+          - raspberry_pi_7
+          - raspberry_pi_64
+        with_converter:
+          type: boolean
+          description: 'Check whether the raw file needs to be stored in Chomtion,
+            or if storing only the converted BagIt archive is sufficient. If checked,
+            you must specify two destinations: the already configured destination
+            is used for the raw data file, and the additional input below is used
+            for the BagIt archive (Chemotion).'
+        dst_bagit:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n            <span style=\"\
+            margin-left: 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \            <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                        <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                        <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                        <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                        <span\
+            \ style=\"margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within\
+            \ the LSDF</span>"
+        user_bagit:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User for converted Bagit
+        passwort_bagit:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password for converted Bagit
+        public_link:
+          type: string
+          maxLength: 200
+          description: The prefix of the publicly accessible link to the raw files.
+            It must include the scheme, domain, and path (e.g. https://your-file-storage-example.eu/data/raw/).
+            Only the file name is appended.
+        profile:
+          type: string
+          format: binary
+          maxLength: 100
+      required:
+      - name
+      - transfer
+      - user
+      - password
+      - src
+      - dst
+      - shuttle_type
+      - duration
+      - architecture
+    ShuttleInstanceEdit:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the Shuttle instance. This name cannot be changed!
+        transfer:
+          type: string
+          description: You can either use the WebDAV protocol or the SFTP protocol
+          enum:
+          - webdav
+          - sftp
+        user:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User
+        password:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password
+        src:
+          type: string
+          maxLength: 255
+          description: Source directory to monitor.
+        dst:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n        <span style=\"margin-left:\
+            \ 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \        <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                    <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                    <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                    <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                    <span style=\"\
+            margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within the LSDF</span>"
+        shuttle_type:
+          type: string
+          description: Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option
+            means that each file is handled individually, the 'folder' option means
+            that entire folders are transmitted only when all files in them are ready.
+            The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as
+            tar archieve), only when all files in a folder are ready.
+          enum:
+          - file
+          - folder
+          - zip
+          - tar
+          - flat_tar
+        common_name_parts:
+          type: string
+          maxLength: 255
+          description: The regex for the common name is used to collect all files
+            that belong to the same data set. This value is only used if the type
+            is flat tar. All files that either have the same regex group resolutions
+            or (if you do not use groups) have the same global result are archived
+            together<this.render_help></this.render_help>
+        duration:
+          type: integer
+          description: Duration in seconds, i.e., how long a file must not be changed
+            before sent. (default 300 sec.)
+        architecture:
+          type: string
+          description: 'Your computer architecture : either 64 bit, i386 or ARM And
+            your OS: Linux or Windows'
+          enum:
+          - win_i386
+          - win_64
+          - ubuntu_64
+          - raspberry_pi_6
+          - raspberry_pi_7
+          - raspberry_pi_64
+        with_converter:
+          type: boolean
+          description: 'Check whether the raw file needs to be stored in Chomtion,
+            or if storing only the converted BagIt archive is sufficient. If checked,
+            you must specify two destinations: the already configured destination
+            is used for the raw data file, and the additional input below is used
+            for the BagIt archive (Chemotion).'
+        dst_bagit:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n            <span style=\"\
+            margin-left: 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \            <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                        <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                        <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                        <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                        <span\
+            \ style=\"margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within\
+            \ the LSDF</span>"
+        user_bagit:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User for converted Bagit
+        passwort_bagit:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password for converted Bagit
+        public_link:
+          type: string
+          maxLength: 200
+          description: The prefix of the publicly accessible link to the raw files.
+            It must include the scheme, domain, and path (e.g. https://your-file-storage-example.eu/data/raw/).
+            Only the file name is appended.
+        profile:
+          type: string
+          format: binary
+          maxLength: 100
+      required:
+      - name
+      - transfer
+      - user
+      - password
+      - src
+      - dst
+      - shuttle_type
+      - duration
+      - architecture
+    ShuttleInstancePatch:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          description: Unique name of the Shuttle instance. This name cannot be changed!
+        transfer:
+          type: string
+          description: You can either use the WebDAV protocol or the SFTP protocol
+          enum:
+          - webdav
+          - sftp
+        user:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User
+        password:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password
+        src:
+          type: string
+          maxLength: 255
+          description: Source directory to monitor.
+        dst:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n        <span style=\"margin-left:\
+            \ 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \        <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                    <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                    <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                    <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                    <span style=\"\
+            margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within the LSDF</span>"
+        shuttle_type:
+          type: string
+          description: Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option
+            means that each file is handled individually, the 'folder' option means
+            that entire folders are transmitted only when all files in them are ready.
+            The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as
+            tar archieve), only when all files in a folder are ready.
+          enum:
+          - file
+          - folder
+          - zip
+          - tar
+          - flat_tar
+        common_name_parts:
+          type: string
+          maxLength: 255
+          description: The regex for the common name is used to collect all files
+            that belong to the same data set. This value is only used if the type
+            is flat tar. All files that either have the same regex group resolutions
+            or (if you do not use groups) have the same global result are archived
+            together<this.render_help></this.render_help>
+        duration:
+          type: integer
+          description: Duration in seconds, i.e., how long a file must not be changed
+            before sent. (default 300 sec.)
+        architecture:
+          type: string
+          description: 'Your computer architecture : either 64 bit, i386 or ARM And
+            your OS: Linux or Windows'
+          enum:
+          - win_i386
+          - win_64
+          - ubuntu_64
+          - raspberry_pi_6
+          - raspberry_pi_7
+          - raspberry_pi_64
+        with_converter:
+          type: boolean
+          description: 'Check whether the raw file needs to be stored in Chomtion,
+            or if storing only the converted BagIt archive is sufficient. If checked,
+            you must specify two destinations: the already configured destination
+            is used for the raw data file, and the additional input below is used
+            for the BagIt archive (Chemotion).'
+        dst_bagit:
+          type: string
+          maxLength: 255
+          description: "WebDAV or SFTP destination URL. If the destination is on the\
+            \ lsdf, the URL should be as follows:<br>\n            <span style=\"\
+            margin-left: 20px; font-weight: 800;\">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \            <span style=\"margin-left: 20px; font-weight: 800;\">WebDAV</span>:\
+            \ https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>\n\
+            \n                        <span style=\"margin-left: 30px;\">[OE]-Organisationseinheit,\
+            \ z.B. kit.</span><br>\n                        <span style=\"margin-left:\
+            \ 30px;\">[inst]-Institut-Name, z.B. ioc, scc, ikp, imk-asf etc.</span><br>\n\
+            \                        <span style=\"margin-left: 30px;\">[USERNAME]-User-Name\
+            \ z.B. xy1234, bs_abcd etc.</span><br>\n                        <span\
+            \ style=\"margin-left: 30px;\">[PROJECT_PATH]-Path (directory) within\
+            \ the LSDF</span>"
+        user_bagit:
+          type: string
+          maxLength: 50
+          description: WebDAV or STFP User for converted Bagit
+        passwort_bagit:
+          type: string
+          maxLength: 100
+          description: WebDAV or STFP Password for converted Bagit
+        public_link:
+          type: string
+          maxLength: 200
+          description: The prefix of the publicly accessible link to the raw files.
+            It must include the scheme, domain, and path (e.g. https://your-file-storage-example.eu/data/raw/).
+            Only the file name is appended.
+        profile:
+          type: string
+          format: binary
+          maxLength: 100
+security:
+- BearerAuth: []

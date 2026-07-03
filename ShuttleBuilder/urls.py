@@ -15,14 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, re_path, include
 from django.shortcuts import render
 from django.conf import settings
 from django.views.i18n import JavaScriptCatalog
 
+from sdc_core.rest_api import AdcApi, get_api_token
+
+def ping(request):
+    return HttpResponse('pong')
+
 urlpatterns = [
     re_path('sdc_view/sdc_tools/', include('sdc_tools.sdc_urls')),
     re_path('sdc_view/sdc_user/', include('sdc_user.sdc_urls')),
+    path('sdc_api/houston/are/you/there', ping),
+    path('sdc_api/login', get_api_token),
+    path('sdc_api/<str:model>/<int:id>', AdcApi.as_view()),
+    path('sdc_api/<str:model>', AdcApi.as_view()),
     # scd view below
     path('sdc_view/main_app/', include('main_app.sdc_urls')),
     path('sdc_view/main_app/', include('file_handler.urls')),
