@@ -35,8 +35,8 @@ RUN poetry run python manage.py collectstatic  --no-input
 FROM python:3.13-slim AS shuttlebuilder
 LABEL authors="martin"
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 RUN mkdir -p /srv/app
 RUN mkdir -p /srv/app/private_libs

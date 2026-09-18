@@ -11,7 +11,6 @@ from urllib.parse import urlparse, urlunparse
 
 from ShuttleBuilder.base_settings import *
 
-
 if not DEBUG:
     hosts = [urlparse(x) for x in os.environ.get('ALLOWED_HOST').split(',')]
     ALLOWED_HOSTS = [host.hostname for host in hosts]
@@ -69,7 +68,14 @@ else:
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                "hosts": [('redis', 6379)],
+                # NB: must be a dict (not a (host, port) tuple) so we can pass
+                # socket_timeout. redis-py >= 8 defaults socket_timeout to 5s,
+                # which exactly races channels-redis' hardcoded brpop_timeout=5,
+                # raising "Timeout reading from redis" on every idle WebSocket
+                # receive. Keep socket_timeout > brpop_timeout (5s) to avoid it.
+                "hosts": [{"host": "redis", "port": 6379, "socket_timeout": 20}],
+                "capacity": 1500,
+                "expiry": 10,
             },
         },
     }
@@ -86,8 +92,6 @@ LOGIN_CONTROLLER = 'shuttle-login'
 LOGIN_SUCCESS = '/'
 
 JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256', "exp_delta_seconds": 3600}
-
-
 
 """
 def sdc_user_get_queryset(user, action, obj):
@@ -120,14 +124,14 @@ EMAIL_USE_SSL = False
 
 EMAIL_TIMEOUT = 10
 
-GOOS =  "windows"
+GOOS = "windows"
 GOROOT = os.environ.get('GOROOT')
 GOPATH = os.environ.get('GOPATH')
 
 if DEBUG:
-    ELN_URL=os.environ.get('ELN_URL', 'http://127.0.0.1:3000')
-    MAX_UPLOAD_SIZE=os.environ.get('MAX_UPLOAD_SIZE', 250000)
+    ELN_URL = os.environ.get('ELN_URL', 'http://127.0.0.1:3000')
+    MAX_UPLOAD_SIZE = os.environ.get('MAX_UPLOAD_SIZE', 250000)
 
 else:
-    ELN_URL=os.environ.get('ELN_URL')
-    MAX_UPLOAD_SIZE=os.environ.get('MAX_UPLOAD_SIZE', 5e+7)
+    ELN_URL = os.environ.get('ELN_URL')
+    MAX_UPLOAD_SIZE = os.environ.get('MAX_UPLOAD_SIZE', 5e+7)

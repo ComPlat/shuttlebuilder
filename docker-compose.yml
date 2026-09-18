@@ -31,7 +31,7 @@ services:
     volumes:
       - bridge_db:/var/lib/postgresql/data/
   broadcaster:
-    image: mstarman/shuttlebuilder_broadcaster:0.1.0
+    image: mstarman/shuttlebuilder_broadcaster:0.1.1
     build:
       context: .
       dockerfile: ./broadcaster.Dockerfile
@@ -39,12 +39,16 @@ services:
     restart: unless-stopped
     environment:
        PUBLIC_IP_URL: ${PUBLIC_IP_URL}
-  messenger:
-    image: mstarman/shuttlebuilder:0.2.17
+  web:
+    image: mstarman/shuttlebuilder:0.2.19
     build: .
     restart: unless-stopped
     depends_on:
-      - db
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_started
+
     environment:
       <<:
         - *envs
@@ -64,7 +68,15 @@ services:
       - db
 
   redis:
-    image: redis:7-alpine
-    container_name: django-redis
+    image: redis:8.8.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+
 volumes:
   bridge_db:

@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 LABEL authors="martin"
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -13,6 +13,6 @@ WORKDIR /srv/app
 COPY ./ShuttleBuilder/brodcast_service_info.py .
 
 RUN pip install --upgrade pip
-RUN pip install "zeroconf==0.149.16"
+RUN pip install "zeroconf==0.150.0"
 
 CMD python ./brodcast_service_info.py

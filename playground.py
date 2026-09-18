@@ -3,7 +3,7 @@ import json
 import requests
 
 if __name__ == '__main__':
-    res = requests.post('http://0.0.0.0:8000/sdc_api/login/', json={'username': 'Martin', 'password': '1234qweR!'})
+    res = requests.post('http://0.0.0.0:8000/sdc_api/login', json={'username': 'Martin', 'password': '1234qweR!'})
     ers_json = res.json()
     refresh = ers_json['refresh_token']
     headers = {
@@ -21,6 +21,11 @@ if __name__ == '__main__':
     }
 
 
+
+    response = requests.get(
+        "http://localhost:8000/sdc_api/shuttleinstance",
+        headers=headers
+    )
 
 
     data = {
@@ -62,3 +67,4 @@ if __name__ == '__main__':
 
     a = res_list.json()
     print(a)
+

@@ -1517,14 +1517,14 @@ type = ["importlib_metadata (>=7.0.2) ; python_version < \"3.10\"", "jaraco.deve
 
 [[package]]
 name = "simpledomcontrol"
-version = "0.158.2"
+version = "0.158.9"
 description = "Simple DOM control -> a django MVC framework"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "simpledomcontrol-0.158.2-py3-none-any.whl", hash = "sha256:c0ee850ffad13594c3b1a7e1144eac9ffa95edf508fa138492a508eab2a7a690"},
-    {file = "simpledomcontrol-0.158.2.tar.gz", hash = "sha256:a96205358067283c968619969ea4f56a696783aa9e2af0dc0c71690eaace8936"},
+    {file = "simpledomcontrol-0.158.9-py3-none-any.whl", hash = "sha256:a416058a52f9ab44c6aa1f54554f384883de05168fd814220d0ebdfe6648baf8"},
+    {file = "simpledomcontrol-0.158.9.tar.gz", hash = "sha256:9a4ecace9c1971bf5ec6c95bc504dfd43a416b9a6c83d83c4ac8af2ae35e0377"},
 ]
 
 [package.dependencies]
@@ -1874,4 +1874,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "c193855dc07b28d3116ba4aafb6fd99104075084a45cec0a50e6a7aafa62343a"
+content-hash = "fb8430dc5856051dd1db707e23ba928d25c3c40d02e63d41eb0c6706739ff1a9"
