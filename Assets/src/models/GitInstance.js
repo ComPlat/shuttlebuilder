@@ -14,7 +14,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "name": {
         "type": "CharField",
@@ -26,7 +27,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "url": {
         "type": "CharField",
@@ -38,7 +40,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "branch": {
         "type": "CharField",
@@ -50,7 +53,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "is_active": {
         "type": "BooleanField",
@@ -62,7 +66,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "last_reload": {
         "type": "DateTimeField",
@@ -74,7 +79,8 @@ export default class GitInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       }
     }
 

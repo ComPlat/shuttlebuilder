@@ -7,11 +7,11 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.13,<3.14"
+python = ">=3.14,<3.15"
 simpledomcontrol = "0.158.9"
-chemotion-api = "^211.0.1"
+chemotion-api = "^312.0.2"
 pywinrm = "^0.5.0"
-zeroconf = "^0.150.0"
+zeroconf = "==0.153.0"
 
 
 

@@ -26,11 +26,8 @@ class ShuttleInstanceListController extends AbstractSDC {
     // - onRemove                                      //
     //-------------------------------------------------//
 
-    onInit() {
-        this.model = this.newModel('ShuttleInstance');
-    }
-
     onLoad($html) {
+        this.model = this.newModel('ShuttleInstance');
         return super.onLoad($html);
     }
 

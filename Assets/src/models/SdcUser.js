@@ -14,7 +14,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": false,
         "related_model": "LogEntry",
-        "remote_field": "user"
+        "remote_field": "user",
+        "reverse_relation": true
       },
       "elnuser": {
         "type": "OneToOneField",
@@ -26,7 +27,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": true,
         "related_model": "ElnUser",
-        "remote_field": "user"
+        "remote_field": "user",
+        "reverse_relation": true
       },
       "shuttleinstance_set": {
         "type": "ForeignKey",
@@ -38,7 +40,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": false,
         "related_model": "ShuttleInstance",
-        "remote_field": "owner"
+        "remote_field": "owner",
+        "reverse_relation": true
       },
       "id": {
         "type": "BigAutoField",
@@ -50,7 +53,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "password": {
         "type": "CharField",
@@ -62,7 +66,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "last_login": {
         "type": "DateTimeField",
@@ -74,7 +79,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "is_superuser": {
         "type": "BooleanField",
@@ -86,7 +92,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "username": {
         "type": "CharField",
@@ -98,7 +105,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "first_name": {
         "type": "CharField",
@@ -110,7 +118,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "last_name": {
         "type": "CharField",
@@ -122,7 +131,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "email": {
         "type": "CharField",
@@ -134,7 +144,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "is_staff": {
         "type": "BooleanField",
@@ -146,7 +157,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "is_active": {
         "type": "BooleanField",
@@ -158,7 +170,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "date_joined": {
         "type": "DateTimeField",
@@ -170,7 +183,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "email_confirmed": {
         "type": "BooleanField",
@@ -182,7 +196,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "groups": {
         "type": "ManyToManyField",
@@ -194,7 +209,8 @@ export default class SdcUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": false,
         "related_model": "Group",
-        "remote_field": "user"
+        "remote_field": "user",
+        "reverse_relation": false
       },
       "user_permissions": {
         "type": "ManyToManyField",
@@ -206,17 +222,19 @@ export default class SdcUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": false,
         "related_model": "Permission",
-        "remote_field": "user"
+        "remote_field": "user",
+        "reverse_relation": false
       }
     }
 
   constructor(data = {}) {
     super("SdcUser");
     this._toManyFields = [];
-    this._logentry_set = new SdcQuerySet('LogEntry');
+    this._logentry_set = new SdcQuerySet('LogEntry', { user: this.id });
     this._toManyFields.push([this._logentry_set, 'user']);
-    this._elnuser = new SdcQuerySet('ElnUser');
-    this._shuttleinstance_set = new SdcQuerySet('ShuttleInstance');
+    this._elnuser = new SdcQuerySet('ElnUser', { user: this.id });
+    this._toManyFields.push([this._elnuser, 'user']);
+    this._shuttleinstance_set = new SdcQuerySet('ShuttleInstance', { owner: this.id });
     this._toManyFields.push([this._shuttleinstance_set, 'owner']);
     this._id = null;
     this._password = null;
@@ -244,7 +262,8 @@ export default class SdcUser extends SdcModel {
     this.logentry_set = data.logentry_set || [];
     } catch {} 
     try {
-      if (data.elnuser) { this.elnuser = data.elnuser; }
+    this.elnuser.setFilter({ user:  data.id });
+    this.elnuser = data.elnuser || [];
     } catch {} 
     try {
     this.shuttleinstance_set.setFilter({ owner:  data.id });
@@ -474,7 +493,7 @@ export default class SdcUser extends SdcModel {
   }
 
   get elnuser(){
-    return this._elnuser.length > 0 ? this._elnuser[0] : this._elnuser.new();
+    return this._elnuser;
   }
 
   get shuttleinstance_set(){

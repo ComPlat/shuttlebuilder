@@ -25,11 +25,8 @@ class GitInstanceListController extends AbstractSDC {
     // - onRemove                                      //
     //-------------------------------------------------//
 
-    onInit() {
-        this.model = this.newModel('GitInstance');
-    }
-
     onLoad($html) {
+        this.model = this.newModel('GitInstance');
         return super.onLoad($html);
     }
 

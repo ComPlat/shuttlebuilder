@@ -47,13 +47,11 @@ class ShuttleInstanceEditController extends AbstractSDC {
     }
   }
 
-  async onInit(copypk) {
+  async onLoad($html) {
+    const {copypk} = this.params;
     if (copypk) {
       this._toCopy = await this._copy(copypk);
     }
-  }
-
-  onLoad($html) {
     return super.onLoad($html);
   }
 

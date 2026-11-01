@@ -40,7 +40,7 @@ services:
     environment:
        PUBLIC_IP_URL: ${PUBLIC_IP_URL}
   web:
-    image: mstarman/shuttlebuilder:0.2.19
+    image: mstarman/shuttlebuilder:0.2.20
     build: .
     restart: unless-stopped
     depends_on:

@@ -14,7 +14,8 @@ export default class ElnUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "user": {
         "type": "OneToOneField",
@@ -26,7 +27,8 @@ export default class ElnUser extends SdcModel {
         "many_to_one": false,
         "one_to_one": true,
         "related_model": "SdcUser",
-        "remote_field": "elnuser"
+        "remote_field": "elnuser",
+        "reverse_relation": false
       },
       "token": {
         "type": "CharField",
@@ -38,7 +40,8 @@ export default class ElnUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "is_eln_user": {
         "type": "BooleanField",
@@ -50,7 +53,8 @@ export default class ElnUser extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       }
     }
 

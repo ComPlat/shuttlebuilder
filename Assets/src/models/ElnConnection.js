@@ -14,7 +14,8 @@ export default class ElnConnection extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "url": {
         "type": "CharField",
@@ -26,7 +27,8 @@ export default class ElnConnection extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "active": {
         "type": "BooleanField",
@@ -38,7 +40,8 @@ export default class ElnConnection extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "token": {
         "type": "CharField",
@@ -50,7 +53,8 @@ export default class ElnConnection extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "device": {
         "type": "IntegerField",
@@ -62,7 +66,8 @@ export default class ElnConnection extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       }
     }
 

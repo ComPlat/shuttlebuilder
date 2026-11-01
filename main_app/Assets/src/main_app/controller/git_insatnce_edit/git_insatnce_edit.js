@@ -26,8 +26,6 @@ class GitInsatnceEditController extends AbstractSDC {
     // - onRemove                                      //
     //-------------------------------------------------//
 
-    onInit() {}
-
     onLoad($html) {
         return super.onLoad($html);
     }

@@ -40,3 +40,4 @@
 # Large converter binaries (kept local, not tracked)
 Assets/static/files/ChemConverterApp
 Assets/static/files/ChemConverterApp.exe
+__pycache__/

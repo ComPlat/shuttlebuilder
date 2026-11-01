@@ -14,7 +14,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "name": {
         "type": "CharField",
@@ -26,7 +27,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "user": {
         "type": "CharField",
@@ -38,7 +40,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "password": {
         "type": "CharField",
@@ -50,7 +53,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "transfer": {
         "type": "CharField",
@@ -62,7 +66,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "src": {
         "type": "CharField",
@@ -74,7 +79,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "dst": {
         "type": "CharField",
@@ -86,7 +92,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "shuttle_type": {
         "type": "CharField",
@@ -98,7 +105,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "common_name_parts": {
         "type": "CharField",
@@ -110,7 +118,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "duration": {
         "type": "PositiveIntegerField",
@@ -122,7 +131,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "architecture": {
         "type": "CharField",
@@ -134,7 +144,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "with_converter": {
         "type": "BooleanField",
@@ -146,7 +157,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "user_bagit": {
         "type": "CharField",
@@ -158,7 +170,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "passwort_bagit": {
         "type": "CharField",
@@ -170,7 +183,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "dst_bagit": {
         "type": "CharField",
@@ -182,7 +196,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "public_link": {
         "type": "CharField",
@@ -194,7 +209,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "profile": {
         "type": "FileField",
@@ -207,6 +223,7 @@ export default class ShuttleInstance extends SdcModel {
         "one_to_one": null,
         "related_model": null,
         "remote_field": null,
+        "reverse_relation": false,
         "max_size": 5368709120,
         "allowed_types": null
       },
@@ -220,7 +237,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "last_build": {
         "type": "DateTimeField",
@@ -232,7 +250,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": null,
         "one_to_one": null,
         "related_model": null,
-        "remote_field": null
+        "remote_field": null,
+        "reverse_relation": false
       },
       "owner": {
         "type": "ForeignKey",
@@ -244,7 +263,8 @@ export default class ShuttleInstance extends SdcModel {
         "many_to_one": true,
         "one_to_one": false,
         "related_model": "SdcUser",
-        "remote_field": "shuttleinstance"
+        "remote_field": "shuttleinstance",
+        "reverse_relation": false
       }
     }
 
