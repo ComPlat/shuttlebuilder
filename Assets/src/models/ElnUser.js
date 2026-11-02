@@ -65,7 +65,7 @@ export default class ElnUser extends SdcModel {
     this._user = new SdcQuerySet('SdcUser');
     this._token = null;
     this._is_eln_user = null;
-    this.setValues(data);
+    this.setValues(data || {});
   }
 
   setValues(data = {}) {

@@ -1,6 +1,15 @@
 import {AbstractSDC, app} from 'sdc_client';
 
 
+/**
+ * List of all linked git repositories (`GitInstance`) with Shuttle source code; the active one is marked `ACTIVE`.
+ *
+ * - "Activate" (inactive repos) clones the repo and makes it the only active one; Shuttles are then built from it.
+ * - "Reload" (active repo) clones it again to pick up new commits.
+ * - Both run on the server and can take a while; a loading screen is shown. All Shuttles are rebuilt on their next download.
+ * - "NEW" opens `<git-insatnce-edit>` to link a repo; the wrench edits one; the trash button deletes it after a confirm dialog.
+ * - Requires login.
+ */
 class GitInstanceListController extends AbstractSDC {
 
     constructor() {

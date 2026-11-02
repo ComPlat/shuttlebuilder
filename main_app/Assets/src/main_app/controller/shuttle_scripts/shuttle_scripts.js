@@ -1,6 +1,14 @@
 import {AbstractSDC, app} from 'sdc_client';
 
 
+/**
+ * Help page about preprocess scripts that a Shuttle runs on each file before sending it.
+ *
+ * - Static text; no data is shown or changed. Requires login.
+ * - Explains the script folder (`~/shuttle/scripts` on Linux, `%USERPROFILE%\shuttle\scripts` on Windows) and how scripts are run.
+ * - Offers downloads of the "ShuttleFromContentRenamer" script and of the ChemConverterApp (Linux and Windows).
+ * - The ChemConverter is not a script; it is enabled with `with_converter` in `<shuttle-instance-edit>`.
+ */
 class ShuttleScriptsController extends AbstractSDC {
 
     constructor() {

@@ -1,23 +1,55 @@
-import {jest} from '@jest/globals';
+import { jest } from '@jest/globals';
 import * as _sdc from 'sdc_client';
 import $ from 'jquery';
 import _ from 'lodash';
 
 import { TextEncoder, TextDecoder } from 'util';
 
-global['SCRIPT_OUTPUT'] = process.env.SCRIPT_OUTPUT.split("\n");
-await new Promise(resolve => {
-    $.get('/').then((res) => {
-        for(let line of res.split('\n')) {
-            line = line.trim();
-            if(line.startsWith('window.')) {
-                eval(line);
-            }
-        }
-        resolve();
-    }).catch((e) => {
-        console.error(e);
+// SCRIPT_OUTPUT is only set when DB_PYTHON_SCRIPT is configured in Assets/.sdc_env.
+global.SCRIPT_OUTPUT = (process.env.SCRIPT_OUTPUT || "").split("\n");
+global.SDC_TEST_USER = Object.fromEntries(SCRIPT_OUTPUT.filter((ol) => ol.startsWith('USER_FOR_SDC_TESTS$$$')).map((ol) => ol.replace(/^USER_FOR_SDC_TESTS\$\$\$/, '').split('$$$')));
+global.gettext = (x) => x;
+
+if (!File.prototype.arrayBuffer) {
+  File.prototype.arrayBuffer = function () {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      }
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(this);
     });
+  };
+}
+
+if (!File.prototype.text) {
+  File.prototype.text = function () {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      }
+      reader.onerror = reject;
+      reader.readAsText(this);
+    });
+  };
+}
+
+// Read the window.* settings (CSRF token, DEBUG, ...) from the index page of the test server.
+await new Promise((resolve, reject) => {
+  $.get('/').then((res) => {
+    for (let line of res.split('\n')) {
+      line = line.trim();
+      if (line.startsWith('window.')) {
+        eval(line);
+      }
+    }
+    resolve();
+  }).catch((e) => {
+    reject(new Error(`The test server did not answer GET / (status ${e?.status}). ` +
+      'See the server log in Assets/tests/logs/.'));
+  });
 });
 
-Object.assign(global, { TextDecoder, TextEncoder, $, jest, _sdc, _});
+Object.assign(global, { TextDecoder, TextEncoder, $, jest, _sdc, _ });

@@ -1,0 +1,21 @@
+[
+  {
+    "model": "sdc_user.sdcuser",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1500000$Hd9Kv13GI1HIkcAZ9xC9u2$cvdaEyeCLcJs4ddnDA/PGf9eTZrSfR9tDiu9iLa/wdg=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "teacher",
+      "first_name": "SDC",
+      "last_name": "Teacher",
+      "email": "teacher@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-11-02T00:00:00Z",
+      "email_confirmed": true,
+      "groups": [],
+      "user_permissions": []
+    }
+  }
+]

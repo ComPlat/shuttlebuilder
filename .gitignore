@@ -41,3 +41,4 @@
 Assets/static/files/ChemConverterApp
 Assets/static/files/ChemConverterApp.exe
 __pycache__/
+/test_db.sqlite3

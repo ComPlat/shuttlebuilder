@@ -291,7 +291,7 @@ export default class ShuttleInstance extends SdcModel {
     this._last_update = null;
     this._last_build = null;
     this._owner = new SdcQuerySet('SdcUser');
-    this.setValues(data);
+    this.setValues(data || {});
   }
 
   setValues(data = {}) {

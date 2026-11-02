@@ -1,6 +1,16 @@
 import {AbstractSDC, app, trigger} from 'sdc_client';
 import * as regexpTree from 'regexp-tree'
 
+/**
+ * Form to create, edit or copy a `ShuttleInstance` (the configuration of one Shuttle executable).
+ *
+ * - Arguments: `pk` (optional) is the id of the instance to edit; `copypk` (optional) prefills a new instance from an existing one, with ` (COPY)` added to the name.
+ * - Without `pk`: "Save & Done" creates the instance (owned by the current user) and returns to `<shuttle-instance-list>`.
+ * - With `pk`: there is no save button; changes are stored by the model form directly.
+ * - The `common_name_parts` field is only shown for type `flat_tar`; it has a test input that shows the regex match and structure.
+ * - The BagIt fields (`dst_bagit`, `user_bagit`, `passwort_bagit`, `profile`, `public_link`) are only shown when `with_converter` is checked.
+ * - Shows the active git repo; if none is linked the form is not shown. Requires login.
+ */
 class ShuttleInstanceEditController extends AbstractSDC {
 
   constructor() {
@@ -18,8 +28,10 @@ class ShuttleInstanceEditController extends AbstractSDC {
      * The pattern is {'event': {'dom_selector': handler}}
      * Uncommend the following line to add events;
      */
+    // 'input' (not 'change'): also fired by the AI assistant's fill_form, which avoids 'change' so model forms
+    // do not save themselves. Browsers fire 'input' for selects and checkboxes as well.
     this.events.unshift({
-      'change': {
+      'input': {
         '#id_shuttle_type': this.onTypeChange,
         '#id_with_converter': this.onConverterChange
       }
