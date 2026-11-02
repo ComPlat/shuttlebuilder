@@ -7,16 +7,41 @@ For more information on this file, see
 https://simpledomcontrol.readthedocs.io/en/latest/
 """
 import os
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
+
+from django.core.exceptions import ImproperlyConfigured
 
 from ShuttleBuilder.base_settings import *
 
+
+def _parse_allowed_host(value):
+    # ALLOWED_HOST is a comma-separated list of site URLs, e.g. "https://example.com,https://www.example.com".
+    # Entries without a scheme are read as https.
+    urls = []
+    for entry in value.split(','):
+        entry = entry.strip()
+        if entry:
+            urls.append(urlparse(entry if '://' in entry else f'https://{entry}'))
+    return urls
+
+
 if not DEBUG:
-    hosts = [urlparse(x) for x in os.environ.get('ALLOWED_HOST').split(',')]
-    ALLOWED_HOSTS = [host.hostname for host in hosts]
-    CSRF_TRUSTED_ORIGINS = [urlunparse(x) for x in hosts]
+    _hosts = _parse_allowed_host(os.environ.get('ALLOWED_HOST', ''))
+    if not _hosts:
+        raise ImproperlyConfigured(
+            "Set the environment variable ALLOWED_HOST to the comma-separated URLs of this site "
+            "(e.g. ALLOWED_HOST=https://example.com) when DEBUG is False.")
+    ALLOWED_HOSTS = [host.hostname for host in _hosts]
+    CSRF_TRUSTED_ORIGINS = [f'{host.scheme}://{host.netloc}' for host in _hosts]
+    _default_home_url = f'{_hosts[0].scheme}://{_hosts[0].netloc}'
 else:
     ALLOWED_HOSTS = ['*']
+    _default_home_url = 'http://127.0.0.1:8000'
+
+# Base URL used in links of e-mails (e.g. confirmation and password reset of sdc_user)
+# when it cannot be taken from the request.
+if 'HOME_URL' not in locals():
+    HOME_URL = os.environ.get('HOME_URL', _default_home_url)
 
 if 'VERSION' not in locals():
     VERSION = 0.0
@@ -48,8 +73,12 @@ DATABASES_AVAILABLE = {
                       } | DATABASES
 
 database = os.environ.get('DJANGO_DATABASE', 'default')
+if database not in DATABASES_AVAILABLE:
+    raise ImproperlyConfigured(
+        f"DJANGO_DATABASE={database!r} is not defined. Use one of: {', '.join(DATABASES_AVAILABLE)}")
 
-DATABASES = {'default': DATABASES_AVAILABLE[database]}
+# The selected database becomes the default one; other aliases of DATABASES are kept.
+DATABASES = DATABASES | {'default': DATABASES_AVAILABLE[database]}
 
 # Setup necessary template settings for SDC
 
@@ -88,29 +117,59 @@ if 'MEDIA_ROOT' not in locals():
 
 SERVER_CALL_VIA_WEB_SOCKET = False
 MODEL_FORM_TEMPLATE = "elements/form.html"
-LOGIN_CONTROLLER = 'shuttle-login'
+LOGIN_CONTROLLER = 'sdc-login'
 LOGIN_SUCCESS = '/'
 
-JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256', "exp_delta_seconds": 3600}
-
-"""
-def sdc_user_get_queryset(user, action, obj):
-    return True
-"""
-SDC_USER_GET_QUERYSET = "sdc_user.models.sdc_user_get_queryset"
-
-""""
-def sdc_user_get_queryset(sdc_user_cls, user, action, ob
-    if user.is_superuser:
-        return sdc_user_cls.queryset.all()
-    else:
-        return sdc_user_cls.objects.filter(pk=user.pk)
-"""
-SDC_USER_IS_AUTHORISED = "sdc_user.models.sdc_user_is_authorised"
-SDC_USER_FIELDS = "__all__"
-SDC_USER_FIELDS_EXCLUDE = None
+JWT = {'secret': SECRET_KEY, 'algorithm': 'HS256' , 'exp_delta_seconds': 3600}
 
 AUTH_USER_MODEL = "sdc_user.SdcUser"
+
+# Access rules of the SdcUser model. Both settings are dotted paths to functions:
+#
+# def sdc_user_get_queryset(sdc_user_cls, user, action, obj):
+#     # Rows a user may load/edit. Default: all users for superusers, otherwise only the user itself.
+#     return sdc_user_cls.objects.all() if user.is_superuser else sdc_user_cls.objects.filter(pk=user.pk)
+#
+# def sdc_user_is_authorised(user, action, obj):
+#     # Whether a user may perform an action. Default: registration for everyone,
+#     # read/edit for logged-in users, delete/upload for superusers only.
+#     ...
+SDC_USER_GET_QUERYSET = "sdc_user.models.sdc_user_get_queryset"
+SDC_USER_IS_AUTHORISED = "sdc_user.models.sdc_user_is_authorised"
+# Fields of SdcUser sent to clients. The password hash is never sent.
+SDC_USER_FIELDS = "__all__"
+SDC_USER_FIELDS_EXCLUDE = None
+# If True, users (except superusers) can only log in after confirming their e-mail address.
+SDC_USER_REQUIRE_CONFIRMED_EMAIL = False
+
+SDC_AI_ASSISTANT = False
+SDC_AI_TOKEN_FROM_SYSTEM = False
+# Only logged-in users may use the assistant. Must stay True while SDC_AI_TOKEN_FROM_SYSTEM is True
+# (otherwise anonymous visitors would use the system's provider key).
+SDC_AI_REQUIRE_LOGIN = True
+# Optional list of group names allowed to use the assistant (staff and superusers always are); None = all users.
+SDC_AI_ALLOWED_GROUPS = None
+# Optional cap of assistant requests per user and day on the system's key; None = unlimited.
+SDC_AI_MAX_REQUESTS_PER_USER = 100
+# AI model connection. Provider credentials (ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, AWS_*/GOOGLE_*
+# for Bedrock/Vertex, ...) stay plain environment variables read by the provider SDKs; never put them here.
+# SDC_AI_PROVIDER: anthropic, anthropic-bedrock, anthropic-vertex, openai, azure-openai, gemini, gemini-vertex,
+# mistral, ollama or openai-compatible (with SDC_AI_BASE_URL).
+SDC_AI_PROVIDER = os.environ.get('SDC_AI_PROVIDER', 'anthropic')
+SDC_AI_MODEL = os.environ.get('SDC_AI_MODEL', 'claude-opus-5-5')
+SDC_AI_BASE_URL = os.environ.get('SDC_AI_BASE_URL', '')
+# Users with their own key may set an API URL in the assistant's settings (https, public addresses only)
+SDC_AI_ALLOW_USER_BASE_URL = True
+SDC_AI_MAX_TOKENS = int(os.environ.get('SDC_AI_MAX_TOKENS', 16000))
+SDC_AI_TIMEOUT = float(os.environ.get('SDC_AI_TIMEOUT', 600))
+SDC_AI_MAX_RETRIES = int(os.environ.get('SDC_AI_MAX_RETRIES', 2))
+# Claude only: low, medium, high, xhigh or max
+SDC_AI_EFFORT = os.environ.get('SDC_AI_EFFORT', 'medium')
+# Additional skill file(s) for the assistant (path or list of paths, relative to BASE_DIR), appended to the
+# generated SDC_SKILL.md, e.g. hand-written knowledge about workflows of this project
+SDC_AI_ADDITIONAL_SKILL_FILE = None
+
+
 DEFAULT_FROM_EMAIL = "chemotion@martin-starman.com"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
@@ -135,3 +194,4 @@ if DEBUG:
 else:
     ELN_URL = os.environ.get('ELN_URL')
     MAX_UPLOAD_SIZE = os.environ.get('MAX_UPLOAD_SIZE', 5e+7)
+

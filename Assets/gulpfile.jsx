@@ -1,13 +1,20 @@
 'use strict'
 
-const {src, dest, series, parallel} = require('gulp');
-const {sync} = require("glob");
+const { src, dest, series, parallel } = require('gulp');
+const { sync } = require("glob");
 const webpack = require('webpack-stream');
 const copy = require('gulp-copy');
 const through = require('through2');
 
 const gulp = require('gulp');
 process.env.JS_CILENT_FILE_EXTENTIONS = ['.js', '.json'];
+
+// The npm scripts pass --mode=production or --mode=development; it selects the webpack config.
+const modeArg = process.argv.find((arg) => arg.startsWith('--mode='));
+if (modeArg) {
+  process.env.NODE_ENV = modeArg.slice('--mode='.length);
+  process.env.BABEL_ENV = process.env.NODE_ENV;
+}
 
 const {
   sdc_scss,
@@ -19,13 +26,14 @@ const {
   sdc_default_bundle_factory, sdc_pre_compile_javascript
 } = require('sdc_client/gulp/gulp.jsx');
 
-
 function webpack_bundle() {
   const webpack_config = require('./webpack.config/webpack.bundle.config.jsx');
   const filename = [];
 
   sync("./_build/*/*.js").forEach(file => {
-    -filename.push(file);
+    if (!file.startsWith("./_build/models/")) {
+      filename.push(file);
+    }
   });
 
   return through.obj()
@@ -35,7 +43,7 @@ function webpack_bundle() {
 
 function copy_js_dev_bundle() {
   return src('./_build/**/*.js')
-    .pipe(copy('./bin', {prefix: 1}))
+    .pipe(copy('./bin', { prefix: 1 }))
     .on('end', () => {
       console.log('DEv bundle copied successfully!');
     });
@@ -52,7 +60,7 @@ function webpack_javascript() {
 
 function copy_statics() {
   return src('./static/**/*')
-    .pipe(copy('../static', {prefix: 1}))
+    .pipe(copy('../static', { prefix: 1 }))
     .on('end', () => {
       console.log('Contents copied successfully!');
     });

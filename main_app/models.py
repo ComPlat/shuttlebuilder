@@ -34,6 +34,15 @@ signals.post_save.connect(create_user, sender=User, weak=False,
 
 
 class ElnUser(models.Model, SdcModel):
+    """
+    Per-user profile that records whether a user logs in through the connected Chemotion ELN.
+
+    - One record per Django `User` (`user`, one-to-one); created automatically when a user is created.
+    - `is_eln_user`: `true` if the last login was verified by the active `ElnConnection`, `false` for a local account login.
+    - `token`: Chemotion API token from the last ELN login; empty for local logins.
+    - Both fields are set by the login process, not by the user.
+    - Each user can only read their own record; deleting the `User` deletes it.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, default='')
     is_eln_user = models.BooleanField(default=False)
@@ -78,6 +87,16 @@ class ElnConnectionSearchForm(AbstractSearchForm):
 
 
 class ElnConnection(models.Model, SdcModel):
+    """
+    Connection to a Chemotion ELN server whose accounts may log in to the ShuttleBuilder.
+
+    - `url`: base URL of the Chemotion instance; `active`: only the active connection is used for login.
+    - `token`, `device`: optional Chemotion API token and device id for this connection.
+    - If no connection is active and the setting `ELN_URL` exists, an active connection to it is created automatically.
+    - Users who log in with Chemotion credentials get a local account; new ones become staff if they are Chemotion admins.
+    - Managed in the Django admin (`/admin/main_app/elnconnection/`); saving one as active deactivates all others.
+    - `<shuttle-login>` shows the active connection's URL.
+    """
     edit_form = "main_app.forms.ElnConnectionForm"
     create_form = "main_app.forms.ElnConnectionForm"
     html_list_template = "main_app/models/ElnConnection/ElnConnection_list.html"
@@ -111,7 +130,9 @@ class ElnConnection(models.Model, SdcModel):
         try:
             return ElnConnection.objects.get(active=True)
         except ElnConnection.MultipleObjectsReturned:
-            ElnConnection.objects.filter(active=True).update(is_active=False)
+            keep = ElnConnection.objects.filter(active=True).order_by('-pk').first()
+            ElnConnection.objects.filter(active=True).exclude(pk=keep.pk).update(active=False)
+            return keep
         except ElnConnection.DoesNotExist:
             if hasattr(settings, 'ELN_URL'):
                 return ElnConnection.objects.create(active=True, url=settings.ELN_URL)
@@ -126,6 +147,17 @@ class GitInstanceSearchForm(AbstractSearchForm):
 
 
 class GitInstance(models.Model, SdcModel):
+    """
+    A git repository (and branch or commit) holding the Shuttle source code that executables are built from.
+
+    - `name`: unique, cannot be changed later; `url`: clone URL; `branch`: branch name or commit id (default `main`).
+    - `is_active`: exactly one repo is active; all Shuttle builds use it.
+    - `last_reload`: when the repo was last cloned; `null` means it is cloned on the next build.
+    - If none is active, the default `ComPlat/shuttle/Main` (https://github.com/ComPlat/shuttle.git, `main`) is created and activated.
+    - Activating or reloading a repo clones it again; afterwards every `ShuttleInstance` is rebuilt on its next download.
+    - Readable and editable by every logged-in user.
+    - Listed and activated in `<git-instance-list>`, created/edited in `<git-insatnce-edit>`.
+    """
     edit_form = "main_app.forms.GitInstanceForm"
     create_form = "main_app.forms.GitInstanceForm"
     html_list_template = "main_app/models/GitInstance/GitInstance_list.html"
@@ -247,6 +279,18 @@ TRANSFER_CHOISES = (
 
 
 class ShuttleInstance(models.Model, SdcModel):
+    """
+    Configuration of one Shuttle: a small program for a lab PC that watches a folder and uploads new data.
+
+    - `name`: unique, cannot be changed later; `src`: folder to watch on the lab PC; `duration`: seconds a file must stay unchanged before it is sent (default 300).
+    - `transfer`: `webdav` or `sftp`; `dst`, `user`, `password`: target URL and credentials on the server.
+    - `shuttle_type`: `file` (each file), `folder`, `zip`, `tar` (whole folder once complete) or `flat_tar` (files grouped by the `common_name_parts` regex).
+    - `architecture`: target system: `win_i386`, `win_64`, `ubuntu_64`, `raspberry_pi_6`, `raspberry_pi_7` or `raspberry_pi_64`.
+    - `with_converter`: also convert data to a BagIt archive, sent to `dst_bagit` with `user_bagit`/`passwort_bagit`; needs a JSON `profile`, `public_link` is the URL prefix of the raw files.
+    - `owner`: the creating user. Logged-in users see and change only their own instances; staff and superusers see all.
+    - Downloading compiles the executable from the active `GitInstance` (slow on first download or after changes); deleting also removes the build files.
+    - Listed in `<shuttle-instance-list>`, created/edited/copied in `<shuttle-instance-edit>`.
+    """
     edit_form = "main_app.forms.ShuttleInstanceForm"
     create_form = "main_app.forms.ShuttleInstanceForm"
     html_list_template = "main_app/models/ShuttleInstance/ShuttleInstance_list.html"

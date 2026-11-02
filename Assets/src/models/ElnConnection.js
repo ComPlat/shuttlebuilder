@@ -79,7 +79,7 @@ export default class ElnConnection extends SdcModel {
     this._active = null;
     this._token = null;
     this._device = null;
-    this.setValues(data);
+    this.setValues(data || {});
   }
 
   setValues(data = {}) {

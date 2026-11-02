@@ -56,19 +56,6 @@ export default class SdcUser extends SdcModel {
         "remote_field": null,
         "reverse_relation": false
       },
-      "password": {
-        "type": "CharField",
-        "required": true,
-        "max_length": 128,
-        "is_relation": false,
-        "many_to_many": null,
-        "one_to_many": null,
-        "many_to_one": null,
-        "one_to_one": null,
-        "related_model": null,
-        "remote_field": null,
-        "reverse_relation": false
-      },
       "last_login": {
         "type": "DateTimeField",
         "required": false,
@@ -237,7 +224,6 @@ export default class SdcUser extends SdcModel {
     this._shuttleinstance_set = new SdcQuerySet('ShuttleInstance', { owner: this.id });
     this._toManyFields.push([this._shuttleinstance_set, 'owner']);
     this._id = null;
-    this._password = null;
     this._last_login = null;
     this._is_superuser = null;
     this._username = null;
@@ -252,7 +238,7 @@ export default class SdcUser extends SdcModel {
     this._toManyFields.push([this._groups, 'user']);
     this._user_permissions = new SdcQuerySet('Permission');
     this._toManyFields.push([this._user_permissions, 'user']);
-    this.setValues(data);
+    this.setValues(data || {});
   }
 
   setValues(data = {}) {
@@ -271,9 +257,6 @@ export default class SdcUser extends SdcModel {
     } catch {} 
     try {
       this.id = data.id ?? null;
-    } catch {} 
-    try {
-      this.password = data.password ?? null;
     } catch {} 
     try {
       this.last_login = data.last_login ?? null;
@@ -333,11 +316,6 @@ export default class SdcUser extends SdcModel {
   set id(value){
     this.setid(value);
     this._updateForm('id');
-  }
-
-  set password(value){
-    this.setpassword(value);
-    this._updateForm('password');
   }
 
   set last_login(value){
@@ -422,11 +400,6 @@ export default class SdcUser extends SdcModel {
     this._id = this.parseValue(value, SdcUser.fields.id);
   }
 
-  setpassword(value){
-    this.validate(value, SdcUser.fields.password);
-    this._password = this.parseValue(value, SdcUser.fields.password);
-  }
-
   setlast_login(value){
     this.validate(value, SdcUser.fields.last_login);
     this._last_login = this.parseValue(value, SdcUser.fields.last_login);
@@ -502,10 +475,6 @@ export default class SdcUser extends SdcModel {
 
   get id(){
     return this._id;
-  }
-
-  get password(){
-    return this._password;
   }
 
   get last_login(){

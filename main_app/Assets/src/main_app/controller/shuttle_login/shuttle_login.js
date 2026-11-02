@@ -1,6 +1,14 @@
 import {AbstractSDC, app} from 'sdc_client';
 
 
+/**
+ * Login page; wraps the standard `<sdc-login>` form.
+ *
+ * - Users can log in with a local account or, if a Chemotion ELN is connected, with their Chemotion username and password.
+ * - With an active `ElnConnection` the page shows a link to that Chemotion server.
+ * - A Chemotion login creates or updates a local account with the same name; new accounts of Chemotion admins become staff.
+ * - No login required.
+ */
 class ShuttleLoginController extends AbstractSDC {
 
     constructor() {

@@ -1150,6 +1150,31 @@ files = [
 ]
 
 [[package]]
+name = "nodejs"
+version = "0.1.1"
+description = "Python bindings and utils for Node.js and io.js"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "nodejs-0.1.1.tar.gz", hash = "sha256:4c585fecc51a91b151bbc6dd01c0fb8d93f29f897a8298009205b59b80b52933"},
+]
+
+[package.dependencies]
+optional-django = "0.1.0"
+
+[[package]]
+name = "optional-django"
+version = "0.1.0"
+description = "Utils for apps to provide optional support for django applications"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "optional-django-0.1.0.tar.gz", hash = "sha256:77d6b9fb74bda30583e1af4683a39e0af725cea6003252bba75838f4939326c5"},
+]
+
+[[package]]
 name = "packaging"
 version = "26.3"
 description = "Core utilities for Python packages"
@@ -2440,4 +2465,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "2079ca3c21cf854a7466cb8e26cc3780154e48d7805ad39b75f080983b931148"
+content-hash = "c2f1af515a84ca65765c5b34341221181383be65ffede3e83ea19ac9abd572b7"

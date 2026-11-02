@@ -8,8 +8,8 @@ from .models import GitInstance, ElnConnection, ShuttleInstance
 class GitInstanceAdmin(admin.ModelAdmin):
     list_display = ["name", "url", "branch", "is_active", "last_reload"]
     def save_model(self, request, obj, form, change):
-        if obj.active:
-            ElnConnection.objects.all().update(active=False)
+        if obj.is_active:
+            GitInstance.objects.all().update(is_active=False)
         super().save_model(request, obj, form, change)
 
 

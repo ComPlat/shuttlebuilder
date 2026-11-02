@@ -10,15 +10,16 @@ await (async () => Promise.all([
   import("#lib/sdc_tools/sdc_tools.organizer.js"),
 ]))();
 
+
 Promise.all([
-    import('jquery'),
-    import('bootstrap/dist/js/bootstrap.bundle.js'),
-    import('lodash')]).then(([jquery, bootstrap, lodash]) => {
-    window['Modal'] = bootstrap.Modal;
-    window['Tooltip'] = bootstrap.Tooltip;
-    window['jQuery'] = window['$'] = jquery.default;
-    window['_'] = lodash.default;
-    sdc_client.app.init_sdc()
-        .then(() => {
-        });
+  import('jquery'),
+  import('bootstrap/dist/js/bootstrap.bundle.js'),
+  import('lodash')]).then(([jquery, bootstrap, lodash]) => {
+  window['Modal'] = bootstrap.Modal;
+  window['Tooltip'] = bootstrap.Tooltip;
+  window['jQuery'] = window['$'] = jquery.default;
+  window['_'] = lodash.default;
+  sdc_client.app.init_sdc()
+    .then(() => {
+    });
 });

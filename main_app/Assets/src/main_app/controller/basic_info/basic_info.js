@@ -1,6 +1,14 @@
 import {AbstractSDC, app} from 'sdc_client';
 
 
+/**
+ * Start page of the ShuttleBuilder: explains what a Shuttle is and how to install one.
+ *
+ * - Static help text; no data is shown or changed. No login required.
+ * - Describes the workflow: create a Shuttle in `<shuttle-instance-list>`, download the executable, install it on the lab PC.
+ * - Contains install steps for Windows, Windows XP with SFTP and Linux (systemd), with links to the needed helper files.
+ * - Links to `<shuttle-scripts>` for preprocess scripts, the OpenAPI file and the Chemotion documentation.
+ */
 class BasicInfoController extends AbstractSDC {
 
     constructor() {

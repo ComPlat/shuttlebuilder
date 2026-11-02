@@ -93,7 +93,7 @@ export default class GitInstance extends SdcModel {
     this._branch = null;
     this._is_active = null;
     this._last_reload = null;
-    this.setValues(data);
+    this.setValues(data || {});
   }
 
   setValues(data = {}) {
