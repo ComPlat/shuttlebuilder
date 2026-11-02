@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS client_build
+FROM python:3.14-slim AS client_build
 RUN apt-get update
 
 ENV NODE_VERSION=22.16.0
@@ -32,7 +32,7 @@ RUN poetry run python manage.py sdc_update_links
 RUN npm run build
 RUN poetry run python manage.py collectstatic  --no-input
 
-FROM python:3.13-slim AS shuttlebuilder
+FROM python:3.14-slim AS shuttlebuilder
 LABEL authors="martin"
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
