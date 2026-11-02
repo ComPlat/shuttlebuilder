@@ -13,6 +13,7 @@ chemotion-api = "^312.0.2"
 pywinrm = "^0.5.0"
 zeroconf = "==0.153.0"
 nodejs = "^0.1.1"
+openai = "^3.42.1"
 
 
 

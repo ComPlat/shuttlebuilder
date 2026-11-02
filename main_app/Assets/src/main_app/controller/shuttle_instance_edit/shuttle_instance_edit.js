@@ -28,8 +28,10 @@ class ShuttleInstanceEditController extends AbstractSDC {
      * The pattern is {'event': {'dom_selector': handler}}
      * Uncommend the following line to add events;
      */
+    // 'input' (not 'change'): also fired by the AI assistant's fill_form, which avoids 'change' so model forms
+    // do not save themselves. Browsers fire 'input' for selects and checkboxes as well.
     this.events.unshift({
-      'change': {
+      'input': {
         '#id_shuttle_type': this.onTypeChange,
         '#id_with_converter': this.onConverterChange
       }

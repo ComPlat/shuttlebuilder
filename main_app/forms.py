@@ -7,6 +7,7 @@ from main_app.models import ShuttleInstance
 from main_app.models import GitInstance
 from main_app.models import ElnConnection
 from django.forms.models import ModelForm
+from django.forms import PasswordInput
 
 
 # Form Model ElnConnection
@@ -94,6 +95,11 @@ class ShuttleInstanceForm(ModelForm):
     class Meta:
         model = ShuttleInstance
         fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture', 'with_converter', 'dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile']
+        # Password fields keep the stored value but are never read or filled by the AI assistant
+        widgets = {
+            'password': PasswordInput(render_value=True),
+            'passwort_bagit': PasswordInput(render_value=True),
+        }
 
 
 
