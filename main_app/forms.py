@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from cryptography import x509
 
-from main_app.validators import validate_host_key, validate_destination, destination_host_port
+from main_app.validators import validate_host_key, validate_destination, destination_host_port, LINUX_USER_RE
 
 from main_app.models import ShuttleInstance
 from main_app.models import GitInstance
@@ -78,6 +78,12 @@ class ShuttleInstanceForm(ModelForm):
         validate_host_key(val)
         return val
 
+    def clean_linux_user(self):
+        val = (self.cleaned_data.get('linux_user') or '').strip()
+        if val and not LINUX_USER_RE.match(val):
+            raise ValidationError(_('The Linux user must start with a lowercase letter or underscore and contain only lowercase letters, digits, "_" and "-" (max. 32 characters).'))
+        return val
+
     def clean_cert(self):
         cert = self.cleaned_data.get('cert')
         # an already stored, unchanged file is not re-read
@@ -98,6 +104,10 @@ class ShuttleInstanceForm(ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         transfer = cleaned_data.get('transfer')
+        if str(cleaned_data.get('architecture') or '').startswith('win'):
+            # linux_user doesn't apply to Windows: drop the value and any format error
+            self._errors.pop('linux_user', None)
+            cleaned_data['linux_user'] = ''
         with_converter = cleaned_data.get('with_converter')
         if with_converter:
             if cleaned_data.get('architecture') not in ['win_64', 'ubuntu_64']:
@@ -149,7 +159,7 @@ class ShuttleInstanceForm(ModelForm):
 
     class Meta:
         model = ShuttleInstance
-        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture', 'with_converter', 'dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile', 'host_key', 'cert', 'insecure']
+        fields = ['name', 'transfer', 'user', 'password', 'src', 'dst', 'shuttle_type', 'common_name_parts', 'duration', 'architecture', 'with_converter', 'dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile', 'host_key', 'cert', 'insecure', 'linux_user']
         # Password fields keep the stored value but are never read or filled by the AI assistant
         widgets = {
             'password': PasswordInput(render_value=True),
