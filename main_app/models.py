@@ -7,7 +7,7 @@ import tempfile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.utils import timezone
 from sdc_core.sdc_extentions.models import SdcModel
 from sdc_core.sdc_extentions.forms import AbstractSearchForm
@@ -170,6 +170,8 @@ class GitInstance(models.Model, SdcModel):
                               default='main')
     is_active = models.BooleanField(default=False)
     last_reload = models.DateTimeField(null=True, blank=True)
+    shuttle_version = models.CharField(_('Shuttle version'), max_length=20, blank=True, default='',
+                                       help_text=_('Version of the Shuttle in this checkout, read from main.go after each reload.'))
 
     def __str__(self):
         return self.name
@@ -338,8 +340,14 @@ class ShuttleInstance(models.Model, SdcModel):
                                              "The regex for the common name is used to collect all files that belong to the same data set. This value is only used if the type is flat tar. All files that either have the same regex group resolutions or (if you do not use groups) have the same global result are archived together<this.render_help></this.render_help>"))
     duration = models.PositiveIntegerField(
         help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
-        default=300)
-    # cert = models.CharField(help_text=_("Path to server TLS certificate. Only needed if the server has a self signed certificate."), max_length=255, blank=True, null=True)
+        default=300, validators=[MinValueValidator(1)])
+    host_key = models.CharField(_('SSH host key'), max_length=255, blank=True, default='',
+                                help_text=_("SFTP only: expected SSH host key fingerprint of the server."))
+    cert = models.FileField(_('Server certificate'), upload_to='certs/', null=True, blank=True,
+                            validators=[FileExtensionValidator(allowed_extensions=['crt', 'pem', 'cer'])],
+                            help_text=_("WebDAV only: PEM certificate of the server, needed for self-signed servers."))
+    insecure = models.BooleanField(_('Disable verification (insecure)'), default=False,
+                                   help_text=_("Skip TLS certificate and SSH host key verification."))
     architecture = models.CharField(_('System architecture'),
                                     help_text=_(
                                         "Your computer architecture : either 64 bit, i386 or ARM And your OS: Linux or Windows"),
@@ -367,6 +375,8 @@ class ShuttleInstance(models.Model, SdcModel):
 
     last_update = models.DateTimeField(default=timezone.now)
     last_build = models.DateTimeField(null=True, blank=True)
+    built_version = models.CharField(_('Built Shuttle version'), max_length=20, blank=True, default='',
+                                     help_text=_('Shuttle version of the last successful build.'))
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):

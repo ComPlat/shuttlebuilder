@@ -109,6 +109,8 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M3 – Shuttle 1.13 options in the UI
 
+**Status:** in progress
+
 ### WP 3.1 – SSH host key (`-hostkey`)
 - **Shuttle behaviour:** `-hostkey` pins the server key, as `SHA256:…`, WinSCP style `ssh-ed25519 255 SHA256:…`, or MD5. Without it, Shuttle trusts the first key it sees (stored in `known_hosts`) and refuses a later change. On Windows XP, WinSCP needs either `-hostkey` or a key accepted once in the WinSCP GUI.
 - **Files:** `main_app/models.py`, `main_app/forms.py`, a migration, `_get_build_config`
@@ -313,7 +315,9 @@ M7 ◄── Shuttle M8 (new transfer type `chemassistent`); needs M1 WP 1.1 (es
 1. **WP 1.1, existing records:** convert stored `\\` to `\` (a data migration), or keep the old meaning for old records?
    **Decided (2026-11-18): data migration.** Each stored value becomes what Shuttle actually received before (Go-decode of the old rendering); values that could never compile stay unchanged.
 2. **WP 3.3:** may every user set `-insecure`, or only staff?
+   **Decided (2026-11-18): every user**, with a clear warning in the form and the instance list.
 3. **WP 3.1:** require a host key for `win_i386` + SFTP, or only recommend it?
+   **Decided (2026-11-18): required** (unless `insecure` is set).
 4. **WP 4.1:** keep `C:\Program Files\Shuttle` and `/opt/Shuttle` (matching the start files), or change the start files to a new path?
 5. **WP 1.3:** render only `*.go` files (recommended), or keep rendering every file?
    **Decided (2026-11-18): render only `*.go` files that are not `_test.go`;** copy everything else unchanged.
@@ -323,6 +327,7 @@ M7 ◄── Shuttle M8 (new transfer type `chemassistent`); needs M1 WP 1.1 (es
 ## Cross-repo follow-ups (Shuttle)
 - go.mod `go 1.26` and the latest x/crypto, x/sys and pkg/sftp, after WP 2.1.
 - Resolve a relative `-crt` against the executable's folder (needed by WP 3.2).
+  **Decided (2026-11-18): Shuttle fix first.** ShuttleBuilder passes `crt="server.crt"` and bundles the file; M3 is deployed only after the Shuttle fix is merged and the `GitInstance` reloaded.
 - Once WP 1.3 is done: relax `dev/check_templates.py` to `.go` files.
 - The open manual Windows XP test of Shuttle M5.
 - Shuttle M8: the `chemassistent` transfer type, which ShuttleBuilder M7 needs.
