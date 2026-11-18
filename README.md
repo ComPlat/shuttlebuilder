@@ -91,6 +91,18 @@ This section explains how to install Shuttle. Following these instructions will 
       systemctl enable shuttle
       ```
 
+## Security options
+
+Each Shuttle instance has three optional settings that control how the server is verified:
+
+- **SSH host key** (SFTP only): the fingerprint of the server, either `SHA256:...` (optionally with the WinSCP prefix such as `ssh-ed25519 255 `) or `MD5:aa:bb:...`. Get it from WinSCP (*Session > Server/Protocol Information*) or with `ssh-keyscan -p <port> <host> | ssh-keygen -lf -`. It applies to both SFTP destinations (main and converter), so they must be the same server. **Required for Windows XP with SFTP**, unless verification is disabled.
+- **Server certificate** (WebDAV only): a PEM file for servers with a self-signed or private certificate. It is shipped as `server.crt` next to the executable, so the download becomes a zip file (`shuttle_<architecture>.zip`). On Windows XP it is the only way TLS is verified.
+- **Disable verification (insecure)**: switches off TLS and SSH host key verification. Any user can set it. The instance list marks such instances with a red "Verification disabled" badge; SFTP instances without host key show a "No host key" hint (the key is trusted on first use). Use it only for tests.
+
+## Shuttle version
+
+The git instance list shows the Shuttle version of each checkout (read after "Reload"). The Shuttle list shows the version each instance was last built with ("not built yet" otherwise); the tooltip of the download button names the version of the active git instance.
+
 ---
 
 ## Preprocess Scripts

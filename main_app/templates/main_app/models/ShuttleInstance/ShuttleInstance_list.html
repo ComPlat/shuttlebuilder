@@ -1,5 +1,7 @@
 {% load sdc_filter %}
 {% load i18n %}
+{% load shuttle_extras %}
+{% active_shuttle_version as active_version %}
 
 <div class="search-view-container">
     <sdc-search-view
@@ -26,14 +28,22 @@
     </tr>
     {% endif %}
     <tr>
-        <th class="item-row-name" scope="row">{{ instance.name }}</th>
+        <th class="item-row-name" scope="row">
+            {{ instance.name }}
+            {% if instance.insecure %}
+            <span class="badge text-bg-danger" data-toggle="tooltip" title="{% trans 'TLS and SSH host key verification are disabled. Use only for tests.' %}"><i class="bi bi-exclamation-triangle-fill"></i> {% trans 'Verification disabled' %}</span>
+            {% elif instance.transfer == 'sftp' and not instance.host_key %}
+            <span class="badge text-bg-info" data-toggle="tooltip" title="{% trans 'No SSH host key is pinned: the key of the server is trusted on first use.' %}"><i class="bi bi-info-circle"></i> {% trans 'No host key' %}</span>
+            {% endif %}
+        </th>
         <td>{{ instance.get_shuttle_type_display }}</td>
         <td>{{ instance.get_transfer_display }}</td>
         <td>{{ instance.get_architecture_display }}</td>
         <td>
-            <a target="_blank" href="{% url 'scd_view_shuttle_download' pk=instance.pk %}" class="btn btn-info" data-toggle="tooltip" data-placement="left" title="{% trans 'Download Executable!' %}">
+            <a target="_blank" href="{% url 'scd_view_shuttle_download' pk=instance.pk %}" class="btn btn-info" data-toggle="tooltip" data-placement="left" title="{% if active_version %}{% blocktrans %}Downloads build Shuttle {{ active_version }}{% endblocktrans %}{% else %}{% trans 'Download Executable!' %}{% endif %}">
                 <i class="bi bi-download"></i>
             </a>
+            <small class="text-muted built-version">{% if instance.built_version %}Shuttle {{ instance.built_version }}{% else %}{% trans 'not built yet' %}{% endif %}</small>
             <a class="btn btn-dark navigation-links" href="/~*~shuttle-instance-edit&pk={{instance.pk}}">
                 <i class="bi bi-wrench-adjustable-circle"></i>
             </a>

@@ -9,6 +9,7 @@ import * as regexpTree from 'regexp-tree'
  * - With `pk`: there is no save button; changes are stored by the model form directly.
  * - The `common_name_parts` field is only shown for type `flat_tar`; it has a test input that shows the regex match and structure.
  * - The BagIt fields (`dst_bagit`, `user_bagit`, `passwort_bagit`, `profile`, `public_link`) are only shown when `with_converter` is checked.
+ * - `host_key` is only shown for SFTP and `cert` only for WebDAV; `insecure` always shows a red warning (translated notes come from the template).
  * - Shows the active git repo; if none is linked the form is not shown. Requires login.
  */
 class ShuttleInstanceEditController extends AbstractSDC {
@@ -33,7 +34,9 @@ class ShuttleInstanceEditController extends AbstractSDC {
     this.events.unshift({
       'input': {
         '#id_shuttle_type': this.onTypeChange,
-        '#id_with_converter': this.onConverterChange
+        '#id_with_converter': this.onConverterChange,
+        '#id_transfer': this.onTransferChange,
+        '#id_insecure': this.onInsecureChange
       }
     });
   }
@@ -80,6 +83,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
     if ($withConverter.length > 0) {
       this.onConverterChange($withConverter, null, true);
     }
+    this._updateOptionFields(true);
     return super.onRefresh();
   }
 
@@ -243,6 +247,49 @@ class ShuttleInstanceEditController extends AbstractSDC {
     }
   }
 
+  onTransferChange($dom, ev, fast) {
+    this._updateOptionFields(fast);
+  }
+
+  onInsecureChange($dom, ev, fast) {
+    this._updateOptionFields(fast);
+  }
+
+  /**
+   * Show `host_key` only for SFTP, `cert` only for WebDAV and attach the notes/warning (hidden in the template) to the fields.
+   */
+  _updateOptionFields(fast) {
+    const dur = fast ? 0 : 300;
+    const attach = (field, note) => {
+      const $field = this.find(`.id_${field}`);
+      const $note = this.find(`.option-note.${note}`);
+      if ($field.length > 0 && $note.length > 0 && $field.find(`.option-note.${note}`).length === 0) {
+        $field.append($note);
+      }
+    };
+    attach('host_key', 'note-host-key');
+    attach('cert', 'note-cert');
+    attach('insecure', 'note-insecure');
+
+    const $transfer = this.find('#id_transfer');
+    if ($transfer.length > 0) {
+      const sftp = $transfer.val() === 'sftp';
+      if (sftp) {
+        this.find('.id_host_key').show(dur);
+        this.find('.id_cert').hide(dur);
+      } else {
+        this.find('.id_host_key').hide(dur);
+        this.find('.id_cert').show(dur);
+      }
+    }
+    const $insecure = this.find('#id_insecure');
+    if ($insecure.length > 0) {
+      const checked = $insecure[0].checked;
+      this.find('.option-note.note-insecure').toggleClass('fw-bold', checked);
+      this.find('.id_insecure label').toggleClass('text-danger', checked);
+    }
+  }
+
   onConverterChange($dom, ev, fast) {
     const convFields = ['dst_bagit', 'passwort_bagit', 'user_bagit', 'profile', 'public_link'];
     const dur = fast ? 0 : 600;
@@ -286,6 +333,7 @@ class ShuttleInstanceEditController extends AbstractSDC {
       });
       this.model.syncModelToForm();
     }
+    this._updateOptionFields(true);
 
   }
 

@@ -1,4 +1,5 @@
 {% load sdc_filter %}
+{% load i18n %}
 
 <div class="search-view-container">
     <sdc-search-view
@@ -20,6 +21,7 @@
         <th>Identifier</th>
         <th>Url</th>
         <th>Branch</th>
+        <th>{% trans 'Shuttle version' %}</th>
         <th>Control</th>
     </tr>
     {% endif %}
@@ -36,6 +38,9 @@
         </td>
         <td>
             {{instance.branch}}
+        </td>
+        <td>
+            {% if instance.shuttle_version %}{{ instance.shuttle_version }}{% else %}-{% endif %}
         </td>
         <td>
             {% if not instance.is_active %}

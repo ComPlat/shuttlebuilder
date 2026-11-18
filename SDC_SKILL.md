@@ -387,3 +387,10 @@ Fields: `id` (BigAutoField), `last_login` (DateTimeField), `is_superuser` (Boole
 - `/~shuttle-instance-list~shuttle-instance-edit~sdc-login~&3.next=~shuttle-instance-list~shuttle-instance-edit`: 403 Not allowed!
 - `/~shuttle-instance-list~sdc-password-forgotten~sdc-login~&3.next=~shuttle-instance-list`: SDC Model (ShuttleInstance, 0) Socket closed unexpectedly
 - `/~shuttle-instance-list~shuttle-instance-edit~sdc-login~&3.next=~shuttle-instance-list~shuttle-instance-edit`: SDC Model (ShuttleInstance, 0) Socket closed unexpectedly
+
+
+## Shuttle 1.13 options (M3)
+
+- `ShuttleInstance` has `host_key` (SFTP only; SHA256/MD5 fingerprint; required for Windows XP + SFTP unless `insecure`), `cert` (WebDAV only; PEM; delivered as `server.crt`, so `ShuttleDownload` returns a zip `shuttle_<arch>.zip`) and `insecure` (disables TLS and SSH host key verification; allowed for every user), plus `built_version` (Shuttle version of the last build). `GitInstance.shuttle_version` is read from `main.go` after a reload.
+- `shuttle-instance-edit` hides `host_key` for WebDAV and `cert` for SFTP (`#id_transfer` input handler) and shows a red warning next to `insecure`; the translated notes live in `shuttle_instance_edit.html` and are moved next to the fields by the controller.
+- `shuttle-instance-list` rows show a "Verification disabled" badge (`insecure`) or a "No host key" badge (SFTP without host key), the built version next to the download button and the active Shuttle version in its tooltip (template tag `active_shuttle_version`). `git-instance-list` has a "Shuttle version" column.

@@ -93,6 +93,19 @@
             </ul>
         </li>
     </ol>
+    <h3>Security options</h3>
+    <ul>
+        <li><b>SSH host key</b> (SFTP only): fingerprint of the server (<code>SHA256:...</code> or <code>MD5:aa:bb:...</code>),
+            e.g. from WinSCP (Session, Server/Protocol Information) or <code>ssh-keyscan -p &lt;port&gt; &lt;host&gt; | ssh-keygen -lf -</code>.
+            It is <b>required for Windows XP with SFTP</b> and applies to both SFTP destinations.</li>
+        <li><b>Server certificate</b> (WebDAV only): PEM file for self-signed servers. It is delivered as
+            <b>server.crt</b> inside a zip file next to the executable.</li>
+        <li><b>Disable verification (insecure)</b>: turns off TLS and SSH host key verification. Only for tests; such
+            instances are marked in the Shuttle list.</li>
+    </ul>
+    <h3>Shuttle version</h3>
+    <p>The Git list shows the Shuttle version of every repository. The Shuttle list shows the version each instance was
+        built with; the tooltip of the download button shows the version of the active repository.</p>
     <div class="alert alert-warning">
         <ul>
             <li>Make sure the task scheduler is pointing to the correct executable file in the correct location</li>
