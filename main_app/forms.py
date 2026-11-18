@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from cryptography import x509
 
-from main_app.validators import validate_host_key, validate_destination, destination_host_port
+from main_app.validators import validate_host_key, validate_destination, destination_host_port, LINUX_USER_RE
 
 from main_app.models import ShuttleInstance
 from main_app.models import GitInstance
@@ -80,7 +80,7 @@ class ShuttleInstanceForm(ModelForm):
 
     def clean_linux_user(self):
         val = (self.cleaned_data.get('linux_user') or '').strip()
-        if val and not re.match(r'^[a-z_][a-z0-9_-]{0,31}$', val):
+        if val and not LINUX_USER_RE.match(val):
             raise ValidationError(_('The Linux user must start with a lowercase letter or underscore and contain only lowercase letters, digits, "_" and "-" (max. 32 characters).'))
         return val
 

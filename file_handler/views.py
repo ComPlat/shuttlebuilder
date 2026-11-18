@@ -7,6 +7,8 @@ from django.views import View
 from django.utils.encoding import smart_str
 import datetime
 
+from main_app.validators import LINUX_USER_RE
+
 
 # Create your views here.
 
@@ -53,7 +55,6 @@ RestartSec=10
 WantedBy=multi-user.target
 """
 
-LINUX_USER_RE = re.compile(r'^[a-z_][a-z0-9_-]{0,31}$')
 CONTROL_RE = re.compile(r'[\x00-\x1f\x7f-\x9f\u2028\u2029]')
 
 
