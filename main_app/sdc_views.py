@@ -1,6 +1,7 @@
 import logging
 import os
 import uuid
+import tempfile
 import zipfile
 
 from django.conf import settings
@@ -68,6 +69,62 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
             body += '<pre>%s</pre>' % escape(detail)
         return HttpResponseServerError(body)
 
+    @staticmethod
+    def _zip_name(instance):
+        if instance.architecture == 'win_i386' and instance.transfer == 'sftp':
+            return 'shuttle_sftp_winxp.zip'
+        if instance.with_converter:
+            return 'shuttle_with_converter.zip'
+        return 'shuttle_%s.zip' % instance.architecture
+
+    @staticmethod
+    def _cert_bytes(instance):
+        """Bytes of the server certificate if it applies (WebDAV only), else None."""
+        if not instance.cert or instance.transfer != 'webdav':
+            return None
+        instance.cert.open('rb')
+        try:
+            return instance.cert.read()
+        finally:
+            instance.cert.close()
+
+    def _zip_response(self, instance, file_location, zip_name):
+        """Pack the executable with everything that has to ship next to it into a temporary zip."""
+        static_files = os.path.join(settings.STATIC_ROOT, 'files')
+        cert = self._cert_bytes(instance)
+        tmp = tempfile.NamedTemporaryFile(prefix='shuttle_', suffix='.zip', delete=False,
+                                          dir=os.path.dirname(file_location))
+        tmp.close()
+        try:
+            with zipfile.ZipFile(tmp.name, 'w') as zf:
+                if zip_name == 'shuttle_sftp_winxp.zip':
+                    zf.write(file_location, 'shuttle.exe')
+                    zf.write(os.path.join(static_files, 'license.txt'), 'license.txt')
+                    zf.write(os.path.join(static_files, 'WinSCP.com'), 'WinSCP.com')
+                    zf.write(os.path.join(static_files, 'WinSCP.exe'), 'WinSCP.exe')
+                else:
+                    zf.write(file_location, os.path.basename(file_location))
+                    if instance.with_converter:
+                        if instance.architecture == 'win_64':
+                            zf.write(os.path.join(static_files, 'ChemConverterApp.exe'), 'ChemConverterApp.exe')
+                        else:
+                            zf.write(os.path.join(static_files, 'ChemConverterApp'), 'ChemConverterApp')
+                        instance.profile.open('r')
+                        zf.writestr(instance.profile.name, instance.profile.read())
+                        instance.profile.close()
+                if cert is not None:
+                    zf.writestr('server.crt', cert)
+            with open(tmp.name, 'rb') as f:
+                file_data = f.read()
+        finally:
+            try:
+                os.remove(tmp.name)
+            except OSError:
+                pass
+        response = HttpResponse(file_data, content_type='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % zip_name
+        return response
+
     def get(self, request, pk, *args, **kwargs):
         if request.user.is_staff or request.user.is_superuser:
             filter_set = dict(pk=pk)
@@ -83,35 +140,9 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
                     file_data = f.read()
                     response = HttpResponse(file_data, content_type='application/octet-stream')
                     response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(file_location)
-            elif instance.architecture == 'win_i386':
-                zip_path = os.path.join(os.path.dirname(file_location), "shuttle_sftp_winxp.zip")
-                zf = zipfile.ZipFile(zip_path, "w")
-                zf.write(file_location, 'shuttle.exe')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'files/license.txt'), 'license.txt')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'files/WinSCP.com'), 'WinSCP.com')
-                zf.write(os.path.join(settings.STATIC_ROOT, 'files/WinSCP.exe'), 'WinSCP.exe')
-                zf.close()
-                with open(zip_path, 'rb') as f:
-                    file_data = f.read()
-                    response = HttpResponse(file_data, content_type='application/octet-stream')
-                    response['Content-Disposition'] = 'attachment; filename="shuttle_sftp_winxp.zip"'
             else:
-                zip_path = os.path.join(os.path.dirname(file_location), "shuttle.zip")
-                with zipfile.ZipFile(zip_path, "w") as zf:
-                    zf.write(file_location, os.path.basename(file_location))
-                    if instance.architecture == 'win_64':
-                        zf.write(os.path.join(settings.STATIC_ROOT, 'files/ChemConverterApp.exe'), 'ChemConverterApp.exe')
-                    else:
-                        zf.write(os.path.join(settings.STATIC_ROOT, 'files/ChemConverterApp'), 'ChemConverterApp')
-                    instance.profile.open('r')
-                    zf.writestr(instance.profile.name, instance.profile.read())
-                    instance.profile.close()
-
-                with open(zip_path, 'rb') as f:
-                    file_data = f.read()
-                    response = HttpResponse(file_data, content_type='application/octet-stream')
-                    response['Content-Disposition'] = 'attachment; filename="shuttle_with_converter.zip"'
-
+                zip_name = self._zip_name(instance)
+                response = self._zip_response(instance, file_location, zip_name)
 
         except BuildError as e:
             response = self._error_response(e.public_message, e.reference, e.detail if is_staff else "")

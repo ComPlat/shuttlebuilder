@@ -1,7 +1,16 @@
+{% load i18n %}
 <div class="container">
     <h2 class="page-header"><this.form_header></this.form_header></h2>
     {% if gitInstance != None %}
     <p>Git: {{ gitInstance }}</p>
+    <div class="d-none">
+        <div class="option-note note-host-key text-muted small">{% trans 'SFTP only. Required for Windows XP unless verification is disabled.' %}</div>
+        <div class="option-note note-cert text-muted small">{% trans 'WebDAV only. Shipped as server.crt next to the executable.' %}</div>
+        <div class="option-note note-insecure small text-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {% trans 'Warning: this disables the verification of the TLS certificate and of the SSH host key. Data and credentials can be intercepted. Use only for tests.' %}
+        </div>
+    </div>
     <form >
         <div class="form-container"></div>
         <this.form_btn></this.form_btn>
