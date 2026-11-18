@@ -9,7 +9,7 @@ from django.utils.translation import gettext as _
 _SHA256 = re.compile(r'^(?:\S+ \d+ )?SHA256:[A-Za-z0-9+/]{43}=?$')
 _MD5 = re.compile(r'^(?:MD5:)?[0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){15}$')
 # Linux user names accepted for the systemd unit (User=); shared by the form and the unit renderer.
-LINUX_USER_RE = re.compile(r'^[a-z_][a-z0-9_-]{0,31}$')
+LINUX_USER_RE = re.compile(r'^[a-z_][a-z0-9_-]{0,31}\Z')
 
 
 def validate_host_key(value):

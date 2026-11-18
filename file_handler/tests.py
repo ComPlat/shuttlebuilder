@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from file_handler.views import render_unit
 from main_app.models import ShuttleInstance
 
 
@@ -62,6 +63,14 @@ class InstanceUnitTest(TestCase):
         body = self.get(self.make(linux_user='x\nExecStart=/bin/evil'), self.owner).content.decode()
         self.assertNotIn('evil', body)
         self.assertIn('User=CHANGE_ME', body)
+
+    def test_user_with_trailing_newline_not_written(self):
+        # "$" would also match before a final newline; a value saved outside the form must not reach User=
+        for bad in ("root\n", "root\nExecStartPre=/bin/sh"):
+            text = render_unit("Shuttle (x)", bad).decode()
+            self.assertIn("User=CHANGE_ME", text)
+            self.assertNotIn("User=root", text)
+            self.assertNotIn("ExecStartPre", text)
 
     def test_name_control_chars_stripped(self):
         body = self.get(self.make(name='a\nExecStart=/bin/x\r\x00b'), self.owner).content.decode()
