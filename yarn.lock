@@ -4681,16 +4681,17 @@ schema-utils@^4.6.0, schema-utils@^4.8.1:
     ajv-formats "^3.0.1"
     ajv-keywords "^5.1.0"
 
-sdc_client@0.160.0:
-  version "0.160.0"
-  resolved "https://registry.yarnpkg.com/sdc_client/-/sdc_client-0.160.0.tgz#fd32387d15c2644fc3f5c92f96f008c54e2da42b"
-  integrity sha512-J88b0R7hO0rS0xQI0kykQwhL4Fgm25X65aeUMyVpmyyfEB+ntpDVS3SELnEZyjSHg7Dwylbe3+qq1oalwkRLZQ==
+sdc_client@0.166.0:
+  version "0.166.0"
+  resolved "https://registry.yarnpkg.com/sdc_client/-/sdc_client-0.166.0.tgz#a1afbf8966772f49f2bf67cb58d6bf9ae0da43ca"
+  integrity sha512-WBRXEVIIZ41B8uVXn5KvghxQh+5DvtXyr33mGtTGthgflTLsRdD2ARV8QOP3+/b9tCjEsYX2ADrNWESUMVgpvg==
   dependencies:
     dotenv "^16.4.7"
     gulp-exec "^5.0.0"
     gulp-sass "^6.0.1"
     js-cookie "^3.0.8"
     sass "^1.85.1"
+    semver "^7.7.0"
     through2 "^4.0.2"
 
 semver-greatest-satisfied-range@^2.0.0:
@@ -4719,6 +4720,11 @@ semver@^7.6.3:
   version "7.7.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.3.tgz#4b5f4143d007633a8dc671cd0a6ef9147b8bb946"
   integrity sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==
+
+semver@^7.7.0:
+  version "7.8.6"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.8.6.tgz#67c0cda133a3ceb6f70b803e67625bf969000424"
+  integrity sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==
 
 serialize-javascript@^6.0.2:
   version "6.0.2"

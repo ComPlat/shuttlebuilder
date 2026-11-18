@@ -14,14 +14,14 @@ files = [
 
 [[package]]
 name = "anthropic"
-version = "2.4.0"
+version = "2.10.0"
 description = "The official Python library for the anthropic API"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "anthropic-2.4.0-py3-none-any.whl", hash = "sha256:db2e691364ae2e04083ed9b8deb49f1a6967e9f184f8cbb5afcb3bcda8ab0532"},
-    {file = "anthropic-2.4.0.tar.gz", hash = "sha256:c59cab76049cf581e90e2ee3a20472291029b7a6a1ee2ef32bff2b2a7010fd47"},
+    {file = "anthropic-2.10.0-py3-none-any.whl", hash = "sha256:1b91b2b4aa2bab44db8712e8a9053454bcff6daa3e6f5f11d85dc38b37d0a2a3"},
+    {file = "anthropic-2.10.0.tar.gz", hash = "sha256:6f3ffbdc6eb0a09a197be2eabdc62b8395a13d692710b8cdfa0393a80b355585"},
 ]
 
 [package.dependencies]
@@ -2419,14 +2419,14 @@ idna = ["idna"]
 
 [[package]]
 name = "simpledomcontrol"
-version = "0.160.0"
+version = "0.166.0"
 description = "Simple DOM control -> a django MVC framework"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "simpledomcontrol-0.160.0-py3-none-any.whl", hash = "sha256:37457252b9d4be55d580371c73b43ba3a4d43fbd02484dd421f75cc693eabd3b"},
-    {file = "simpledomcontrol-0.160.0.tar.gz", hash = "sha256:a847f2c774fe53cd8b17ae9e7ddbd2452d9f43854f9b6e3ece72d7b04818146b"},
+    {file = "simpledomcontrol-0.166.0-py3-none-any.whl", hash = "sha256:44ed438e978748896e29ab766a95208cab872349098f466848dad75b941c8de8"},
+    {file = "simpledomcontrol-0.166.0.tar.gz", hash = "sha256:44f6ab76d2db76750b02642e915235556768bde9f49e7c3fbeb04cb8047ae421"},
 ]
 
 [package.dependencies]
@@ -3002,4 +3002,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "993024dade0a20838b0cecc282841889caa9355739a14ac9f0e98852186f80b1"
+content-hash = "d640e43a755eda2f21e67110198c7e11032cba46cfe1d3a333901dc76512cc5f"
