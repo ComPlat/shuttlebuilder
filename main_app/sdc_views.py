@@ -1,13 +1,20 @@
+import logging
 import os
+import uuid
 import zipfile
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
 from sdc_core.sdc_extentions.views import SDCView, SdcLoginRequiredMixin
 from django.shortcuts import render
-from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
+from django.utils.html import escape
+from django.utils.translation import gettext as _
 
+from main_app.build import BuildError
 from main_app.models import GitInstance, ShuttleInstance, ElnConnection
+
+logger = logging.getLogger("main_app.build")
 
 
 class BasicInfo(SDCView):
@@ -52,13 +59,23 @@ class ShuttleInstanceEdit(SdcLoginRequiredMixin, SDCView):
 class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
     raise_exception = True
 
+    @staticmethod
+    def _error_response(message, reference, detail):
+        body = '<h1>%s</h1>' % escape(message)
+        if reference:
+            body += '<p>%s %s</p>' % (escape(_('Reference:')), escape(reference))
+        if detail:
+            body += '<pre>%s</pre>' % escape(detail)
+        return HttpResponseServerError(body)
+
     def get(self, request, pk, *args, **kwargs):
         if request.user.is_staff or request.user.is_superuser:
             filter_set = dict(pk=pk)
         else:
             filter_set = dict(pk=pk, owner=request.user)
 
-        instance = ShuttleInstance.objects.get(**filter_set)
+        instance = get_object_or_404(ShuttleInstance, **filter_set)
+        is_staff = request.user.is_staff or request.user.is_superuser
         try:
             file_location = instance.build()
             if instance.only_exe():
@@ -96,12 +113,16 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
                     response['Content-Disposition'] = 'attachment; filename="shuttle_with_converter.zip"'
 
 
-        except IOError as e:
+        except BuildError as e:
+            response = self._error_response(e.public_message, e.reference, e.detail if is_staff else "")
+        except IOError:
             # handle file not exist case here
-            response = HttpResponseNotFound('<h1>File not exist</h1>')
-        except Exception as e:
-            response = HttpResponseServerError(
-                '<h1>%s</h1>' % _('There was en compilation error. Maybe you have used \\ in the src instead of \\\\.'))
+            response = HttpResponseNotFound('<h1>%s</h1>' % escape(_('File not found')))
+        except Exception:
+            reference = uuid.uuid4().hex[:8]
+            logger.exception("Download of Shuttle instance %s failed unexpectedly (reference %s)",
+                             instance.name, reference)
+            response = self._error_response(_("Building the Shuttle failed."), reference, "")
 
         return response
 
