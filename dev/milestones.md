@@ -33,6 +33,8 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M1 – Correct builds (bugs that affect every lab today)
 
+**Status:** in progress
+
 ### WP 1.1 – Build values are HTML-escaped into the binary
 - **Bug (verified):** `build()` renders with `django.template.Template`, where **autoescape is on** (default `TEMPLATES` in `base_settings.py`). A password `a&b<c>` is compiled in as `a&amp;b&lt;c&gt;`, and `it's` becomes `it&#x27;s`. The same happens to `src` paths (`C:\Data & Results`), URLs with `&`, and regexes with `<`/`>`. Those labs fail to log in or watch a folder that doesn't exist.
 - **Files:** `main_app/models.py` (`_get_build_config`, `build`)
@@ -306,10 +308,12 @@ M7 ◄── Shuttle M8 (new transfer type `chemassistent`); needs M1 WP 1.1 (es
 
 ## Owner decisions needed
 1. **WP 1.1, existing records:** convert stored `\\` to `\` (a data migration), or keep the old meaning for old records?
+   **Decided (2026-11-18): data migration.** Each stored value becomes what Shuttle actually received before (Go-decode of the old rendering); values that could never compile stay unchanged.
 2. **WP 3.3:** may every user set `-insecure`, or only staff?
 3. **WP 3.1:** require a host key for `win_i386` + SFTP, or only recommend it?
 4. **WP 4.1:** keep `C:\Program Files\Shuttle` and `/opt/Shuttle` (matching the start files), or change the start files to a new path?
 5. **WP 1.3:** render only `*.go` files (recommended), or keep rendering every file?
+   **Decided (2026-11-18): render only `*.go` files that are not `_test.go`;** copy everything else unchanged.
 
 6. **M7:** inherits the decisions of Shuttle M8 (type name, token flag, `-dst` form, folder mode, preconvert).
 
