@@ -152,7 +152,7 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M4 – Packaging and install files
 
-**Status:** in progress
+**Status:** done (#5)
 
 ### WP 4.1 – Install paths don't match the start files
 - **Bug:**
