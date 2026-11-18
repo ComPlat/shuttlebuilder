@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DJANGO_DATABASE: jest
+      COPY_DEFAULT_DB: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install Python dependencies
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install --no-root --no-interaction
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: yarn
+
+      - name: Install JavaScript dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Django checks
+        run: |
+          poetry run python manage.py check
+          poetry run python manage.py makemigrations --check --dry-run
+
+      - name: Python tests
+        run: poetry run python manage.py test main_app file_handler
+
+      - name: SDC links and frontend build
+        run: |
+          poetry run python manage.py sdc_update_links
+          npm run build
+
+      - name: JavaScript tests (jest)
+        run: npm run sdc_test

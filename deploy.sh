@@ -14,6 +14,12 @@ ARCHIVE="deploy_$(date +%Y%m%d_%H%M%S).tar.gz"
 echo "==> Building image..."
 docker build -t ${IMAGE} .
 
+echo "==> Smoke build (all architectures) against the new image..."
+if ! dev/smoke_build.sh "${IMAGE}"; then
+    echo "Smoke build FAILED: the image is not deployed." >&2
+    exit 1
+fi
+
 echo "==> Saving image..."
 docker save ${IMAGE} | gzip > "${ARCHIVE}"
 
