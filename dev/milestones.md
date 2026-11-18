@@ -160,21 +160,21 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
   - On Linux, `shuttle.service` starts `/opt/Shuttle/shuttle`, but the docs say `/opt/file_exporter`.
   - Labs that follow the docs end up with a Shuttle that never starts.
 - **Tasks:**
-  - [ ] One path per OS. Proposal: `C:\Program Files\Shuttle` and `/opt/Shuttle`, matching the existing start files, so installed labs keep working.
-  - [ ] Fix the README, `basic_info.html` and the WinXP steps to match.
+  - [x] One path per OS. Proposal: `C:\Program Files\Shuttle` and `/opt/Shuttle`, matching the existing start files, so installed labs keep working.
+  - [x] Fix the README, `basic_info.html` and the WinXP steps to match.
 
 ### WP 4.2 – systemd unit
 - **Tasks:**
-  - [ ] `After=network-online.target` plus `Wants=network-online.target`. Shuttle 1.13 tolerates a missing network, but this avoids noise.
-  - [ ] `RestartSec=10`. Shuttle 1.13 exits on configuration errors (for example a missing converter or an unreadable scripts folder), and with `RestartSec=1` plus `StartLimitIntervalSec=0` it restarts every second forever.
-  - [ ] Replace `User=!!!!` with a generated file per instance, with the user taken from a form field, or at least a clear `User=CHANGE_ME` plus a comment.
-  - [ ] `Description=Shuttle (<instance name>)`; Shuttle stops cleanly on SIGTERM (the default `KillSignal`).
+  - [x] `After=network-online.target` plus `Wants=network-online.target`. Shuttle 1.13 tolerates a missing network, but this avoids noise.
+  - [x] `RestartSec=10`. Shuttle 1.13 exits on configuration errors (for example a missing converter or an unreadable scripts folder), and with `RestartSec=1` plus `StartLimitIntervalSec=0` it restarts every second forever.
+  - [x] Replace `User=!!!!` with a generated file per instance, with the user taken from a form field, or at least a clear `User=CHANGE_ME` plus a comment.
+  - [x] `Description=Shuttle (<instance name>)`; Shuttle stops cleanly on SIGTERM (the default `KillSignal`).
 
 ### WP 4.3 – Download view robustness
 - **Tasks:**
-  - [ ] The `win_i386` branch assumes "SFTP without converter". It would silently drop the converter and profile if one were set. The form forbids that, but `build()`/the download should check `architecture`/`with_converter` again (admin and API can bypass the form).
-  - [ ] Build zips in a temp file instead of a fixed name in the build folder, so concurrent downloads don't clash (see WP 1.5).
-  - [ ] Optional: add a short `INSTALL.txt` to every zip (paths from WP 4.1, where logs and the sent register live).
+  - [x] The `win_i386` branch assumes "SFTP without converter". It would silently drop the converter and profile if one were set. The form forbids that, but `build()`/the download should check `architecture`/`with_converter` again (admin and API can bypass the form).
+  - [x] Build zips in a temp file instead of a fixed name in the build folder, so concurrent downloads don't clash (see WP 1.5).
+  - [x] Optional: add a short `INSTALL.txt` to every zip (paths from WP 4.1, where logs and the sent register live).
 
 ---
 
