@@ -81,6 +81,19 @@ export default class GitInstance extends SdcModel {
         "related_model": null,
         "remote_field": null,
         "reverse_relation": false
+      },
+      "shuttle_version": {
+        "type": "CharField",
+        "required": false,
+        "max_length": 20,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false
       }
     }
 
@@ -93,6 +106,7 @@ export default class GitInstance extends SdcModel {
     this._branch = null;
     this._is_active = null;
     this._last_reload = null;
+    this._shuttle_version = null;
     this.setValues(data || {});
   }
 
@@ -115,6 +129,9 @@ export default class GitInstance extends SdcModel {
     } catch {} 
     try {
       this.last_reload = data.last_reload ?? null;
+    } catch {} 
+    try {
+      this.shuttle_version = data.shuttle_version ?? null;
     } catch {} 
   }
 
@@ -146,6 +163,11 @@ export default class GitInstance extends SdcModel {
   set last_reload(value){
     this.setlast_reload(value);
     this._updateForm('last_reload');
+  }
+
+  set shuttle_version(value){
+    this.setshuttle_version(value);
+    this._updateForm('shuttle_version');
   }
 
 
@@ -180,6 +202,11 @@ export default class GitInstance extends SdcModel {
     this._last_reload = this.parseValue(value, GitInstance.fields.last_reload);
   }
 
+  setshuttle_version(value){
+    this.validate(value, GitInstance.fields.shuttle_version);
+    this._shuttle_version = this.parseValue(value, GitInstance.fields.shuttle_version);
+  }
+
 
   get id(){
     return this._id;
@@ -203,6 +230,10 @@ export default class GitInstance extends SdcModel {
 
   get last_reload(){
     return this._last_reload;
+  }
+
+  get shuttle_version(){
+    return this._shuttle_version;
   }
 
 }

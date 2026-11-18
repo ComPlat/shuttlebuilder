@@ -44,3 +44,4 @@ __pycache__/
 /test_db.sqlite3
 # Milestone design docs and round reports (dev/milestones.md stays tracked)
 /dev/m*/
+/.sdc_agent/

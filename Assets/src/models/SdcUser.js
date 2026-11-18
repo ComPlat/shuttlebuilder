@@ -17,6 +17,19 @@ export default class SdcUser extends SdcModel {
         "remote_field": "user",
         "reverse_relation": true
       },
+      "sdc_api_tokens": {
+        "type": "ForeignKey",
+        "required": false,
+        "max_length": null,
+        "is_relation": true,
+        "many_to_many": false,
+        "one_to_many": true,
+        "many_to_one": false,
+        "one_to_one": false,
+        "related_model": "ApiToken",
+        "remote_field": "user",
+        "reverse_relation": true
+      },
       "elnuser": {
         "type": "OneToOneField",
         "required": false,
@@ -219,6 +232,8 @@ export default class SdcUser extends SdcModel {
     this._toManyFields = [];
     this._logentry_set = new SdcQuerySet('LogEntry', { user: this.id });
     this._toManyFields.push([this._logentry_set, 'user']);
+    this._sdc_api_tokens = new SdcQuerySet('ApiToken', { user: this.id });
+    this._toManyFields.push([this._sdc_api_tokens, 'user']);
     this._elnuser = new SdcQuerySet('ElnUser', { user: this.id });
     this._toManyFields.push([this._elnuser, 'user']);
     this._shuttleinstance_set = new SdcQuerySet('ShuttleInstance', { owner: this.id });
@@ -246,6 +261,10 @@ export default class SdcUser extends SdcModel {
     try {
     this.logentry_set.setFilter({ user:  data.id });
     this.logentry_set = data.logentry_set || [];
+    } catch {} 
+    try {
+    this.sdc_api_tokens.setFilter({ user:  data.id });
+    this.sdc_api_tokens = data.sdc_api_tokens || [];
     } catch {} 
     try {
     this.elnuser.setFilter({ user:  data.id });
@@ -301,6 +320,11 @@ export default class SdcUser extends SdcModel {
   set logentry_set(value){
     this.setlogentry_set(value);
     this._updateForm('logentry_set');
+  }
+
+  set sdc_api_tokens(value){
+    this.setsdc_api_tokens(value);
+    this._updateForm('sdc_api_tokens');
   }
 
   set elnuser(value){
@@ -384,6 +408,11 @@ export default class SdcUser extends SdcModel {
     this._logentry_set.setIds(this.parseValue(value, SdcUser.fields.logentry_set));
   }
 
+  setsdc_api_tokens(value){
+    this.validate(value, SdcUser.fields.sdc_api_tokens);
+    this._sdc_api_tokens.setIds(this.parseValue(value, SdcUser.fields.sdc_api_tokens));
+  }
+
   setelnuser(value){
     this.validate(value, SdcUser.fields.elnuser);
     this._elnuser.setIds(this.parseValue(value, SdcUser.fields.elnuser));
@@ -463,6 +492,10 @@ export default class SdcUser extends SdcModel {
 
   get logentry_set(){
     return this._logentry_set;
+  }
+
+  get sdc_api_tokens(){
+    return this._sdc_api_tokens;
   }
 
   get elnuser(){

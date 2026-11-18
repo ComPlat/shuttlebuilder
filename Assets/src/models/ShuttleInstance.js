@@ -134,6 +134,47 @@ export default class ShuttleInstance extends SdcModel {
         "remote_field": null,
         "reverse_relation": false
       },
+      "host_key": {
+        "type": "CharField",
+        "required": false,
+        "max_length": 255,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false
+      },
+      "cert": {
+        "type": "FileField",
+        "required": false,
+        "max_length": 100,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false,
+        "max_size": 5368709120,
+        "allowed_types": null
+      },
+      "insecure": {
+        "type": "BooleanField",
+        "required": true,
+        "max_length": null,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false
+      },
       "architecture": {
         "type": "CharField",
         "required": true,
@@ -253,6 +294,19 @@ export default class ShuttleInstance extends SdcModel {
         "remote_field": null,
         "reverse_relation": false
       },
+      "built_version": {
+        "type": "CharField",
+        "required": false,
+        "max_length": 20,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false
+      },
       "owner": {
         "type": "ForeignKey",
         "required": false,
@@ -281,6 +335,9 @@ export default class ShuttleInstance extends SdcModel {
     this._shuttle_type = null;
     this._common_name_parts = null;
     this._duration = null;
+    this._host_key = null;
+    this._cert = null;
+    this._insecure = null;
     this._architecture = null;
     this._with_converter = null;
     this._user_bagit = null;
@@ -290,6 +347,7 @@ export default class ShuttleInstance extends SdcModel {
     this._profile = null;
     this._last_update = null;
     this._last_build = null;
+    this._built_version = null;
     this._owner = new SdcQuerySet('SdcUser');
     this.setValues(data || {});
   }
@@ -327,6 +385,15 @@ export default class ShuttleInstance extends SdcModel {
       this.duration = data.duration ?? null;
     } catch {} 
     try {
+      this.host_key = data.host_key ?? null;
+    } catch {} 
+    try {
+      this.cert = data.cert ?? null;
+    } catch {} 
+    try {
+      this.insecure = data.insecure ?? null;
+    } catch {} 
+    try {
       this.architecture = data.architecture ?? null;
     } catch {} 
     try {
@@ -352,6 +419,9 @@ export default class ShuttleInstance extends SdcModel {
     } catch {} 
     try {
       this.last_build = data.last_build ?? null;
+    } catch {} 
+    try {
+      this.built_version = data.built_version ?? null;
     } catch {} 
     try {
       if (data.owner) { this.owner = data.owner; }
@@ -408,6 +478,21 @@ export default class ShuttleInstance extends SdcModel {
     this._updateForm('duration');
   }
 
+  set host_key(value){
+    this.sethost_key(value);
+    this._updateForm('host_key');
+  }
+
+  set cert(value){
+    this.setcert(value);
+    this._updateForm('cert');
+  }
+
+  set insecure(value){
+    this.setinsecure(value);
+    this._updateForm('insecure');
+  }
+
   set architecture(value){
     this.setarchitecture(value);
     this._updateForm('architecture');
@@ -451,6 +536,11 @@ export default class ShuttleInstance extends SdcModel {
   set last_build(value){
     this.setlast_build(value);
     this._updateForm('last_build');
+  }
+
+  set built_version(value){
+    this.setbuilt_version(value);
+    this._updateForm('built_version');
   }
 
   set owner(value){
@@ -510,6 +600,21 @@ export default class ShuttleInstance extends SdcModel {
     this._duration = this.parseValue(value, ShuttleInstance.fields.duration);
   }
 
+  sethost_key(value){
+    this.validate(value, ShuttleInstance.fields.host_key);
+    this._host_key = this.parseValue(value, ShuttleInstance.fields.host_key);
+  }
+
+  setcert(value){
+    this.validate(value, ShuttleInstance.fields.cert);
+    this._cert = this.parseValue(value, ShuttleInstance.fields.cert);
+  }
+
+  setinsecure(value){
+    this.validate(value, ShuttleInstance.fields.insecure);
+    this._insecure = this.parseValue(value, ShuttleInstance.fields.insecure);
+  }
+
   setarchitecture(value){
     this.validate(value, ShuttleInstance.fields.architecture);
     this._architecture = this.parseValue(value, ShuttleInstance.fields.architecture);
@@ -553,6 +658,11 @@ export default class ShuttleInstance extends SdcModel {
   setlast_build(value){
     this.validate(value, ShuttleInstance.fields.last_build);
     this._last_build = this.parseValue(value, ShuttleInstance.fields.last_build);
+  }
+
+  setbuilt_version(value){
+    this.validate(value, ShuttleInstance.fields.built_version);
+    this._built_version = this.parseValue(value, ShuttleInstance.fields.built_version);
   }
 
   setowner(value){
@@ -601,6 +711,18 @@ export default class ShuttleInstance extends SdcModel {
     return this._duration;
   }
 
+  get host_key(){
+    return this._host_key;
+  }
+
+  get cert(){
+    return this._cert;
+  }
+
+  get insecure(){
+    return this._insecure;
+  }
+
   get architecture(){
     return this._architecture;
   }
@@ -635,6 +757,10 @@ export default class ShuttleInstance extends SdcModel {
 
   get last_build(){
     return this._last_build;
+  }
+
+  get built_version(){
+    return this._built_version;
   }
 
   get owner(){
