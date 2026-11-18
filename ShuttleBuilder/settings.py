@@ -188,6 +188,8 @@ GOROOT = os.environ.get('GOROOT')
 GOPATH = os.environ.get('GOPATH')
 # Seconds each Go step (go mod download, go build) may take before the build is aborted.
 SHUTTLE_BUILD_TIMEOUT = int(os.environ.get('SHUTTLE_BUILD_TIMEOUT', 600))
+# Go 1.10.8 installation used for win_i386 (Windows XP) builds in GOPATH mode.
+XP_GOROOT = os.environ.get('XP_GOROOT', '/usr/local/go1.10.8')
 
 if DEBUG:
     ELN_URL = os.environ.get('ELN_URL', 'http://127.0.0.1:3000')

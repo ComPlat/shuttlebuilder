@@ -9,9 +9,9 @@ docker-compose.yml
 docker-compose.db.yml
 docker-compose.dev.yml
 .gitignore
-poetry.lock
 .tool-versions
 .idea
 media
 .devcontainer
 backup
+projects/

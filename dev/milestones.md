@@ -75,32 +75,35 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M2 – Toolchains and reproducible builds
 
+**Status:** done (#3)
+
 ### WP 2.1 – Go 1.26 for modern builds
 - **Why:** the `Dockerfile` installs Go **1.24.13**, which is out of upstream support. Standard-library vulnerabilities (crypto/tls, net/http, crypto/x509) end up in every lab binary. Shuttle had to keep x/crypto at v0.48.0, which still has 7 known vulnerabilities, because newer versions need Go ≥ 1.25.
 - **Files:** `Dockerfile`
 - **Tasks:**
-  - [ ] Install the latest Go 1.26.x patch release (pinned by version and SHA256 checksum).
-  - [ ] Set `ENV GOTOOLCHAIN=local`, so a future `go.mod` directive never triggers a silent toolchain download at build time.
-  - [ ] Build all six architectures with the current Shuttle `main` (go.mod `go 1.24`).
+  - [x] Install the latest Go 1.26.x patch release (pinned by version and SHA256 checksum).
+  - [x] Set `ENV GOTOOLCHAIN=local`, so a future `go.mod` directive never triggers a silent toolchain download at build time.
+  - [x] Build all six architectures with the current Shuttle `main` (go.mod `go 1.24`).
   - [ ] **Then** the Shuttle follow-up PR moves go.mod to `go 1.26` and updates x/crypto, x/sys and pkg/sftp to the latest versions (tracked in the Shuttle repo).
 - **Acceptance:** `govulncheck` on a built Shuttle reports no reachable standard-library vulnerabilities.
 
 ### WP 2.2 – The XP toolchain is Go 1.10.0, not 1.10.8
+- **Done differently (M2):** Go 1.10.8 is installed from its SHA256-pinned tarball at `/usr/local/go1.10.8` and selected by the setting `XP_GOROOT` (not a `go1.10.8` wrapper / `XP_GO_TOOL`); XP builds get `GOROOT=XP_GOROOT` explicitly.
 - **Bug:** `go install golang.org/dl/go1.10@latest` installs the **Go 1.10.0** wrapper. Shuttle's CI (`dev/build_xp.sh`) verifies with **1.10.8**, the last 1.10 release, with its security fixes.
 - **Tasks:**
-  - [ ] Use `golang.org/dl/go1.10.8` and `go1.10.8 download`, and call `go1.10.8` in `build()` (make it a setting, `XP_GO_TOOL`).
-  - [ ] Build a `win_i386` WebDAV and a `win_i386` SFTP instance.
+  - [x] Use `golang.org/dl/go1.10.8` and `go1.10.8 download`, and call `go1.10.8` in `build()` (make it a setting, `XP_GO_TOOL`).
+  - [x] Build a `win_i386` WebDAV and a `win_i386` SFTP instance.
 
 ### WP 2.3 – Pin `gowebdav` for the XP build
 - **Risk:** `go1.10 get github.com/StarmanMartin/gowebdav` fetches the fork's **master** when the Docker image is built, so every image can contain different code. The modern builds use the version pinned in Shuttle's `go.mod` (`v0.0.0-20220901075112-8721ee532c0c`).
 - **Tasks:**
-  - [ ] After `go get -d`, `git -C $GOPATH/src/github.com/StarmanMartin/gowebdav checkout 8721ee532c0c` (or read the pin from the active checkout's `go.mod` at build time).
+  - [x] After `go get -d`, `git -C $GOPATH/src/github.com/StarmanMartin/gowebdav checkout 8721ee532c0c` (or read the pin from the active checkout's `go.mod` at build time).
 
 ### WP 2.4 – Build hygiene
 - **Tasks:**
-  - [ ] Timeouts for `go mod download` and `go build`.
-  - [ ] Clean `tp_src` on failure as well; today it's only removed after success.
-  - [ ] `GOFLAGS=-buildvcs=false` (the checkout has no `.git`; this keeps future Go versions from failing on VCS stamping).
+  - [x] Timeouts for `go mod download` and `go build`.
+  - [x] Clean `tp_src` on failure as well; today it's only removed after success.
+  - [x] `GOFLAGS=-buildvcs=false` (the checkout has no `.git`; this keeps future Go versions from failing on VCS stamping).
 
 ---
 
