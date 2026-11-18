@@ -42,3 +42,5 @@ Assets/static/files/ChemConverterApp
 Assets/static/files/ChemConverterApp.exe
 __pycache__/
 /test_db.sqlite3
+# Milestone design docs and round reports (dev/milestones.md stays tracked)
+/dev/m*/
