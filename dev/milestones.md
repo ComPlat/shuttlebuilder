@@ -115,38 +115,38 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 - **Shuttle behaviour:** `-hostkey` pins the server key, as `SHA256:…`, WinSCP style `ssh-ed25519 255 SHA256:…`, or MD5. Without it, Shuttle trusts the first key it sees (stored in `known_hosts`) and refuses a later change. On Windows XP, WinSCP needs either `-hostkey` or a key accepted once in the WinSCP GUI.
 - **Files:** `main_app/models.py`, `main_app/forms.py`, a migration, `_get_build_config`
 - **Tasks:**
-  - [ ] `host_key = CharField(blank=True)`, validated by regex for the three forms. Also add `host_key_bagit` for the converter destination, or document that both destinations need the same host.
-  - [ ] Pass it as `"hostkey"`.
-  - [ ] Help text: how to get the fingerprint (WinSCP *Session → Server/Protocol Information*; `ssh-keyscan -p <port> <host> | ssh-keygen -lf -`).
-  - [ ] **Strongly recommended for `win_i386` + SFTP:** show a hint, or make it required, because otherwise the XP Shuttle can't upload until someone accepts the key in WinSCP on the lab PC.
+  - [x] `host_key = CharField(blank=True)`, validated by regex for the three forms. Also add `host_key_bagit` for the converter destination, or document that both destinations need the same host.
+  - [x] Pass it as `"hostkey"`.
+  - [x] Help text: how to get the fingerprint (WinSCP *Session → Server/Protocol Information*; `ssh-keyscan -p <port> <host> | ssh-keygen -lf -`).
+  - [x] **Strongly recommended for `win_i386` + SFTP:** show a hint, or make it required, because otherwise the XP Shuttle can't upload until someone accepts the key in WinSCP on the lab PC.
 
 ### WP 3.2 – Server certificate (`-crt`)
 - **Shuttle behaviour:** WebDAV TLS is verified on modern builds. A self-signed server needs `-crt`. **Windows XP verifies only when `-crt` is given.**
 - **Tasks:**
-  - [ ] `cert = FileField(upload_to="certs/", blank=True)`, PEM only (validate by parsing).
-  - [ ] When set, download a zip with the executable plus `server.crt`, and pass the **file name** as `crt`.
-  - [ ] **Cross-repo dependency:** Shuttle reads `-crt` relative to the *working directory*. The `.vbs`/systemd setups don't define it, so Shuttle must resolve a relative `-crt` against the executable's folder. This needs a small Shuttle PR first; until then, pass the absolute install path from M4.
-  - [ ] Packaging (`only_exe`, `sdc_views.ShuttleDownload`): add `server.crt` to every zip variant, and switch "exe only" to a zip when a cert is present.
+  - [x] `cert = FileField(upload_to="certs/", blank=True)`, PEM only (validate by parsing).
+  - [x] When set, download a zip with the executable plus `server.crt`, and pass the **file name** as `crt`.
+  - [x] **Cross-repo dependency:** Shuttle reads `-crt` relative to the *working directory*. The `.vbs`/systemd setups don't define it, so Shuttle must resolve a relative `-crt` against the executable's folder. This needs a small Shuttle PR first; until then, pass the absolute install path from M4.
+  - [x] Packaging (`only_exe`, `sdc_views.ShuttleDownload`): add `server.crt` to every zip variant, and switch "exe only" to a zip when a cert is present.
 
 ### WP 3.3 – Disable verification (`-insecure`)
 - **Tasks:**
-  - [ ] `insecure = BooleanField(default=False)`, passed as `"insecure": "1"` or `""`.
-  - [ ] **Owner decision:** visible to everyone, or only to staff.
-  - [ ] Show a clear warning in the form and in the instance list when it's on.
+  - [x] `insecure = BooleanField(default=False)`, passed as `"insecure": "1"` or `""`.
+  - [x] **Owner decision:** visible to everyone, or only to staff.
+  - [x] Show a clear warning in the form and in the instance list when it's on.
 
 ### WP 3.4 – Help texts and validation for 1.13 semantics
 - **Tasks:**
-  - [ ] `dst`/`dst_bagit` help: SFTP accepts `host[:port]/path`, `ssh://…` and `sftp://…` (the port defaults to 22); WebDAV must start with `https://` (or `http://`). Validate this in the form, mirroring Shuttle's `parseDst`, so a bad value is caught before building.
-  - [ ] `duration` must be > 0; Shuttle 1.13 refuses 0. `PositiveIntegerField` allows 0, so add `MinValueValidator(1)`.
-  - [ ] `shuttle_type` help text: mention `flat_tar` (it's missing), and that a changed folder is sent again **completely**.
-  - [ ] `src` help: remove the "use `\\`" advice after WP 1.1.
+  - [x] `dst`/`dst_bagit` help: SFTP accepts `host[:port]/path`, `ssh://…` and `sftp://…` (the port defaults to 22); WebDAV must start with `https://` (or `http://`). Validate this in the form, mirroring Shuttle's `parseDst`, so a bad value is caught before building.
+  - [x] `duration` must be > 0; Shuttle 1.13 refuses 0. `PositiveIntegerField` allows 0, so add `MinValueValidator(1)`.
+  - [x] `shuttle_type` help text: mention `flat_tar` (it's missing), and that a changed folder is sent again **completely**.
+  - [x] `src` help: remove the "use `\\`" advice after WP 1.1.
 
 ### WP 3.5 – Show which Shuttle version is built
 - **Why:** builds only pick up a new Shuttle after the active `GitInstance` is reloaded. Nobody can see which version a download contains.
 - **Tasks:**
-  - [ ] After `git_reload`, read `const shuttleVersion = "…"` from `main.go` and store it on `GitInstance` (a migration).
-  - [ ] Show it in the git-instance list and on the download button. Record `built_version` on `ShuttleInstance` at build time.
-  - [ ] Roll-out note for admins: reload `ComPlat/shuttle/Main` to deliver 1.13.
+  - [x] After `git_reload`, read `const shuttleVersion = "…"` from `main.go` and store it on `GitInstance` (a migration).
+  - [x] Show it in the git-instance list and on the download button. Record `built_version` on `ShuttleInstance` at build time.
+  - [x] Roll-out note for admins: reload `ComPlat/shuttle/Main` to deliver 1.13.
 
 ---
 
