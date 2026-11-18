@@ -109,7 +109,7 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M3 – Shuttle 1.13 options in the UI
 
-**Status:** in progress
+**Status:** done (#4)
 
 ### WP 3.1 – SSH host key (`-hostkey`)
 - **Shuttle behaviour:** `-hostkey` pins the server key, as `SHA256:…`, WinSCP style `ssh-ed25519 255 SHA256:…`, or MD5. Without it, Shuttle trusts the first key it sees (stored in `known_hosts`) and refuses a later change. On Windows XP, WinSCP needs either `-hostkey` or a key accepted once in the WinSCP GUI.
