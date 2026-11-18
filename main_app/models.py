@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -15,7 +16,7 @@ from sdc_core.sdc_extentions.search import handle_search_form
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models import signals
-from django.template import Template, Context
+from main_app.build import go_str, make_context, file_lock, compile_into_temp, build_timeout
 
 User = get_user_model()
 
@@ -208,24 +209,37 @@ class GitInstance(models.Model, SdcModel):
 
     def git_reload(self):
         file_paths, x = self.get_path()
-        shutil.rmtree(os.path.join(file_paths), ignore_errors=True)
-        os.makedirs(file_paths, exist_ok=True)
-        abs_path = os.path.abspath(file_paths)
-        p = subprocess.Popen(['git', 'clone', self.url], cwd=abs_path)
-        p_status = p.wait()
-        if p_status != 0:
-            raise Exception(_("Url cannot be cloned: %s") % self.url)
-        x, abs_path = self.get_path()
-        p = subprocess.Popen(['git', 'checkout', self.branch], cwd=abs_path)
-        p_status = p.wait()
-        if p_status != 0:
-            raise Exception(_("Branch or ID cannot be checked out: %s") % self.branch)
-        files = glob.glob(os.path.join(file_paths, '*', '.git'))
-        for f in files:
-            shutil.rmtree(f)
-        files = glob.glob(os.path.join(file_paths, '*', 'bin'))
-        for f in files:
-            shutil.rmtree(f)
+        parent = os.path.dirname(os.path.abspath(file_paths))
+        os.makedirs(parent, exist_ok=True)
+        with file_lock(os.path.join(parent, ".lock")):
+            tmp = tempfile.mkdtemp(prefix=".%s.tmp-" % os.path.basename(file_paths), dir=parent)
+            try:
+                try:
+                    p = subprocess.run(['git', 'clone', self.url], cwd=tmp, capture_output=True, text=True,
+                                       timeout=build_timeout())
+                    cloned = p.returncode == 0
+                except (subprocess.TimeoutExpired, OSError):
+                    cloned = False
+                if not cloned:
+                    raise Exception(_("Url cannot be cloned: %s") % self.url)
+                repos = glob.glob(os.path.join(tmp, '*'))
+                repo = os.path.abspath(repos[0]) if repos else tmp
+                try:
+                    p = subprocess.run(['git', 'checkout', self.branch], cwd=repo, capture_output=True, text=True,
+                                       timeout=build_timeout())
+                    checked_out = p.returncode == 0
+                except (subprocess.TimeoutExpired, OSError):
+                    checked_out = False
+                if not checked_out:
+                    raise Exception(_("Branch or ID cannot be checked out: %s") % self.branch)
+                for f in glob.glob(os.path.join(tmp, '*', '.git')) + glob.glob(os.path.join(tmp, '*', 'bin')):
+                    shutil.rmtree(f, ignore_errors=True)
+                shutil.rmtree(file_paths, ignore_errors=True)
+                os.rename(tmp, file_paths)
+                tmp = None
+            finally:
+                if tmp:
+                    shutil.rmtree(tmp, ignore_errors=True)
 
         self.last_reload = timezone.now()
         self.save()
@@ -366,7 +380,11 @@ class ShuttleInstance(models.Model, SdcModel):
 
     def delete(self, using=None, keep_parents=False):
         build_path = self.get_path()
-        shutil.rmtree(build_path)
+        shutil.rmtree(build_path, ignore_errors=True)
+        try:
+            os.remove(build_path.rstrip('/') + '.lock')
+        except OSError:
+            pass
         super().delete(using, keep_parents)
 
     def get_path(self):
@@ -374,33 +392,22 @@ class ShuttleInstance(models.Model, SdcModel):
         os.makedirs(file_paths, exist_ok=True)
         return file_paths
 
-    @staticmethod
-    def replace_single_backslashes(s):
-        if not s:
-            s = ""
-        return re.sub(r'(?<!\\)\\(?!\\)', r'\\\\', s)
-
-    @staticmethod
-    def replace_all_single_backslashes(s):
-        return re.sub(r'\\', r'\\\\', s)
-
     def _get_build_config(self):
-        return Context({"src": self.replace_single_backslashes(self.src),
-                        "dst": self.replace_single_backslashes(self.dst),
-                        "user": self.replace_single_backslashes(self.user),
-                        "password": self.replace_single_backslashes(self.password),
-                        "duration": self.duration,
-                        "common_regex": self.replace_all_single_backslashes(self.common_name_parts),
-                        "tType": self.transfer,
-                        "name": self.replace_single_backslashes(self.name),
-                        "crt": "None",
-                        "type": self.shuttle_type,
-                        "preconvert": "T" if self.with_converter else "N",
-                        "dst_converter": self.replace_single_backslashes(self.dst_bagit),
-                        "user_converter": self.replace_single_backslashes(self.user_bagit),
-                        "password_converter": self.replace_single_backslashes(self.passwort_bagit),
-                        "public": self.public_link
-        })
+        return make_context({"src": go_str(self.src),
+                             "dst": go_str(self.dst),
+                             "user": go_str(self.user),
+                             "password": go_str(self.password),
+                             "duration": go_str(self.duration),
+                             "common_regex": go_str(self.common_name_parts),
+                             "tType": go_str(self.transfer),
+                             "name": go_str(self.name),
+                             "crt": "",
+                             "type": go_str(self.shuttle_type),
+                             "preconvert": "T" if self.with_converter else "N",
+                             "dst_converter": go_str(self.dst_bagit),
+                             "user_converter": go_str(self.user_bagit),
+                             "password_converter": go_str(self.passwort_bagit),
+                             "public": go_str(self.public_link)})
 
     def only_exe(self):
         if self.architecture == 'win_i386' and self.transfer == 'sftp':
@@ -408,77 +415,38 @@ class ShuttleInstance(models.Model, SdcModel):
         return not self.with_converter
 
     def build(self):
-        git = GitInstance.objects.get(is_active=True)
-        if git.last_reload is None:
-            git.git_reload()
-        __, repo_path = git.get_path()
-
+        filename = 'shuttle.exe' if self.architecture.startswith('win') else 'shuttle'
         tp = self.get_path()
         tp_bin = os.path.abspath(os.path.join(tp, 'bin'))
-        tp_src = os.path.abspath(os.path.join(tp, 'src'))
+        target = os.path.join(tp_bin, filename)
+        builds_dir = os.path.dirname(os.path.abspath(tp))
+        git_lock = os.path.join(os.path.abspath('./projects/git_repos'), '.lock')
 
-        if self.architecture.startswith('win'):
-            filename = 'shuttle.exe'
-        else:
-            filename = 'shuttle'
+        with file_lock(os.path.abspath(tp) + '.lock'):
+            git = GitInstance.objects.get(is_active=True)
+            if git.last_reload is None:
+                git.git_reload()
+            if self.pk:
+                # another request may have built while we waited for the lock
+                self.last_build = ShuttleInstance.objects.filter(pk=self.pk).values_list(
+                    'last_build', flat=True).first()
+            if not (self.last_build is None or self.last_build <= git.last_reload
+                    or self.last_update > self.last_build or not os.path.exists(target)):
+                return target
 
-        if self.last_build is None or self.last_build <= git.last_reload or self.last_update > self.last_build or not os.path.exists(
-                os.path.join(tp_bin, filename)):
-            shutil.rmtree(tp, ignore_errors=True)
-            os.makedirs(tp_src, exist_ok=True)
-            shutil.copytree(repo_path, tp_src, dirs_exist_ok=True)
-
-            for root, dirs, files in os.walk(tp_src, topdown=False):
-                for name in files:
-                    f = open(os.path.join(root, name), "r")
-                    try:
-                        text = f.read()
-                        t = Template(text)
-                        f.close()
-                        text = t.render(self._get_build_config())
-                        f = open(os.path.join(root, name), "w")
-                        f.write(text)
-                        f.close()
-                    except:
-                        raise Exception(_("Compiling failed"))
-            os.makedirs(tp_bin, exist_ok=True)
-            my_env = os.environ.copy()
-            my_env["GOROOT"] = settings.GOROOT
-            my_env["GOPATH"] = settings.GOPATH
-            if self.architecture.startswith('win'):
-                my_env["GOOS"] = "windows"
-            else:
-                my_env["GOOS"] = "linux"
-            if self.architecture == 'raspberry_pi_6':
-                my_env["GOARCH"] = "arm"
-                my_env["GOARM"] = "6"
-            elif self.architecture == 'raspberry_pi_7':
-                my_env["GOARCH"] = "arm"
-                my_env["GOARM"] = "7"
-            elif self.architecture == 'raspberry_pi_64':
-                my_env["GOARCH"] = "arm64"
-
-            if self.architecture == 'win_i386':
-                my_env['GOARCH'] = '386'
-                go_tool = "go1.10"
-            else:
-                go_tool = os.path.join(settings.GOROOT, "bin/go")
-                p = subprocess.Popen([go_tool, "mod", "download"], env=my_env, cwd=tp_src)
-                p_status = p.wait()
-                if p_status != 0:
-                    raise Exception(_("Download mod failed"))
-
-            p = subprocess.Popen(
-                [go_tool, "build", "-o", os.path.join(tp_bin, filename)], env=my_env,
-                cwd=tp_src)
-            p_status = p.wait()
-            if p_status != 0:
-                raise Exception(_("Compiling failed"))
-
-            shutil.rmtree(tp_src, ignore_errors=True)
+            __, repo_path = git.get_path()
+            with file_lock(git_lock, shared=True):
+                built, tmp_root = compile_into_temp(self, repo_path, builds_dir, filename, self._get_build_config())
+            try:
+                os.makedirs(tp_bin, exist_ok=True)
+                os.replace(built, target)
+            finally:
+                shutil.rmtree(tmp_root, ignore_errors=True)
             self.last_build = timezone.now()
-            self.save()
-        return os.path.join(tp_bin, filename)
+            if self.pk:
+                # update() instead of save(): save() would bump last_update and force a rebuild next time
+                ShuttleInstance.objects.filter(pk=self.pk).update(last_build=self.last_build)
+        return target
 
     @classmethod
     def render(cls, template_name, context=None, request=None, using=None):
