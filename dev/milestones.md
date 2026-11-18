@@ -33,7 +33,7 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M1 – Correct builds (bugs that affect every lab today)
 
-**Status:** in progress
+**Status:** done (#2)
 
 ### WP 1.1 – Build values are HTML-escaped into the binary
 - **Bug (verified):** `build()` renders with `django.template.Template`, where **autoescape is on** (default `TEMPLATES` in `base_settings.py`). A password `a&b<c>` is compiled in as `a&amp;b&lt;c&gt;`, and `it's` becomes `it&#x27;s`. The same happens to `src` paths (`C:\Data & Results`), URLs with `&`, and regexes with `<`/`>`. Those labs fail to log in or watch a folder that doesn't exist.
