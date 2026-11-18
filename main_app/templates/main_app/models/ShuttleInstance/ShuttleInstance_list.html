@@ -43,6 +43,11 @@
             <a target="_blank" href="{% url 'scd_view_shuttle_download' pk=instance.pk %}" class="btn btn-info" data-toggle="tooltip" data-placement="left" title="{% if active_version %}{% blocktrans %}Downloads build Shuttle {{ active_version }}{% endblocktrans %}{% else %}{% trans 'Download Executable!' %}{% endif %}">
                 <i class="bi bi-download"></i>
             </a>
+            {% if not instance.architecture|slice:":3" == "win" %}{% url 'file_shuttle_instance.service' pk=instance.pk as unit_url %}{% if unit_url %}
+            <a target="_blank" href="{{ unit_url }}" class="btn btn-secondary" data-toggle="tooltip" title="{% trans 'Download the systemd unit for this instance' %}">
+                <i class="bi bi-hdd-network"></i> {% trans 'systemd unit' %}
+            </a>
+            {% endif %}{% endif %}
             <small class="text-muted built-version">{% if instance.built_version %}Shuttle {{ instance.built_version }}{% else %}{% trans 'not built yet' %}{% endif %}</small>
             <a class="btn btn-dark navigation-links" href="/~*~shuttle-instance-edit&pk={{instance.pk}}">
                 <i class="bi bi-wrench-adjustable-circle"></i>

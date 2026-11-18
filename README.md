@@ -64,32 +64,30 @@ This section explains how to install Shuttle. Following these instructions will 
    After creating a new instance, download the executable from the Shuttle list.
 
 3. **Install Shuttle instance:**  
-   Installation is straightforward but requires administrative rights.  
-   Steps:
-   1. Make a directory: `C:\Program Files\eln_exporter`
-   2. Copy the generated `shuttle.exe` into `C:\Program Files\file_exporter`
+   Installation is straightforward but requires administrative rights. Every zip file contains an `INSTALL.txt` with the steps for this instance (without any secrets).  
+   Windows (64 Bit and i386):
+   1. Make a directory: `C:\Program Files\Shuttle`
+   2. Copy the generated `shuttle.exe` (for a zip: all its files) into `C:\Program Files\Shuttle`
    3. Copy the [shuttle_task.vbs](/sdc_view/main_app/download/file_exporter_task.vbs) into the startup directory.  
       **Hint:** Press **Windows Key + R**, type `shell:startup`, and press Enter.
 
 4. **(Special case) Install Shuttle with SFTP on Windows XP:**  
-   This installation also requires administrative rights. The downloaded zip file contains both the executable and WinSCP.  
-   Steps:
-   1. Make a directory: `C:\Program Files\eln_exporter`
-   2. Unzip `shuttle_sftp_winxp.zip`
-   3. Copy `shuttle.exe`, `WinSCP.exe`, and `WinSCP.com` into `C:\Program Files\file_exporter`
-   4. Copy the [shuttle_task.vbs](/sdc_view/main_app/download/file_exporter_task.vbs) into the startup directory.  
-      **Hint:** Press **Windows Key + R**, type `shell:startup`, and press Enter.
+   The downloaded zip file `shuttle_sftp_winxp.zip` contains the executable and WinSCP.  
+   1. Make a directory: `C:\Program Files\Shuttle`
+   2. Unzip the file and copy **all** files (`shuttle.exe`, `WinSCP.exe`, `WinSCP.com`, `license.txt`) into `C:\Program Files\Shuttle`. WinSCP must stay next to `shuttle.exe`.
+   3. Copy the [shuttle_task.vbs](/sdc_view/main_app/download/file_exporter_task.vbs) into the startup directory (see above).
 
 5. **Install Shuttle on Linux:**  
-   Installation requires administrative rights and is designed for **systemd**.  
-   Steps:
-   1. Make a directory: `/opt/file_exporter`
-   2. Copy the `shuttle` executable into `/opt/file_exporter/`
-   3. Download [shuttle.service](/sdc_view/main_app/download/shuttle.service), update it with the correct username, copy it into `/etc/systemd/system/shuttle.service`, then run:  
+   Installation requires administrative rights and is designed for **systemd**. Set the optional field *Linux user* of the instance: it is the user whose home holds the working folder.  
+   1. Make a directory: `/opt/Shuttle`
+   2. Copy the `shuttle` executable (for a zip: all its files) into `/opt/Shuttle/` and make it executable.
+   3. Use the **systemd unit** button of the instance in the Shuttle list to download `shuttle.service` (generic fallback: [shuttle.service](/sdc_view/main_app/download/shuttle.service)). If it contains `User=CHANGE_ME`, replace it with the Linux user. Copy it into `/etc/systemd/system/shuttle.service`, then run:  
       ```bash
-      systemctl start shuttle
-      systemctl enable shuttle
+      systemctl daemon-reload
+      systemctl enable --now shuttle.service
       ```
+
+Shuttle keeps its log (`shuttle_log.txt`), the list of sent files (`sent_register.json`) and `known_hosts` in `~/shuttle/shuttle_<name>/` (Windows: `%USERPROFILE%\shuttle\shuttle_<name>\`). On the first start it sends every stable file already in the source folder once; delete `sent_register.json` to send everything again.
 
 ## Security options
 

@@ -47,7 +47,7 @@
                     <p>The installation is simple but require administration rights.</p>
                     <ol>
                         <li>Make a directory "C:\Program Files\Shuttle"</li>
-                        <li>Copy the (on this server generated) <b>shuttle.exe</b> into "C:\Program Files\Shuttle"
+                        <li>Copy the (on this server generated) <b>shuttle.exe</b> into "C:\Program Files\Shuttle" (a zip file contains an <b>INSTALL.txt</b> with these steps; copy all its files)
                         </li>
                         <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into
                             the
@@ -63,8 +63,8 @@
                     <ol>
                         <li>Make a directory "C:\Program Files\Shuttle"</li>
                         <li>Unzip the downloaded file <b>shuttle_sftp_winxp.zip</b></li>
-                        <li>Copy the <b>shuttle.exe</b>, <b>WinSCP.exe</b> and <b>WinSCP.com</b> into "C:\Program
-                            Files\Shuttle"
+                        <li>Copy all files (<b>shuttle.exe</b>, <b>WinSCP.exe</b>, <b>WinSCP.com</b>, <b>license.txt</b>) into "C:\Program
+                            Files\Shuttle". WinSCP must stay next to shuttle.exe.
                         </li>
                         <li>Copy the <a target="_blank" href="{% url 'shuttle_task.vbs' %}">shuttle_task.vbs</a> into
                             the
@@ -79,18 +79,23 @@
                         <b>systemd</b></p>
                     <ol>
                         <li>Make a directory "/opt/Shuttle"</li>
-                        <li>Copy the <b>shuttle</b> executable into "/opt/Shuttle/"</li>
+                        <li>Copy the <b>shuttle</b> executable (for a zip: all its files) into "/opt/Shuttle/" and make it executable</li>
                         <li>
-                            Download <a target="_blank" href="{% url 'file_shuttle.service' %}">shuttle.service</a>.
-                            Edit the file and amend the Linux username. Copy it into
-                            /etc/systemd/system/shuttle.service. Run
-                            <b>systemctl start shuttle</b> to start it and <b>systemctl enable shuttle</b> to
-                            automatically get
-                            it to start on boot.
+                            Set the field <i>Linux user</i> of the instance (the user whose home holds the working
+                            folder). In the Shuttle list use the <b>systemd unit</b> button of the instance to download
+                            <b>shuttle.service</b> (fallback: the generic <a target="_blank" href="{% url 'file_shuttle.service' %}">shuttle.service</a>).
+                            If it contains <code>User=CHANGE_ME</code>, replace it with the Linux user. Copy it into
+                            /etc/systemd/system/shuttle.service and run
+                            <b>systemctl daemon-reload</b> and <b>systemctl enable --now shuttle.service</b>.
                         </li>
                     </ol>
                 </li>
             </ul>
+            <p>Shuttle keeps its log (<code>shuttle_log.txt</code>), the list of sent files
+                (<code>sent_register.json</code>) and <code>known_hosts</code> in <code>~/shuttle/shuttle_&lt;name&gt;/</code>
+                (Windows: <code>%USERPROFILE%\shuttle\shuttle_&lt;name&gt;\</code>). On the first start it sends every
+                stable file already in the source folder once; delete <code>sent_register.json</code> to send everything
+                again.</p>
         </li>
     </ol>
     <h3>Security options</h3>
