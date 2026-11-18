@@ -75,6 +75,8 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M2 – Toolchains and reproducible builds
 
+**Status:** in progress
+
 ### WP 2.1 – Go 1.26 for modern builds
 - **Why:** the `Dockerfile` installs Go **1.24.13**, which is out of upstream support. Standard-library vulnerabilities (crypto/tls, net/http, crypto/x509) end up in every lab binary. Shuttle had to keep x/crypto at v0.48.0, which still has 7 known vulnerabilities, because newer versions need Go ≥ 1.25.
 - **Files:** `Dockerfile`
