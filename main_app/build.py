@@ -152,7 +152,7 @@ def run_step(cmd, step, instance, env, cwd):
     except OSError as e:
         failed = True
         rc = "oserror"
-        output = type(e).__name__
+        output = "%s: %s" % (type(e).__name__, cmd[0])  # tool path is not secret
     if not failed:
         return
     reference = new_reference()
@@ -164,11 +164,22 @@ def run_step(cmd, step, instance, env, cwd):
     raise BuildError(_("Building the Shuttle failed."), detail=detail, reference=reference)
 
 
+def xp_goroot():
+    return getattr(settings, "XP_GOROOT", None) or "/usr/local/go1.10.8"
+
+
 def go_env(architecture):
     env = os.environ.copy()
-    env["GOROOT"] = settings.GOROOT
     env["GOPATH"] = settings.GOPATH
     env["GOOS"] = "windows" if architecture.startswith("win") else "linux"
+    if architecture == "win_i386":
+        # Go 1.10.8 in GOPATH mode: no modules, no toolchain switching.
+        env["GOROOT"] = xp_goroot()
+        env.pop("GO111MODULE", None)
+        env.pop("GOTOOLCHAIN", None)
+    else:
+        env["GOROOT"] = settings.GOROOT
+        env["GOTOOLCHAIN"] = "local"
     if architecture == "raspberry_pi_6":
         env["GOARCH"] = "arm"
         env["GOARM"] = "6"
@@ -196,12 +207,15 @@ def compile_into_temp(instance, repo_path, builds_dir, filename, config):
         render_go_tree(tmp_src, config, get_secrets(instance))
         env = go_env(instance.architecture)
         if instance.architecture == "win_i386":
-            go_tool = "go1.10"
+            go_tool = os.path.join(xp_goroot(), "bin", "go")
+            build_cmd = [go_tool, "build", "-o", None]
         else:
             go_tool = os.path.join(settings.GOROOT, "bin/go")
             run_step([go_tool, "mod", "download"], "go mod download", instance, env, tmp_src)
+            build_cmd = [go_tool, "build", "-buildvcs=false", "-o", None]
         out = os.path.join(tmp_bin, filename)
-        run_step([go_tool, "build", "-o", out], "go build", instance, env, tmp_src)
+        build_cmd[-1] = out
+        run_step(build_cmd, "go build", instance, env, tmp_src)
         return out, tmp_root
     except BaseException:
         shutil.rmtree(tmp_root, ignore_errors=True)
