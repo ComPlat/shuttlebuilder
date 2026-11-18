@@ -361,5 +361,7 @@ class ListTemplatesTest(TestCase):
         lin = self._inst("l-lin", architecture="ubuntu_64")
         win = self._inst("l-win", architecture="win_64")
         html = self._render([lin, win])
-        self.assertEqual(html.count("systemd unit"), 1)
+        # one button for the Linux row (its text and tooltip both say "systemd unit"), none for Windows
+        self.assertEqual(html.count("bi-hdd-network"), 1)
         self.assertIn(reverse("file_shuttle_instance.service", kwargs={"pk": lin.pk}), html)
+        self.assertNotIn(reverse("file_shuttle_instance.service", kwargs={"pk": win.pk}), html)
