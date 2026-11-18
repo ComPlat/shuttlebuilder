@@ -186,6 +186,8 @@ EMAIL_TIMEOUT = 10
 GOOS = "windows"
 GOROOT = os.environ.get('GOROOT')
 GOPATH = os.environ.get('GOPATH')
+# Seconds each Go step (go mod download, go build) may take before the build is aborted.
+SHUTTLE_BUILD_TIMEOUT = int(os.environ.get('SHUTTLE_BUILD_TIMEOUT', 600))
 
 if DEBUG:
     ELN_URL = os.environ.get('ELN_URL', 'http://127.0.0.1:3000')
