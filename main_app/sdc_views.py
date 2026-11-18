@@ -13,6 +13,7 @@ from django.utils.html import escape
 from django.utils.translation import gettext as _
 
 from main_app.build import BuildError
+from main_app.install_txt import render_install_txt
 from main_app.models import GitInstance, ShuttleInstance, ElnConnection
 
 logger = logging.getLogger("main_app.build")
@@ -88,7 +89,7 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
         finally:
             instance.cert.close()
 
-    def _zip_response(self, instance, file_location, zip_name):
+    def _zip_response(self, request, instance, file_location, zip_name):
         """Pack the executable with everything that has to ship next to it into a temporary zip."""
         static_files = os.path.join(settings.STATIC_ROOT, 'files')
         cert = self._cert_bytes(instance)
@@ -114,6 +115,7 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
                         instance.profile.close()
                 if cert is not None:
                     zf.writestr('server.crt', cert)
+                zf.writestr('INSTALL.txt', render_install_txt(instance, request).encode('utf-8'))
             with open(tmp.name, 'rb') as f:
                 file_data = f.read()
         finally:
@@ -133,6 +135,10 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
 
         instance = get_object_or_404(ShuttleInstance, **filter_set)
         is_staff = request.user.is_staff or request.user.is_superuser
+        if instance.with_converter and instance.architecture not in ('win_64', 'ubuntu_64'):
+            # admin and API can bypass the form rule
+            return self._error_response(
+                _('The converter is only available for Windows 64 Bit and Ubuntu 64 Bit.'), '', '')
         try:
             file_location = instance.build()
             if instance.only_exe():
@@ -142,7 +148,7 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
                     response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(file_location)
             else:
                 zip_name = self._zip_name(instance)
-                response = self._zip_response(instance, file_location, zip_name)
+                response = self._zip_response(request, instance, file_location, zip_name)
 
         except BuildError as e:
             response = self._error_response(e.public_message, e.reference, e.detail if is_staff else "")

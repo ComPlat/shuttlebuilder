@@ -169,7 +169,7 @@ class ShuttleDownloadZipTest(TestCase):
         resp = self._download(self._instance("zip-plain"), only_exe=False)
         self.assertIn('filename="shuttle_win_64.zip"', resp["Content-Disposition"])
         zf = self._zip(resp)
-        self.assertEqual(sorted(zf.namelist()), ["server.crt", "shuttle.exe"])
+        self.assertEqual(sorted(zf.namelist()), ["INSTALL.txt", "server.crt", "shuttle.exe"])
         self.assertEqual(zf.read("server.crt"), self.CERT)
         self.assertEqual(zf.read("shuttle.exe"), b"BIN")
         self._no_temp_zip_left()
@@ -199,7 +199,7 @@ class ShuttleDownloadZipTest(TestCase):
         resp = self._download(inst, only_exe=False)
         self.assertIn('filename="shuttle_sftp_winxp.zip"', resp["Content-Disposition"])
         zf = self._zip(resp)
-        self.assertEqual(sorted(zf.namelist()), ["WinSCP.com", "WinSCP.exe", "license.txt", "shuttle.exe"])
+        self.assertEqual(sorted(zf.namelist()), ["INSTALL.txt", "WinSCP.com", "WinSCP.exe", "license.txt", "shuttle.exe"])
         self._no_temp_zip_left()
 
     def test_cert_is_ignored_for_sftp(self):
@@ -210,6 +210,81 @@ class ShuttleDownloadZipTest(TestCase):
     def test_exe_only_stays_plain(self):
         resp = self._download(self._instance("zip-exe"), only_exe=True)
         self.assertEqual(resp.content, b"BIN")
+
+    def _install(self, inst, only_exe=False):
+        zf = self._zip(self._download(inst, only_exe=only_exe))
+        self.assertIn("INSTALL.txt", zf.namelist())
+        return zf.read("INSTALL.txt").decode()
+
+    def _assert_no_secrets(self, text, inst):
+        for secret in (PASSWORD, "dummy-user", "SHA256:", inst.host_key or "unset-host-key", "passwort-b"):
+            self.assertNotIn(secret, text)
+
+    def test_install_txt_windows_64(self):
+        inst = self._instance("zip-w64", host_key="SHA256:" + "A" * 43)
+        inst.built_version = "1.14"
+        inst.save()
+        text = self._install(inst)
+        self.assertIn("\r\n", text)
+        self.assertNotIn("\r\r", text)
+        self.assertEqual(text.count("\n"), text.count("\r\n"))
+        for part in ("zip-w64", "1.14", "C:\\Program Files\\Shuttle", "shell:startup", "shuttle_task.vbs",
+                     "http://testserver/", "server.crt", "shuttle_log.txt", "sent_register.json",
+                     "%USERPROFILE%\\shuttle\\shuttle_zip-w64\\"):
+            self.assertIn(part, text)
+        self.assertIn(reverse("shuttle_task.vbs"), text)
+        self.assertNotIn("systemctl", text)
+        self.assertNotIn("WinSCP", text)
+        self._assert_no_secrets(text, inst)
+
+    def test_install_txt_winxp_sftp(self):
+        inst = self._instance("zip-xp2", cert=False, transfer="sftp", architecture="win_i386",
+                              host_key="SHA256:" + "B" * 43)
+        text = self._install(inst)
+        self.assertIn("WinSCP.com", text)
+        self.assertIn("same folder as shuttle.exe", text)
+        self.assertIn("C:\\Program Files\\Shuttle", text)
+        self.assertIn("known_hosts", text)
+        self.assertNotIn("server.crt", text)
+        self._assert_no_secrets(text, inst)
+        self.assertNotIn("B" * 43, text)
+
+    def test_install_txt_linux(self):
+        inst = self._instance("zip-lin", architecture="ubuntu_64", linux_user="labuser")
+        inst.built_version = "1.14"
+        inst.save()
+        text = self._install(inst)
+        self.assertNotIn("\r", text)
+        for part in ("/opt/Shuttle", "systemctl daemon-reload", "systemctl enable --now shuttle.service",
+                     "~/shuttle/shuttle_zip-lin/", "SIGTERM", "server.crt", "CHANGE_ME"):
+            self.assertIn(part, text)
+        self.assertIn("/download/shuttle.service", text.replace("%d/" % inst.pk, ""))
+        self.assertNotIn("C:\\", text)
+        self.assertNotIn("labuser", text)  # no user names in the file
+        self._assert_no_secrets(text, inst)
+
+    def test_install_txt_name_is_one_line(self):
+        inst = self._instance("zip-nl")
+        ShuttleInstance.objects.filter(pk=inst.pk).update(name="zip\nEVIL\r\nx")
+        inst.refresh_from_db()
+        text = self._install(inst)
+        self.assertNotIn("\nEVIL", text)
+        self.assertIn("zip EVIL x", text)
+
+    def test_exe_only_has_no_install_txt(self):
+        resp = self._download(self._instance("zip-exe2"), only_exe=True)
+        self.assertEqual(resp.content, b"BIN")
+        self.assertNotIn(b"INSTALL.txt", resp.content)
+
+    def test_converter_on_arm_is_500_and_not_built(self):
+        inst = self._instance("zip-arm", cert=False, with_converter=True, architecture="raspberry_pi_64")
+        self.client.force_login(self.owner)
+        url = reverse("scd_view_shuttle_download", kwargs={"pk": inst.pk})
+        with mock.patch("main_app.models.ShuttleInstance.build") as build:
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 500)
+        self.assertIn("The converter is only available for Windows 64 Bit and Ubuntu 64 Bit.", resp.content.decode())
+        build.assert_not_called()
 
 
 class ListTemplatesTest(TestCase):
@@ -276,3 +351,15 @@ class ListTemplatesTest(TestCase):
         html = self._render([git, other], template="GitInstance")
         self.assertIn("Shuttle version", html)
         self.assertIn("1.14", html)
+
+    def test_systemd_unit_link_only_for_linux(self):
+        from django.urls import NoReverseMatch
+        try:
+            reverse("file_shuttle_instance.service", kwargs={"pk": 1})
+        except NoReverseMatch:
+            self.skipTest("URL file_shuttle_instance.service comes with worker A; run after the merge")
+        lin = self._inst("l-lin", architecture="ubuntu_64")
+        win = self._inst("l-win", architecture="win_64")
+        html = self._render([lin, win])
+        self.assertEqual(html.count("systemd unit"), 1)
+        self.assertIn(reverse("file_shuttle_instance.service", kwargs={"pk": lin.pk}), html)
