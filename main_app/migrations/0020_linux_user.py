@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='shuttleinstance',
             name='linux_user',
-            field=models.CharField(blank=True, default='', help_text='Linux only: the user that runs the Shuttle service (systemd User=).', max_length=32, verbose_name='Linux user'),
+            field=models.CharField(blank=True, default='', help_text='The Linux user that runs the service; its home holds the working folder; leave empty to edit the unit file by hand.', max_length=32, verbose_name='Linux user'),
         ),
     ]

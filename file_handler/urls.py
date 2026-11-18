@@ -7,5 +7,6 @@ urlpatterns = [
     # scd view below
     path('download/file_exporter_task.vbs', views.DownloadVbs.as_view(), name='shuttle_task.vbs'),
     path('download/shuttle.service', views.DownloadService.as_view(), name='file_shuttle.service'),
+    path('download/<int:pk>/shuttle.service', views.DownloadInstanceService.as_view(), name='file_shuttle_instance.service'),
 
 ]
