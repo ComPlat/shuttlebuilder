@@ -16,7 +16,7 @@ from sdc_core.sdc_extentions.search import handle_search_form
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models import signals
-from main_app.build import go_str, make_context, file_lock, compile_into_temp, build_timeout
+from main_app.build import read_shuttle_version, go_str, make_context, file_lock, compile_into_temp, build_timeout
 
 User = get_user_model()
 
@@ -154,6 +154,7 @@ class GitInstance(models.Model, SdcModel):
     - `name`: unique, cannot be changed later; `url`: clone URL; `branch`: branch name or commit id (default `main`).
     - `is_active`: exactly one repo is active; all Shuttle builds use it.
     - `last_reload`: when the repo was last cloned; `null` means it is cloned on the next build.
+    - `shuttle_version`: version of the Shuttle in the checkout (`shuttleVersion` in `main.go`), read after every successful reload; empty if it cannot be found. Shown in `<git-instance-list>`.
     - If none is active, the default `ComPlat/shuttle/Main` (https://github.com/ComPlat/shuttle.git, `main`) is created and activated.
     - Activating or reloading a repo clones it again; afterwards every `ShuttleInstance` is rebuilt on its next download.
     - Readable and editable by every logged-in user.
@@ -244,6 +245,7 @@ class GitInstance(models.Model, SdcModel):
                     shutil.rmtree(tmp, ignore_errors=True)
 
         self.last_reload = timezone.now()
+        self.shuttle_version = read_shuttle_version(self.get_path()[1])
         self.save()
 
     @classmethod
@@ -304,6 +306,11 @@ class ShuttleInstance(models.Model, SdcModel):
     - `architecture`: target system: `win_i386`, `win_64`, `ubuntu_64`, `raspberry_pi_6`, `raspberry_pi_7` or `raspberry_pi_64`.
     - `with_converter`: also convert data to a BagIt archive, sent to `dst_bagit` with `user_bagit`/`passwort_bagit`; needs a JSON `profile`, `public_link` is the URL prefix of the raw files.
     - `owner`: the creating user. Logged-in users see and change only their own instances; staff and superusers see all.
+    - `host_key` (SFTP only): expected SSH host key fingerprint of the server, `SHA256:<base64>` (optionally `ssh-ed25519 255 SHA256:...` as shown by WinSCP) or MD5 `aa:bb:...`. It applies to both SFTP destinations, so with a converter both must be the same server. Required for `win_i386` + SFTP unless `insecure` is set; otherwise empty means trust on first use.
+    - `cert` (WebDAV only): PEM server certificate (`.crt`, `.pem`, `.cer`), needed for self-signed servers and the only way TLS is verified on Windows XP. It is built in as `server.crt` and shipped next to the executable (the download becomes a zip).
+    - `insecure`: WARNING, disables TLS certificate **and** SSH host key verification. Any user may set it; use it only for tests or servers that cannot be verified otherwise. It is flagged in the instance list.
+    - `dst`/`dst_bagit` are checked: SFTP `host[:port]/path` (also `ssh://` or `sftp://`, port 22 by default), WebDAV `http(s)://host/path`. `duration` must be at least 1.
+    - `built_version`: Shuttle version of the last successful build, shown next to the download button (empty: not built yet). The active `GitInstance` version may be newer; the next download then rebuilds.
     - Downloading compiles the executable from the active `GitInstance` (slow on first download or after changes); deleting also removes the build files.
     - Listed in `<shuttle-instance-list>`, created/edited/copied in `<shuttle-instance-edit>`.
     """
@@ -323,7 +330,7 @@ class ShuttleInstance(models.Model, SdcModel):
     src = models.CharField(help_text=_(
         "Source directory to monitor."),
         max_length=255)
-    dst = models.CharField(help_text=_("""WebDAV or SFTP destination URL. If the destination is on the lsdf, the URL should be as follows:<br>
+    dst = models.CharField(help_text=_("""WebDAV or SFTP destination URL. Accepted: SFTP <code>host[:port]/path</code>, also <code>ssh://</code> or <code>sftp://</code> (port 22 by default); WebDAV <code>https://...</code> or <code>http://...</code>. If the destination is on the lsdf, the URL should be as follows:<br>
         <span style="margin-left: 20px; font-weight: 800;">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
         <span style="margin-left: 20px; font-weight: 800;">WebDAV</span>: https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
 
@@ -333,21 +340,21 @@ class ShuttleInstance(models.Model, SdcModel):
                     <span style="margin-left: 30px;">[PROJECT_PATH]-Path (directory) within the LSDF</span>"""),
                            max_length=255)
     shuttle_type = models.CharField(_('Type'), help_text=_(
-        "Type must be 'file', 'folder', 'tar' or 'zip'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' ond/or 'zip' sends a folder zipped (or compressed as tar archieve), only when all files in a folder are ready."),
+        "Type must be 'file', 'folder', 'tar', 'zip' or 'flat_tar'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' and/or 'zip' send a folder zipped (or compressed as tar archive), only when all files in a folder are ready. The 'flat_tar' option groups files by the common name regex. If a folder changes, it is sent again completely."),
                                     max_length=255, choices=TYPE_CHOISES)
     common_name_parts = models.CharField(_('Common name regex'), blank=True, max_length=255, default="^[A-Za-z]{1,4}",
                                          help_text=_(
                                              "The regex for the common name is used to collect all files that belong to the same data set. This value is only used if the type is flat tar. All files that either have the same regex group resolutions or (if you do not use groups) have the same global result are archived together<this.render_help></this.render_help>"))
     duration = models.PositiveIntegerField(
-        help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. (default 300 sec.)"),
+        help_text=_("Duration in seconds, i.e., how long a file must not be changed before sent. Must be at least 1 (default 300 sec.)"),
         default=300, validators=[MinValueValidator(1)])
     host_key = models.CharField(_('SSH host key'), max_length=255, blank=True, default='',
-                                help_text=_("SFTP only: expected SSH host key fingerprint of the server."))
+                                help_text=_("SFTP only: expected SSH host key fingerprint of the server. Formats: SHA256:<base64> (optionally preceded by the algorithm and bits, e.g. ssh-ed25519 255 SHA256:...) or MD5 aa:bb:...:ff. Get it in WinSCP (Session, Server/Protocol Information) or with: ssh-keyscan -p <port> <host> | ssh-keygen -lf - . Required for Windows XP (Windows i386) with SFTP. Applies to both SFTP destinations."))
     cert = models.FileField(_('Server certificate'), upload_to='certs/', null=True, blank=True,
                             validators=[FileExtensionValidator(allowed_extensions=['crt', 'pem', 'cer'])],
-                            help_text=_("WebDAV only: PEM certificate of the server, needed for self-signed servers."))
+                            help_text=_("WebDAV only: PEM certificate of the server (.crt, .pem or .cer), needed for self-signed servers. On Windows XP it is the only way TLS is verified. It is shipped as server.crt next to the executable."))
     insecure = models.BooleanField(_('Disable verification (insecure)'), default=False,
-                                   help_text=_("Skip TLS certificate and SSH host key verification."))
+                                   help_text=_("WARNING: disables the TLS certificate AND the SSH host key verification, so the connection can be intercepted. Only for tests or servers that cannot be verified otherwise."))
     architecture = models.CharField(_('System architecture'),
                                     help_text=_(
                                         "Your computer architecture : either 64 bit, i386 or ARM And your OS: Linux or Windows"),
@@ -360,7 +367,7 @@ class ShuttleInstance(models.Model, SdcModel):
                                   blank=True)
     passwort_bagit = models.CharField(help_text=_("WebDAV or STFP Password for converted Bagit"), max_length=100,
                                       null=True, blank=True)
-    dst_bagit = models.CharField(help_text=_("""WebDAV or SFTP destination URL. If the destination is on the lsdf, the URL should be as follows:<br>
+    dst_bagit = models.CharField(help_text=_("""WebDAV or SFTP destination URL. Accepted: SFTP <code>host[:port]/path</code>, also <code>ssh://</code> or <code>sftp://</code> (port 22 by default); WebDAV <code>https://...</code> or <code>http://...</code>. If the destination is on the lsdf, the URL should be as follows:<br>
             <span style="margin-left: 20px; font-weight: 800;">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
             <span style="margin-left: 20px; font-weight: 800;">WebDAV</span>: https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
 
@@ -411,7 +418,9 @@ class ShuttleInstance(models.Model, SdcModel):
                              "common_regex": go_str(self.common_name_parts),
                              "tType": go_str(self.transfer),
                              "name": go_str(self.name),
-                             "crt": "",
+                             "crt": "server.crt" if self._cert_applies() else "",
+                             "hostkey": go_str(self.host_key.strip()) if self.transfer == 'sftp' else "",
+                             "insecure": "1" if self.insecure else "",
                              "type": go_str(self.shuttle_type),
                              "preconvert": "T" if self.with_converter else "N",
                              "dst_converter": go_str(self.dst_bagit),
@@ -419,7 +428,13 @@ class ShuttleInstance(models.Model, SdcModel):
                              "password_converter": go_str(self.passwort_bagit),
                              "public": go_str(self.public_link)})
 
+    def _cert_applies(self):
+        """A certificate is bundled (as `server.crt`) only for WebDAV."""
+        return bool(self.cert) and self.transfer == 'webdav'
+
     def only_exe(self):
+        if self._cert_applies():
+            return False
         if self.architecture == 'win_i386' and self.transfer == 'sftp':
             return False
         return not self.with_converter
@@ -453,9 +468,11 @@ class ShuttleInstance(models.Model, SdcModel):
             finally:
                 shutil.rmtree(tmp_root, ignore_errors=True)
             self.last_build = timezone.now()
+            self.built_version = git.shuttle_version
             if self.pk:
                 # update() instead of save(): save() would bump last_update and force a rebuild next time
-                ShuttleInstance.objects.filter(pk=self.pk).update(last_build=self.last_build)
+                ShuttleInstance.objects.filter(pk=self.pk).update(last_build=self.last_build,
+                                                                  built_version=self.built_version)
         return target
 
     @classmethod

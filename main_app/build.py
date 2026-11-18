@@ -29,6 +29,7 @@ class BuildError(Exception):
 import fcntl
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -220,3 +221,18 @@ def compile_into_temp(instance, repo_path, builds_dir, filename, config):
     except BaseException:
         shutil.rmtree(tmp_root, ignore_errors=True)
         raise
+
+
+_VERSION_RE = re.compile(r'^\s*(?:const\s+)?shuttleVersion\s*=\s*"([^"\r\n]{1,20})"', re.MULTILINE)
+
+
+def read_shuttle_version(repo_path):
+    """Return the `shuttleVersion` constant of `<repo_path>/main.go`, or "" if it cannot be found."""
+    if not repo_path:
+        return ""
+    try:
+        with open(os.path.join(repo_path, "main.go"), encoding="utf-8", errors="replace") as fh:
+            match = _VERSION_RE.search(fh.read())
+    except OSError:
+        return ""
+    return match.group(1).strip() if match else ""

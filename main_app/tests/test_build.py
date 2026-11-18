@@ -159,7 +159,7 @@ class BuildTest(SimpleTestCase):
         os.makedirs(self.repo)
         with open(os.path.join(self.repo, "main.go"), "w") as f:
             f.write('package main\nvar p = "{{ password }}"\n')
-        self.git = SimpleNamespace(last_reload=None, get_path=lambda: ("x", self.repo),
+        self.git = SimpleNamespace(last_reload=None, shuttle_version="1.14", get_path=lambda: ("x", self.repo),
                                    git_reload=mock.Mock())
         self.git.last_reload = timezone.now() - timedelta(minutes=5)
         patcher = mock.patch("main_app.models.GitInstance.objects.get", return_value=self.git)
@@ -252,6 +252,7 @@ class BuildTest(SimpleTestCase):
             path = inst.build()
         with open(path) as f:
             self.assertIn(go_str(NASTY_PW), f.read())
+        self.assertEqual(inst.built_version, "1.14")
         self.assertEqual(sorted(os.listdir(os.path.join(self.builds(), "inst1"))), ["bin"])
 
     def test_concurrent_builds_run_go_once(self):
