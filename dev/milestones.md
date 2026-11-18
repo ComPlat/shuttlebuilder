@@ -33,41 +33,43 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M1 – Correct builds (bugs that affect every lab today)
 
+**Status:** done (#2)
+
 ### WP 1.1 – Build values are HTML-escaped into the binary
 - **Bug (verified):** `build()` renders with `django.template.Template`, where **autoescape is on** (default `TEMPLATES` in `base_settings.py`). A password `a&b<c>` is compiled in as `a&amp;b&lt;c&gt;`, and `it's` becomes `it&#x27;s`. The same happens to `src` paths (`C:\Data & Results`), URLs with `&`, and regexes with `<`/`>`. Those labs fail to log in or watch a folder that doesn't exist.
 - **Files:** `main_app/models.py` (`_get_build_config`, `build`)
 - **Tasks:**
-  - [ ] Render with autoescape off: `Context(..., autoescape=False)`, or an `Engine(autoescape=False)` used only for the build.
-  - [ ] Escape every value for a **Go string literal** instead of HTML: `\` → `\\`, `"` → `\"`, newline → `\n`, CR → `\r`, tab → `\t`. Do this in one helper, `go_str(value)`, applied to every string placeholder.
-  - [ ] Replace `replace_single_backslashes`. It leaves an already-doubled `\\` alone, which is why the UI tells users to type `\\`. **Owner decision needed:** stored values typed as `C:\\Data` must become `C:\Data` in a data migration (otherwise they would turn into a double backslash), or the old meaning stays for records created before the migration.
-  - [ ] Keep `replace_all_single_backslashes` semantics for `common_regex`. The regex goes into a Go string, so every backslash must be doubled, which `go_str` does anyway.
-  - [ ] Tests: render `cmd_manager.go`-style lines with values containing `& < > ' " \ newline`, and assert that the Go literal decodes back to the original value. Use a tiny `go run` or Python `ast`-style check of the escaping.
+  - [x] Render with autoescape off: `Context(..., autoescape=False)`, or an `Engine(autoescape=False)` used only for the build.
+  - [x] Escape every value for a **Go string literal** instead of HTML: `\` → `\\`, `"` → `\"`, newline → `\n`, CR → `\r`, tab → `\t`. Do this in one helper, `go_str(value)`, applied to every string placeholder.
+  - [x] Replace `replace_single_backslashes`. It leaves an already-doubled `\\` alone, which is why the UI tells users to type `\\`. **Owner decision needed:** stored values typed as `C:\\Data` must become `C:\Data` in a data migration (otherwise they would turn into a double backslash), or the old meaning stays for records created before the migration.
+  - [x] Keep `replace_all_single_backslashes` semantics for `common_regex`. The regex goes into a Go string, so every backslash must be doubled, which `go_str` does anyway.
+  - [x] Tests: render `cmd_manager.go`-style lines with values containing `& < > ' " \ newline`, and assert that the Go literal decodes back to the original value. Use a tiny `go run` or Python `ast`-style check of the escaping.
 - **Acceptance:** a password `p&a<s>s'"\` works end to end, using a test instance against a local SFTP server.
 
 ### WP 1.2 – `crt` is hard-coded to `"None"`
 - **Bug:** `_get_build_config` passes `"crt": "None"`. Shuttle 1.13 tries to read a file called `None` and logs a warning on every start. On Windows XP, a usable `-crt` is the only way to verify TLS.
 - **Tasks:**
-  - [ ] Pass `""` until WP 3.2 provides real certificates.
+  - [x] Pass `""` until WP 3.2 provides real certificates.
 
 ### WP 1.3 – Only render what has placeholders
 - **Risk:** every file of the Shuttle checkout goes through Django, including Markdown, YAML and Python. A single `{%` or a hyphenated `${{ a-b }}` anywhere breaks every build ("Compiling failed"). A binary file breaks it too, because files are opened in text mode with the default encoding.
 - **Tasks:**
-  - [ ] Render only `*.go` files that aren't `_test.go`, and copy everything else unchanged. Coordinate with the Shuttle repo: its `dev/check_templates.py` and the skill rule can then be relaxed to `.go` files.
-  - [ ] Open files with `encoding="utf-8"`, and on failure name the file that failed.
+  - [x] Render only `*.go` files that aren't `_test.go`, and copy everything else unchanged. Coordinate with the Shuttle repo: its `dev/check_templates.py` and the skill rule can then be relaxed to `.go` files.
+  - [x] Open files with `encoding="utf-8"`, and on failure name the file that failed.
 
 ### WP 1.4 – Build failures are invisible
 - **Bug:** `go mod download` and `go build` output isn't captured. The user sees "There was en compilation error. Maybe you have used \ in the src instead of \\." That message is misleading, and wrong once WP 1.1 is done. Every other exception is swallowed with the same text.
 - **Files:** `main_app/models.py` (`build`), `main_app/sdc_views.py` (`ShuttleDownload`)
 - **Tasks:**
-  - [ ] Run `subprocess.run(..., capture_output=True, timeout=…)` and log stdout/stderr with the instance name, **without the rendered sources** (they contain passwords).
-  - [ ] Show staff a short error with the compiler's first lines (redacted); show users a neutral message plus a reference to the log.
-  - [ ] Fix the typo "en compilation error".
+  - [x] Run `subprocess.run(..., capture_output=True, timeout=…)` and log stdout/stderr with the instance name, **without the rendered sources** (they contain passwords).
+  - [x] Show staff a short error with the compiler's first lines (redacted); show users a neutral message plus a reference to the log.
+  - [x] Fix the typo "en compilation error".
 
 ### WP 1.5 – Concurrent downloads of the same instance
 - **Risk:** two simultaneous downloads (or a download while the `GitInstance` reloads) both `rmtree` and rebuild the same folder, and can serve a broken binary.
 - **Tasks:**
-  - [ ] Lock per instance (a file lock in the build folder, or a DB `select_for_update`). Build into a temp folder and rename it into place.
-  - [ ] `git_reload` takes a global lock, so no build runs on a half-cloned repo.
+  - [x] Lock per instance (a file lock in the build folder, or a DB `select_for_update`). Build into a temp folder and rename it into place.
+  - [x] `git_reload` takes a global lock, so no build runs on a half-cloned repo.
 
 ---
 
@@ -306,10 +308,12 @@ M7 ◄── Shuttle M8 (new transfer type `chemassistent`); needs M1 WP 1.1 (es
 
 ## Owner decisions needed
 1. **WP 1.1, existing records:** convert stored `\\` to `\` (a data migration), or keep the old meaning for old records?
+   **Decided (2026-11-18): data migration.** Each stored value becomes what Shuttle actually received before (Go-decode of the old rendering); values that could never compile stay unchanged.
 2. **WP 3.3:** may every user set `-insecure`, or only staff?
 3. **WP 3.1:** require a host key for `win_i386` + SFTP, or only recommend it?
 4. **WP 4.1:** keep `C:\Program Files\Shuttle` and `/opt/Shuttle` (matching the start files), or change the start files to a new path?
 5. **WP 1.3:** render only `*.go` files (recommended), or keep rendering every file?
+   **Decided (2026-11-18): render only `*.go` files that are not `_test.go`;** copy everything else unchanged.
 
 6. **M7:** inherits the decisions of Shuttle M8 (type name, token flag, `-dst` form, folder mode, preconvert).
 
