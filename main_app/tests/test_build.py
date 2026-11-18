@@ -12,7 +12,7 @@ from unittest import mock
 from django.utils import timezone
 from django.test import SimpleTestCase, override_settings
 
-from main_app.build import BuildError, go_str, redact, render_go_tree
+from main_app.build import BuildError, go_env, go_str, redact, render_go_tree
 from main_app.models import ShuttleInstance
 
 NASTY_PW = 'p&a<s>s\'"\\'
@@ -115,6 +115,38 @@ class RenderTest(SimpleTestCase):
         self.assertTrue(cm.exception.reference)
 
 
+@override_settings(GOROOT="/opt/go-new", XP_GOROOT="/opt/go-xp", GOPATH="/opt/gopath")
+class GoEnvTest(SimpleTestCase):
+    CASES = {
+        "ubuntu_64": ("linux", None, None),
+        "raspberry_pi_6": ("linux", "arm", "6"),
+        "raspberry_pi_7": ("linux", "arm", "7"),
+        "raspberry_pi_64": ("linux", "arm64", None),
+        "win_i386": ("windows", "386", None),
+        "win_64": ("windows", None, None),
+    }
+
+    def test_all_architectures(self):
+        from main_app.models import ShuttleInstance
+        known = {c[0] for c in ShuttleInstance._meta.get_field("architecture").choices}
+        self.assertEqual(known, set(self.CASES))
+        with mock.patch.dict(os.environ, {"GO111MODULE": "on", "GOARCH": "", "GOARM": ""}):
+            for arch, (goos, goarch, goarm) in self.CASES.items():
+                env = go_env(arch)
+                self.assertEqual(env["GOOS"], goos, arch)
+                if goarch:
+                    self.assertEqual(env["GOARCH"], goarch, arch)
+                if goarm:
+                    self.assertEqual(env["GOARM"], goarm, arch)
+                self.assertEqual(env["GOPATH"], "/opt/gopath")
+                if arch == "win_i386":
+                    self.assertEqual(env["GOROOT"], "/opt/go-xp")
+                    self.assertNotIn("GO111MODULE", env)
+                else:
+                    self.assertEqual(env["GOROOT"], "/opt/go-new", arch)
+                    self.assertEqual(env["GOTOOLCHAIN"], "local", arch)
+
+
 @override_settings(GOROOT="/nonexistent-goroot", GOPATH="/nonexistent-gopath")
 class BuildTest(SimpleTestCase):
     def setUp(self):
@@ -156,6 +188,47 @@ class BuildTest(SimpleTestCase):
         self.assertEqual([n for n in os.listdir(self.builds()) if n.startswith(".") and ".tmp-" in n], [])
         with open(target) as f:
             self.assertEqual(f.read(), "old")
+
+    def _run_commands(self, arch):
+        inst = make_instance(architecture=arch)
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append((list(cmd), kw["env"]))
+            if cmd[1] == "build":
+                with open(cmd[-1], "w") as f:
+                    f.write("bin")
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with mock.patch("main_app.build.subprocess.run", side_effect=fake):
+            inst.build()
+        return calls
+
+    @override_settings(GOROOT="/opt/go-new", XP_GOROOT="/opt/go-xp")
+    def test_commands_modern(self):
+        calls = self._run_commands("ubuntu_64")
+        self.assertEqual([c[0][:3] for c in calls], [["/opt/go-new/bin/go", "mod", "download"],
+                                                      ["/opt/go-new/bin/go", "build", "-buildvcs=false"]])
+        self.assertEqual(calls[1][0][3], "-o")
+
+    @override_settings(GOROOT="/opt/go-new", XP_GOROOT="/opt/go-xp")
+    def test_commands_xp(self):
+        calls = self._run_commands("win_i386")
+        self.assertEqual(len(calls), 1)
+        cmd, env = calls[0]
+        self.assertEqual(cmd[:3], ["/opt/go-xp/bin/go", "build", "-o"])
+        self.assertNotIn("-buildvcs=false", cmd)
+        self.assertEqual(env["GOROOT"], "/opt/go-xp")
+
+    @override_settings(GOROOT="/opt/go-new", XP_GOROOT="/nonexistent/go-xp")
+    def test_missing_xp_tool_names_path(self):
+        inst = make_instance(architecture="win_i386")
+        with mock.patch("main_app.build.subprocess.run", side_effect=FileNotFoundError(2, "No such file")):
+            with self.assertLogs("main_app.build", "ERROR"):
+                with self.assertRaises(BuildError) as cm:
+                    inst.build()
+        self.assertIn("/nonexistent/go-xp/bin/go", cm.exception.detail)
+        self.assertNotIn("p&a", cm.exception.detail)
 
     def test_timeout_is_build_error(self):
         inst = make_instance()
