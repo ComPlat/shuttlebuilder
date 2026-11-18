@@ -88,6 +88,7 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 - **Acceptance:** `govulncheck` on a built Shuttle reports no reachable standard-library vulnerabilities.
 
 ### WP 2.2 – The XP toolchain is Go 1.10.0, not 1.10.8
+- **Done differently (M2):** Go 1.10.8 is installed from its SHA256-pinned tarball at `/usr/local/go1.10.8` and selected by the setting `XP_GOROOT` (not a `go1.10.8` wrapper / `XP_GO_TOOL`); XP builds get `GOROOT=XP_GOROOT` explicitly.
 - **Bug:** `go install golang.org/dl/go1.10@latest` installs the **Go 1.10.0** wrapper. Shuttle's CI (`dev/build_xp.sh`) verifies with **1.10.8**, the last 1.10 release, with its security fixes.
 - **Tasks:**
   - [x] Use `golang.org/dl/go1.10.8` and `go1.10.8 download`, and call `go1.10.8` in `build()` (make it a setting, `XP_GO_TOOL`).
