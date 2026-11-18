@@ -383,7 +383,7 @@ class ShuttleInstance(models.Model, SdcModel):
     last_update = models.DateTimeField(default=timezone.now)
     last_build = models.DateTimeField(null=True, blank=True)
     linux_user = models.CharField(_('Linux user'), max_length=32, blank=True, default='',
-                                  help_text=_("Linux only: the user that runs the Shuttle service (systemd User=)."))
+                                  help_text=_('The Linux user that runs the service; its home holds the working folder; leave empty to edit the unit file by hand.'))
     built_version = models.CharField(_('Built Shuttle version'), max_length=20, blank=True, default='',
                                      help_text=_('Shuttle version of the last successful build.'))
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
