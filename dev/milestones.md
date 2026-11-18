@@ -152,6 +152,8 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M4 – Packaging and install files
 
+**Status:** in progress
+
 ### WP 4.1 – Install paths don't match the start files
 - **Bug:**
   - The Windows start script (`file_handler/views.py`, `DownloadVbs`) runs `C:\Program Files\Shuttle\shuttle.exe`, but the README and `basic_info.html` say to create `C:\Program Files\eln_exporter` and copy the exe into `C:\Program Files\file_exporter`. Those two even differ from each other.
@@ -319,6 +321,7 @@ M7 ◄── Shuttle M8 (new transfer type `chemassistent`); needs M1 WP 1.1 (es
 3. **WP 3.1:** require a host key for `win_i386` + SFTP, or only recommend it?
    **Decided (2026-11-18): required** (unless `insecure` is set).
 4. **WP 4.1:** keep `C:\Program Files\Shuttle` and `/opt/Shuttle` (matching the start files), or change the start files to a new path?
+   **Decided (2026-11-18): keep `C:\Program Files\Shuttle` and `/opt/Shuttle`.** WP 4.2: the systemd unit is generated per instance with a new optional field `linux_user` (empty → `User=CHANGE_ME`). WP 4.3: every zip gets an `INSTALL.txt`.
 5. **WP 1.3:** render only `*.go` files (recommended), or keep rendering every file?
    **Decided (2026-11-18): render only `*.go` files that are not `_test.go`;** copy everything else unchanged.
 
