@@ -255,6 +255,18 @@ class BuildTest(SimpleTestCase):
         self.assertEqual(inst.built_version, "1.14")
         self.assertEqual(sorted(os.listdir(os.path.join(self.builds(), "inst1"))), ["bin"])
 
+    def test_missing_checkout_is_reloaded(self):
+        # after a redeploy the database still has last_reload, but ./projects is empty
+        paths = {"repo": None}
+        self.git.get_path = lambda: ("x", paths["repo"])
+        self.git.git_reload = mock.Mock(side_effect=lambda: paths.update(repo=self.repo))
+        ok = lambda cmd, **kw: (open(cmd[-1], "w").close() if cmd[1] == "build" else None) or \
+            subprocess.CompletedProcess(cmd, 0, "", "")
+        with mock.patch("main_app.build.subprocess.run", side_effect=ok):
+            path = make_instance().build()
+        self.git.git_reload.assert_called_once_with()
+        self.assertTrue(os.path.exists(path))
+
     def test_concurrent_builds_run_go_once(self):
         inst = make_instance()
         calls = []

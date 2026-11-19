@@ -468,7 +468,8 @@ class ShuttleInstance(models.Model, SdcModel):
 
         with file_lock(os.path.abspath(tp) + '.lock'):
             git = GitInstance.objects.get(is_active=True)
-            if git.last_reload is None:
+            # A fresh container (redeploy) has no checkout in ./projects even though last_reload is set.
+            if git.last_reload is None or git.get_path()[1] is None:
                 git.git_reload()
             if self.pk:
                 # another request may have built while we waited for the lock
