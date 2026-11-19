@@ -2,7 +2,7 @@
 
 Draft for `https://chemotion.net/docs/eln/devices/configurations/data_transfer`. Written for lab staff. Covers Shuttle 1.14.
 
-Shuttle is a small program on a lab PC. It watches a folder and uploads new data to an intermediate storage (a WebDAV or SFTP server) from where Chemotion collects it. You get a ready-made Shuttle for your lab from ShuttleBuilder.
+Shuttle is a small program on a lab PC. It watches a folder and uploads new data to an intermediate storage (a WebDAV or SFTP server) from where Chemotion collects it. Alternatively it can upload to a ChemAssistentManager job (see section 8). You get a ready-made Shuttle for your lab from ShuttleBuilder.
 
 ## 1. Get your Shuttle
 
@@ -51,14 +51,15 @@ SFTP on a real Windows XP machine has not been tested yet. Please test it before
 
 ## 4. Security options
 
-- **Self-signed WebDAV server:** enter the server certificate (PEM) in the instance. It is delivered as `server.crt` next to the executable; keep it there. If you add the certificate later, download the zip again and replace the files.
+- **Self-signed WebDAV or ChemAssistent server:** enter the server certificate (PEM) in the instance. It is delivered as `server.crt` next to the executable; keep it there. If you add the certificate later, download the zip again and replace the files.
 - **SFTP host key:** enter the server's fingerprint (`SHA256:...`, from WinSCP under *Session > Server/Protocol Information*, or with `ssh-keyscan -p <port> <host> | ssh-keygen -lf -`) to make Shuttle connect only to that server. Without a host key Shuttle trusts the key it sees on the first connection and stores it in `known_hosts`. If the server key changes later, Shuttle refuses to connect and logs it; if the change is intended, delete the server's line from `known_hosts` or enter the new host key.
 - **Disable verification (insecure):** switches off TLS and host key checks. For tests only. The instance list marks such instances with a red badge.
 
 ## 5. Windows XP
 
-- WebDAV: XP can only verify the server when the certificate (`server.crt`) is set; without it Shuttle does not verify and logs a warning.
+- WebDAV and ChemAssistent: XP can only verify the server when the certificate (`server.crt`) is set; without it Shuttle does not verify and logs a warning.
 - SFTP: the server's host key is required (unless verification is disabled). WinSCP must be next to `shuttle.exe`.
+- ChemAssistent: XP speaks at most TLS 1.2, so the server must offer TLS 1.2. No WinSCP is needed.
 
 ## 6. Update Shuttle
 
@@ -67,3 +68,20 @@ Download your Shuttle again from ShuttleBuilder, stop the running `shuttle.exe` 
 ## 7. Preprocess scripts
 
 Scripts in `~/shuttle/scripts` (Windows: `%USERPROFILE%\shuttle\scripts`) run before each file is sent and get the absolute file path as their only argument. On Windows only `.exe` files run, on Linux every executable file. Hidden files and folders are ignored. If a script fails, this is logged and the file is sent anyway.
+
+## 8. Upload to ChemAssistentManager
+
+The transfer type *ChemAssistent job (HTTP upload)* sends each file (or each folder) to a ChemAssistentManager job by HTTP POST. **Every upload starts one run** of the job's AI agent, which gets the files as input.
+
+1. In ChemAssistentManager create a job with the trigger **"HTTP file upload (API key)"** and create an **API key** for it. The key is shown only once, so copy it right away.
+2. In ShuttleBuilder create the instance with the transfer type *ChemAssistent job (HTTP upload)*. Enter the server URL as destination and the key (starts with `cam_`) as *API key*. User, SSH host key and converter are not used.
+3. Download and install the Shuttle as in section 2. Without a server certificate the download is a single executable; with a certificate it is a zip with `server.crt` and `INSTALL.txt` (no WinSCP).
+
+How it behaves:
+
+- **Destination:** `http://` or `https://` with a host. Without a path (or with `/`) `/api/jobs/trigger` is appended; any other path is used as the full trigger URL.
+- **One run per upload:** transfer types `file` and `flat_tar` start one run per file, `zip` and `tar` one run per archive, `folder` one run per folder with all its files. Folder paths are flattened into the file names (`A/B/x.csv` becomes `A__B__x.csv`).
+- **Size:** uploads larger than 100 MB are not attempted and stay local.
+- **Deleting:** a file is deleted locally only after the server confirmed the upload (`202`).
+- **Revoked key or disabled job:** the files stay in the working folder and the problem is logged. When the key was revoked, enter a new key in the instance, download the Shuttle again and replace the files; then the waiting files are sent.
+- **Security:** `server.crt` and *insecure* work as for WebDAV. The API key is not written to the log or to `INSTALL.txt`.

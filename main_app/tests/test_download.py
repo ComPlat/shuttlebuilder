@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import os
 import tempfile
@@ -285,6 +286,78 @@ class ShuttleDownloadZipTest(TestCase):
         self.assertEqual(resp.status_code, 500)
         self.assertIn("The converter is only available for Windows 64 Bit and Ubuntu 64 Bit.", resp.content.decode())
         build.assert_not_called()
+
+    def test_chemassistent_zip_with_cert_has_no_winscp_and_no_key(self):
+        key = "cam_" + "x" * 32
+        inst = self._instance("zip-cam", transfer="chemassistent", user="", password=key, dst="https://cam.invalid",
+                              architecture="win_i386")
+        resp = self._download(inst, only_exe=False)
+        self.assertIn('filename="shuttle_win_i386.zip"', resp["Content-Disposition"])
+        zf = self._zip(resp)
+        self.assertEqual(sorted(zf.namelist()), ["INSTALL.txt", "server.crt", "shuttle.exe"])
+        self.assertEqual(zf.read("server.crt"), self.CERT)
+        text = zf.read("INSTALL.txt").decode()
+        self.assertIn("server.crt is the certificate of the server", text)
+        self.assertNotIn("WinSCP", text)
+        self.assertNotIn(key, text)
+        self.assertNotIn("cam.invalid", text)
+
+    def test_chemassistent_exe_only_without_cert_on_win_i386(self):
+        inst = self._instance("zip-cam2", cert=False, transfer="chemassistent", user="", password="cam_" + "y" * 32,
+                              architecture="win_i386")
+        if not hasattr(ShuttleInstance, "uses_tls"):
+            self.skipTest("ShuttleInstance.uses_tls() comes with worker A; run after the merge")
+        self.assertTrue(inst.only_exe())
+        self.client.force_login(self.owner)
+        url = reverse("scd_view_shuttle_download", kwargs={"pk": inst.pk})
+        with mock.patch("main_app.models.ShuttleInstance.build", return_value=self.exe):
+            resp = self.client.get(url)
+        self.assertEqual(resp.content, b"BIN")
+
+    def test_chemassistent_with_cert_is_not_exe_only(self):
+        if not hasattr(ShuttleInstance, "uses_tls"):
+            self.skipTest("ShuttleInstance.uses_tls() comes with worker A; run after the merge")
+        inst = self._instance("zip-cam3", transfer="chemassistent", user="", password="cam_" + "z" * 32,
+                              architecture="win_i386")
+        self.assertFalse(inst.only_exe())
+
+
+class ShuttleInstanceEditPageTest(TestCase):
+    """The edit page links to ChemAssistentManager only if CHEMASSISTENT_URL is set."""
+    URL = "/sdc_view/main_app/shuttle_instance_edit?_method=content"
+    LINK_TEXT = "Create a job and an API key in ChemAssistentManager"
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user("edit-user", password="x")
+        GitInstance.objects.create(name="g-edit", url="http://example.invalid/x.git", branch="main", is_active=True)
+
+    def _get(self):
+        self.client.force_login(self.user)
+        resp = self.client.get(self.URL)
+        self.assertEqual(resp.status_code, 200)
+        resp.html = json.loads(resp.content)["html"]
+        return resp
+
+    def test_no_link_without_setting(self):
+        with override_settings(CHEMASSISTENT_URL=""):
+            resp = self._get()
+        self.assertNotIn(self.LINK_TEXT, resp.html)
+        self.assertIn("API key (cam_", resp.html)
+
+    def test_link_with_setting_is_escaped(self):
+        with override_settings(CHEMASSISTENT_URL='https://cam.example.invalid/x?a=1&b="2"'):
+            resp = self._get()
+        html = resp.html
+        self.assertIn(self.LINK_TEXT, html)
+        self.assertIn('href="https://cam.example.invalid/x?a=1&amp;b=&quot;2&quot;"', html)
+        self.assertIn('target="_blank"', html)
+
+    def test_non_http_url_is_ignored(self):
+        with override_settings(CHEMASSISTENT_URL="javascript:alert(1)"):
+            resp = self._get()
+        self.assertNotIn("javascript:", resp.html)
+        self.assertNotIn(self.LINK_TEXT, resp.html)
 
 
 class ListTemplatesTest(TestCase):

@@ -6,7 +6,7 @@ Full documentation: [Chemotion docs, data transfer](https://chemotion.net/docs/e
 ## What ShuttleBuilder is
 
 ShuttleBuilder is a Django application that builds [Shuttle](https://github.com/ComPlat/shuttle) for each lab and serves it as a download.
-Shuttle is a small Go program that watches a folder on a lab PC and uploads new data via WebDAV or SFTP to an intermediate storage, from where the Electronic Lab Notebook (ELN) Chemotion collects it.
+Shuttle is a small Go program that watches a folder on a lab PC and uploads new data via WebDAV or SFTP to an intermediate storage, from where the Electronic Lab Notebook (ELN) Chemotion collects it. A third transfer type, ChemAssistent, uploads to a ChemAssistentManager job instead (see [ChemAssistent upload](#chemassistent-upload)).
 
 The application works independently of Chemotion but is designed to operate as a service for it. Users log in with their Chemotion password and abbreviation; superusers can also create local users in the [admin](/admin/).
 
@@ -22,7 +22,7 @@ Lab PCs are physically separated from public networks for security reasons, so d
 
 Supported: Windows x64 and i386 (including Windows XP) and Linux x64. Installing needs administrative rights.
 
-1. **Create the instance.** In the Shuttle list click the new-instance button and fill in the [Shuttle instance form](/shuttle-instance-list/shuttle-instance-edit) for your WebDAV or SFTP server.
+1. **Create the instance.** In the Shuttle list click the new-instance button and fill in the [Shuttle instance form](/shuttle-instance-list/shuttle-instance-edit) for your WebDAV or SFTP server (or for a ChemAssistentManager job).
 2. **Download it** from the Shuttle list. Depending on the options you get a single executable or a zip file. Every zip contains an `INSTALL.txt` with the steps for exactly this instance (it never contains passwords, users or host keys).
 3. **Install it** as described below.
 
@@ -79,9 +79,9 @@ Shuttle is installed as a **systemd** service, one unit per instance.
 
 Each instance has three optional settings that control how the server is verified.
 
-### WebDAV: server certificate
+### WebDAV and ChemAssistent: server certificate
 
-Shuttle checks the server certificate with the system root certificates plus an optional certificate file. A server with a **self-signed or private certificate** needs that certificate (or its CA) as the instance's *server certificate* (PEM). Without it, uploads fail until it is set; files wait and are sent once the connection works.
+Shuttle checks the server certificate with the system root certificates plus an optional certificate file. A server with a **self-signed or private certificate** needs that certificate (or its CA) as the instance's *server certificate* (PEM); this works the same for WebDAV and ChemAssistent. Without it, uploads fail until it is set; files wait and are sent once the connection works.
 
 The certificate is shipped as `server.crt` next to the executable, so the download becomes a zip file. **Keep `server.crt` next to `shuttle.exe` / `shuttle`**: Shuttle looks for it there first. If the certificate was added after you installed Shuttle, download the zip again and replace the files. An unreadable certificate file is logged as a warning.
 
@@ -93,6 +93,26 @@ The certificate is shipped as `server.crt` next to the executable, so the downlo
 ### Disable verification (`insecure`)
 
 Switches off TLS and SSH host key verification and logs a warning. Any user can set it. The instance list marks such instances with a red "Verification disabled" badge; SFTP instances without a host key show a "No host key" hint. Use it only for tests.
+
+---
+
+## ChemAssistent upload
+
+The transfer type **ChemAssistent job (HTTP upload)** sends each file (or each folder) to a ChemAssistentManager job by HTTP POST. Every upload starts **one run** of the job's AI agent, which gets the files as input.
+
+1. In ChemAssistentManager create a job with the trigger **"HTTP file upload (API key)"** and create an **API key** for it. The key is shown only once.
+2. In ShuttleBuilder create the Shuttle instance with the transfer type *ChemAssistent job (HTTP upload)*. Enter the server URL as *destination* and the key (starts with `cam_`) in the *API key* field (stored in the instance's `password` field). The user and the SSH host key are not used. If the administrator configured `CHEMASSISTENT_URL`, the form pre-fills the destination and links to ChemAssistentManager.
+3. Download and install the Shuttle as usual.
+
+- **Destination:** `http://` or `https://` with a host. Without a path (or with `/`) `/api/jobs/trigger` is appended; any other path is used as the full trigger URL.
+- **Runs per Shuttle type:** `file` and `flat_tar`: one run per file. `zip` and `tar`: one run per archive. `folder`: one run per folder with all its files; folder paths are flattened into the file names (`A/B/x.csv` becomes `A__B__x.csv`).
+- **Size limit:** uploads larger than 100 MB are not attempted and stay local.
+- **Local files:** a file is deleted locally only after the server confirmed the upload (`202`).
+- **Revoked key or disabled job:** the files stay local and are sent when the problem is fixed. After a revoked key, give the instance a new key, build it and download it again, then replace the Shuttle on the PC.
+- **TLS:** the server certificate and *insecure* work as for WebDAV. Windows XP builds speak at most TLS 1.2, so the server must offer TLS 1.2.
+- **Not supported:** the converter (`ChemConverterApp`) cannot be combined with this transfer type.
+- **Zip or single file:** the download is the plain executable; with a server certificate it is a zip with `server.crt` and `INSTALL.txt` (no WinSCP).
+- The API key is never written to the Shuttle log or to `INSTALL.txt`.
 
 ---
 

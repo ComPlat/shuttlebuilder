@@ -79,6 +79,30 @@ class FileMatcherTest(SimpleTestCase):
         self.assertFalse(smoke.file_matches('win_64', 'ASCII text'))
 
 
+class ChemAssistentCasesTest(SimpleTestCase):
+    def cases(self):
+        return [c for c in smoke.CASES if c[2] == 'chemassistent']
+
+    def test_cases_cover_three_architectures(self):
+        self.assertEqual(sorted(c[1] for c in self.cases()), ['ubuntu_64', 'win_64', 'win_i386'])
+        self.assertEqual(len(smoke.CASES), 12)
+
+    def test_key_format(self):
+        key = smoke.CAM_FIELDS['password']
+        self.assertTrue(key.startswith('cam_'))
+        self.assertEqual(len(key), 4 + 32)
+        self.assertEqual(smoke.CAM_FIELDS['dst'], 'https://cam.example.invalid')
+
+    def test_expected_defaults(self):
+        fields = dict(smoke.NASTY, transfer='chemassistent', **smoke.CAM_FIELDS)
+        want = smoke.expected_defaults(fields, False)
+        self.assertEqual(want['pass'], smoke.CAM_FIELDS['password'])
+        self.assertEqual(want['user'], '')
+        self.assertEqual(want['hostkey'], '')
+        self.assertEqual(want['crt'], '')
+        self.assertEqual(smoke.expected_defaults(fields, True)['crt'], 'server.crt')
+
+
 class DryRunTest(TestCase):
     """Whole command with git, build and subprocess mocked; nothing is cloned or compiled."""
 
@@ -136,7 +160,8 @@ class DryRunTest(TestCase):
         self.assertEqual(code, 0, output)
         self.assertEqual(output.count('OK  '), len(smoke.CASES))
         self.assertIn('SMOKE RESULT: PASS', output)
-        for secret in (smoke.NASTY['password'], 'p&a<s>s'):
+        self.assertIn('chemassistent', output)
+        for secret in (smoke.NASTY['password'], 'p&a<s>s', smoke.CAM_FIELDS['password']):
             self.assertNotIn(secret, output)
         self.assertEqual(os.getcwd(), self.cwd)
 
