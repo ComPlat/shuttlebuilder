@@ -1,129 +1,169 @@
-Welcome to the ShuttleBuilder
------------------------------
+# ShuttleBuilder
 
-Full documentation [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer)
+Full documentation: [Chemotion docs, data transfer](https://chemotion.net/docs/eln/devices/configurations/data_transfer)
+(self-contained lab-staff version in this repository: [docs/chemotion-data-transfer.md](docs/chemotion-data-transfer.md)).
 
-This application works independently of the Electronic Lab Notebook (ELN) Chemotion. However, it is designed to operate as a service for Chemotion. The user can log in with his/her Chemotion password and abbreviation. However, the superuser can also create Locel users.
+## What ShuttleBuilder is
 
-![Diagram: Networg description](https://github.com/ComPlat/shuttlebuilder/blob/master/Assets/static/img/shuttle_builder.drawio.png)
+ShuttleBuilder is a Django application that builds [Shuttle](https://github.com/ComPlat/shuttle) for each lab and serves it as a download.
+Shuttle is a small Go program that watches a folder on a lab PC and uploads new data via WebDAV or SFTP to an intermediate storage, from where the Electronic Lab Notebook (ELN) Chemotion collects it.
 
-The physical separation of laboratory PCs from public networks for security reasons significantly
-impacts the file transfer process requirements. Consequently, data stored locally 
-on lab devices must be forwarded to the ELN via an intermediary system. The Shuttle 
-is one part of such an intermediary system. It can facilitate this by sending device data 
-to an intermediary data storage. It allows you to monitor and organize the data transmission of 
-devices integrated with your ELN Chemotion instance (for more information, click [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer) ). [Shuttle](https://github.com/ComPlat/shuttle) 
-instances can be quickly and easily adapted to specific requirements. These instances can then be installed on the target lab system in just a few steps.
+The application works independently of Chemotion but is designed to operate as a service for it. Users log in with their Chemotion password and abbreviation; superusers can also create local users in the [admin](/admin/).
 
-## How to set up a Shuttle Builder
+![Diagram: Network description](Assets/static/img/shuttle_builder.drawio.png)
 
-Please use Docker image [mstarman/shuttlebuilder](https://hub.docker.com/r/mstarman/shuttlebuilder). Needed Enviroment variables are:
+Lab PCs are physically separated from public networks for security reasons, so data must be forwarded to the ELN through an intermediary system. Shuttle is one part of it: it sends device data to the intermediate storage. Each Shuttle is built for its lab (source folder, destination, credentials, security options), so installing it takes only a few steps.
+
+**Contents:** [Install](#install-shuttle) | [After the installation](#what-shuttle-does-after-the-installation) | [Security](#security) | [Windows XP](#windows-xp) | [Preprocess scripts](#preprocess-scripts) | [Admins](#admins) | [Chemotion docs](#chemotion-docs)
+
+---
+
+## Install Shuttle
+
+Supported: Windows x64 and i386 (including Windows XP) and Linux x64. Installing needs administrative rights.
+
+1. **Create the instance.** In the Shuttle list click the new-instance button and fill in the [Shuttle instance form](/shuttle-instance-list/shuttle-instance-edit) for your WebDAV or SFTP server.
+2. **Download it** from the Shuttle list. Depending on the options you get a single executable or a zip file. Every zip contains an `INSTALL.txt` with the steps for exactly this instance (it never contains passwords, users or host keys).
+3. **Install it** as described below.
+
+### Windows (64 bit and i386)
+
+1. Create the folder `C:\Program Files\Shuttle`.
+2. Copy `shuttle.exe` into it (for a zip: all files except `INSTALL.txt`).
+3. Download `shuttle_task.vbs` (link in the Shuttle documentation page of the app and in `INSTALL.txt`) and copy it into the startup folder: press **Windows key + R**, type `shell:startup`, press Enter.
+4. Restart the computer, or double-click `shuttle_task.vbs` once.
+
+The `.vbs` file starts `C:\Program Files\Shuttle\shuttle.exe` hidden at every login.
+
+### Windows XP with SFTP
+
+Use the zip `shuttle_sftp_winxp.zip`. It contains `shuttle.exe` and a portable WinSCP. Install it like Windows above, but copy **all** files (`shuttle.exe`, `WinSCP.exe`, `WinSCP.com`, `license.txt`) into `C:\Program Files\Shuttle`. WinSCP must stay next to `shuttle.exe`. See [Windows XP](#windows-xp).
+
+### Linux
+
+Shuttle is installed as a **systemd** service, one unit per instance.
+
+1. Set the field *Linux user* of the instance: the user whose home folder holds the working folder.
+2. Create `/opt/Shuttle` and copy `shuttle` into it (for a zip: all files except `INSTALL.txt`). Make the programs executable (`chmod +x /opt/Shuttle/shuttle`, and `/opt/Shuttle/ChemConverterApp` if the instance has a converter).
+3. Click the **systemd unit** button of the instance in the Shuttle list and save the file as `/etc/systemd/system/shuttle.service`. (Generic fallback: `/sdc_view/main_app/download/shuttle.service`.) If it contains `User=CHANGE_ME`, replace `CHANGE_ME` with the Linux user.
+4. Run:
+   ```bash
+   systemctl daemon-reload
+   systemctl enable --now shuttle.service
+   ```
+
+---
+
+## What Shuttle does after the installation
+
+**Working folder.** Shuttle creates `~/shuttle/shuttle_<name>/` (Windows: `%USERPROFILE%\shuttle\shuttle_<name>\`), where `<name>` is the instance name. It holds:
+
+- `shuttle_log.txt`, the log (the first place to look when something does not work);
+- `sent_register.json`, the list of files already handed over (path relative to the source folder, modification time and size);
+- `known_hosts` (SFTP only, see [Security](#security)).
+
+**What gets sent.**
+
+- A file is sent when it is new or has changed since it was last sent, has not been modified for the configured *duration*, and is not locked by another program.
+- Folder-based transfer types (folder, zip, tar): a folder is sent when at least one of its files is new or changed and all of its files have been unchanged for the duration. **A changed folder is always sent again completely.**
+- **First start:** every stable file already in the source folder (older than the duration) is sent **once**. Plan for the traffic, and for duplicates on the server if the data was already transferred another way. The same happens when the register is empty or missing.
+- **Resend everything:** stop Shuttle, delete `sent_register.json`, start Shuttle. A damaged register is moved aside as `sent_register.json.corrupt-<time>` and Shuttle starts with an empty one.
+
+**Outages.** Network problems are never fatal. If the server cannot be reached (also at boot, before the network is up) the error is logged and the upload is retried with increasing waits (up to the duration). Files stay in the working folders until the server confirmed the upload.
+
+**Stopping.** On Linux systemd stops Shuttle cleanly (SIGTERM); files not yet sent are sent after the next start. Shuttle exits on configuration errors (e.g. an unreadable `~/shuttle/scripts` folder, or a missing `ChemConverterApp` when the converter is enabled); the reason is in the log.
+
+---
+
+## Security
+
+Each instance has three optional settings that control how the server is verified.
+
+### WebDAV: server certificate
+
+Shuttle checks the server certificate with the system root certificates plus an optional certificate file. A server with a **self-signed or private certificate** needs that certificate (or its CA) as the instance's *server certificate* (PEM). Without it, uploads fail until it is set; files wait and are sent once the connection works.
+
+The certificate is shipped as `server.crt` next to the executable, so the download becomes a zip file. **Keep `server.crt` next to `shuttle.exe` / `shuttle`**: Shuttle looks for it there first. If the certificate was added after you installed Shuttle, download the zip again and replace the files. An unreadable certificate file is logged as a warning.
+
+### SFTP: SSH host key
+
+- **Pinned:** enter the server's fingerprint as *SSH host key* (`SHA256:...`, optionally with the WinSCP prefix such as `ssh-ed25519 255 SHA256:...`, or `MD5:aa:bb:...`). Shuttle then only connects to a server presenting exactly this key. Get the fingerprint in WinSCP (*Session > Server/Protocol Information*) or with `ssh-keyscan -p <port> <host> | ssh-keygen -lf -` (use the `SHA256:...` value). The host key applies to both SFTP destinations (main and converter), so they must be the same server.
+- **Trust on first use (no host key entered):** Shuttle trusts the key it sees on the first connection and stores it in `known_hosts` in the working folder. If the server later presents a different key, Shuttle refuses to connect and logs which key it saw. If the change is intended (for example a reinstalled server), delete the server's line from `known_hosts`, or set the *SSH host key*.
+
+### Disable verification (`insecure`)
+
+Switches off TLS and SSH host key verification and logs a warning. Any user can set it. The instance list marks such instances with a red "Verification disabled" badge; SFTP instances without a host key show a "No host key" hint. Use it only for tests.
+
+---
+
+## Windows XP
+
+- XP builds are compiled with Go 1.10.8.
+- **SFTP:** WinSCP is used for the transfer. `WinSCP.com` (and `WinSCP.exe`) must be in the same folder as `shuttle.exe`; the zip contains them. Shuttle writes a short temporary script into its working folder, runs `WinSCP.com` once per uploaded file and deletes the script afterwards. The password is not written to the log. At startup a connection check runs, so a missing `WinSCP.com` or a rejected host key shows up in the log immediately.
+- **Host key:** the host key is required for XP with SFTP (unless verification is disabled). It is compiled into `shuttle.exe`. Without a host key WinSCP must already know the server's key (connect once with WinSCP on that PC and accept it), otherwise every upload fails; Shuttle logs a note at startup.
+- **WebDAV / TLS:** the XP build cannot read the Windows certificate store, so it verifies the server certificate **only** when the server certificate (`server.crt`) is set. Without it, verification is off and a warning is logged at startup.
+- **Not yet tested on real hardware:** SFTP on a real Windows XP machine is still an open manual test (tracked as a Shuttle issue). Test it on your PC before relying on it.
+
+---
+
+## Preprocess scripts
+
+Scripts in `~/shuttle/scripts` (Windows: `%USERPROFILE%\shuttle\scripts`) run before each file is sent. They get one argument, the absolute path of the file, and may overwrite it or write a new copy in the same folder.
+
+- Windows: only regular files with the extension `.exe` (any case) run; `.bat`, `.cmd` and `.sh` do not.
+- Linux: every regular file with an execute bit runs, whatever its extension (a symlink to such a file too).
+- Directories and hidden files (names starting with `.`) never run.
+- A failing script or converter is logged; the conversion is skipped and the raw data is still sent.
+
+---
+
+## Admins
+
+### Set up ShuttleBuilder
+
+Use the Docker image [mstarman/shuttlebuilder](https://hub.docker.com/r/mstarman/shuttlebuilder). Environment variables:
 
 ```
 MODE=prod
-# The host URL via which the service can be accessed 
+# The host URL via which the service can be accessed
 ALLOWED_HOST=http://0.0.0.0
-# The Chomtion URL only needed if you like to mirrow the user management
-ELN_URL=https://XXXXXXXX
-# Initial Super user information
-DJANGO_SUPERUSER_USERNAME=Tom Riple
-DJANGO_SUPERUSER_EMAIL=taent.riple@kit.edu
-DJANGO_SUPERUSER_PASSWORD=QWer!1234
-# Database information
+# The Chemotion URL, only needed if you want to mirror the user management
+ELN_URL=https://eln.example.org
+# Initial superuser
+DJANGO_SUPERUSER_USERNAME=admin
+DJANGO_SUPERUSER_EMAIL=admin@example.org
+DJANGO_SUPERUSER_PASSWORD=<choose-a-strong-password>
+# Database
 POSTGRES_DB=builder
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=QWer!1234        
+POSTGRES_PASSWORD=<choose-a-strong-password>
 POSTGRES_PORT=5432
 POSTGRES_HOST=db
 ```
 
-# Basic Documentation
+### Toolchains
 
-Full documentation [here](https://chemotion.net/docs/eln/devices/configurations/data_transfer).
+The image contains two Go toolchains: Go 1.26.11 (`GOROOT=/usr/local/go`, on `PATH`) for all modern targets, and Go 1.10.8 for Windows XP (`XP_GOROOT=/usr/local/go1.10.8`, not on `PATH`; used in GOPATH mode). Both are pinned in the `Dockerfile` (`GO_VERSION`, `XP_GO_VERSION`, with checksums).
 
-After reading this documentation, users will gain a very good understanding of the Shuttle system, its purpose, and how it integrates with the Electronic Lab Notebook (ELN) Chemotion.  
+### Rolling out a new Shuttle version
 
-The Shuttle application works independently of Chemotion but is designed to operate as a service for it. Users can log in with their Chemotion password and abbreviation, while superusers can also create local users [here](/admin/).
+1. In the git instance list, **reload** the active `GitInstance` (or activate another one). This clones the repository again; the Shuttle version of the checkout (`shuttle_version`, read from `main.go`) is shown in the list.
+2. Every Shuttle instance is rebuilt on its next download. The Shuttle list shows the version each instance was last built with (`built_version`, "not built yet" otherwise); `INSTALL.txt` names it too.
+3. Labs download their zip again, replace the executable and restart Shuttle (Windows: end the running `shuttle.exe` in the Task Manager, replace the file, then restart the PC or double-click `shuttle_task.vbs`; Linux: replace the file, then `systemctl restart shuttle.service`).
 
-![Diagram: Network description](/static/img/shuttle_builder.drawio.png)
+Announce the rollout first: **the first start of Shuttle 1.13 or newer sends every stable file in the source folder once** (see [docs/announcement-shuttle-1.14.md](docs/announcement-shuttle-1.14.md)).
 
-Due to the physical separation of laboratory PCs from public networks for security reasons, transferring files from lab devices to the ELN requires an intermediary system. Shuttle is a key component of this process, enabling device data to be sent to an intermediary storage system.  
+### Smoke build and CI
 
-It allows users to monitor and manage data transmission from devices integrated with their ELN Chemotion instance. Shuttle instances are flexible and can be adapted to specific requirements, then installed on target lab systems in just a few steps. For more information, see the [full documentation](https://chemotion.net/docs/eln/devices/configurations/data_transfer) or visit the [Shuttle GitHub repository](https://github.com/ComPlat/shuttle).
-
----
-
-## How to install Shuttle
-
-This section explains how to install Shuttle. Following these instructions will give users a strong understanding of the installation process. Installation is supported for Windows x64 and i386 devices, and Linux x64 devices.
-
-1. **Generate Shuttle instance:**  
-   In the Shuttle list, click the new instance button to create a [Shuttle instance](/shuttle-instance-list/shuttle-instance-edit) configured for an external WebDAV or SFTP server.
-
-2. **Download Shuttle instance:**  
-   After creating a new instance, download the executable from the Shuttle list.
-
-3. **Install Shuttle instance:**  
-   Installation is straightforward but requires administrative rights. Every zip file contains an `INSTALL.txt` with the steps for this instance (without any secrets).  
-   Windows (64 Bit and i386):
-   1. Make a directory: `C:\Program Files\Shuttle`
-   2. Copy the generated `shuttle.exe` (for a zip: all its files) into `C:\Program Files\Shuttle`
-   3. Copy the [shuttle_task.vbs](/sdc_view/main_app/download/file_exporter_task.vbs) into the startup directory.  
-      **Hint:** Press **Windows Key + R**, type `shell:startup`, and press Enter.
-
-4. **(Special case) Install Shuttle with SFTP on Windows XP:**  
-   The downloaded zip file `shuttle_sftp_winxp.zip` contains the executable and WinSCP.  
-   1. Make a directory: `C:\Program Files\Shuttle`
-   2. Unzip the file and copy **all** files (`shuttle.exe`, `WinSCP.exe`, `WinSCP.com`, `license.txt`) into `C:\Program Files\Shuttle`. WinSCP must stay next to `shuttle.exe`.
-   3. Copy the [shuttle_task.vbs](/sdc_view/main_app/download/file_exporter_task.vbs) into the startup directory (see above).
-
-5. **Install Shuttle on Linux:**  
-   Installation requires administrative rights and is designed for **systemd**. Set the optional field *Linux user* of the instance: it is the user whose home holds the working folder.  
-   1. Make a directory: `/opt/Shuttle`
-   2. Copy the `shuttle` executable (for a zip: all its files) into `/opt/Shuttle/` and make it executable.
-   3. Use the **systemd unit** button of the instance in the Shuttle list to download `shuttle.service` (generic fallback: [shuttle.service](/sdc_view/main_app/download/shuttle.service)). If it contains `User=CHANGE_ME`, replace it with the Linux user. Copy it into `/etc/systemd/system/shuttle.service`, then run:  
-      ```bash
-      systemctl daemon-reload
-      systemctl enable --now shuttle.service
-      ```
-
-Shuttle keeps its log (`shuttle_log.txt`), the list of sent files (`sent_register.json`) and `known_hosts` in `~/shuttle/shuttle_<name>/` (Windows: `%USERPROFILE%\shuttle\shuttle_<name>\`). On the first start it sends every stable file already in the source folder once; delete `sent_register.json` to send everything again.
-
-## Security options
-
-Each Shuttle instance has three optional settings that control how the server is verified:
-
-- **SSH host key** (SFTP only): the fingerprint of the server, either `SHA256:...` (optionally with the WinSCP prefix such as `ssh-ed25519 255 `) or `MD5:aa:bb:...`. Get it from WinSCP (*Session > Server/Protocol Information*) or with `ssh-keyscan -p <port> <host> | ssh-keygen -lf -`. It applies to both SFTP destinations (main and converter), so they must be the same server. **Required for Windows XP with SFTP**, unless verification is disabled.
-- **Server certificate** (WebDAV only): a PEM file for servers with a self-signed or private certificate. It is shipped as `server.crt` next to the executable, so the download becomes a zip file (`shuttle_<architecture>.zip`). On Windows XP it is the only way TLS is verified.
-- **Disable verification (insecure)**: switches off TLS and SSH host key verification. Any user can set it. The instance list marks such instances with a red "Verification disabled" badge; SFTP instances without host key show a "No host key" hint (the key is trusted on first use). Use it only for tests.
-
-## Shuttle version
-
-The git instance list shows the Shuttle version of each checkout (read after "Reload"). The Shuttle list shows the version each instance was last built with ("not built yet" otherwise); the tooltip of the download button names the version of the active git instance.
+- `python manage.py shuttle_smoke_build` (inside the image, throw-away SQLite database) builds Shuttle for all six architectures and checks the results. `dev/smoke_build.sh <image>` runs it in a Docker image: `dev/smoke_build.sh -h` shows the options.
+- GitHub Actions: `.github/workflows/ci.yml` runs the tests; `.github/workflows/smoke.yml` runs the smoke build against Shuttle `main`.
+- `deploy.sh` builds the image, runs the smoke build and only deploys when it passes.
 
 ---
 
-## Preprocess Scripts
+## Chemotion docs
 
-Shuttle supports preprocess scripts, allowing custom file manipulations before transfer. Understanding how to use these scripts gives users deeper insight into Shuttle’s flexibility.
-
-- **Windows:** Scripts must be `.exe` files  
-- **Linux:** All executable file types are supported
-
-### Preprocess Script Requirements
-
-Scripts must be placed in:
-
-Linux: 
-```bash
-~/shuttle/scripts
-```
-
-Windows:
-```bash
-%USERPROFILE%\shuttle\scripts
-```
-
-If Shuttle has already run, this folder will exist.
-
-Scripts are called for each file to be sent. They receive one argument: the absolute path to the file. The script can overwrite the file or create a new copy in the same folder, giving users full control over file preprocessing.
+- [Chemotion docs: data transfer](https://chemotion.net/docs/eln/devices/configurations/data_transfer)
+- [Lab-staff version in this repository](docs/chemotion-data-transfer.md)
+- [Announcement for Shuttle 1.14](docs/announcement-shuttle-1.14.md)
+- [Shuttle on GitHub](https://github.com/ComPlat/shuttle)
