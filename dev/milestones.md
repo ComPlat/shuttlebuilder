@@ -252,7 +252,7 @@ Everything that users or admins read, aligned with Shuttle 1.13 and with M1–M5
 
 ## M7 – New transfer type: ChemAssistentManager upload
 
-**Status:** in progress
+**Status:** done (#9)
 
 **Decided (2026-11-19):** Shuttle 1.14.1 settled Shuttle M8: type `chemassistent`, the API key goes in `-pass` (option A: reuse `password`, `user` unused), `-preconvert` refused, `-dst` http(s) with `/api/jobs/trigger` appended when there is no path, also built for XP (TLS 1.2). **No per-instance upload limit:** `-maxUpload` has no placeholder, so every instance uses Shuttle's default 100 MB (documented). **WP 7.3:** `CHEMASSISTENT_URL` from the environment (empty = off).
 
