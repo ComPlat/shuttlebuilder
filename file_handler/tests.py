@@ -15,6 +15,15 @@ class StartFilesTest(TestCase):
         self.assertIn('WinScriptHost.CurrentDirectory = "C:\\Program Files\\Shuttle"', body)
         self.assertLess(body.index('CurrentDirectory'), body.index('.Run'))
 
+    def test_vbs_new_and_legacy_url(self):
+        # the start file has a new URL name-wise; the old URL keeps working for existing links
+        self.assertTrue(reverse('shuttle_task.vbs').endswith('/download/shuttle_task.vbs'))
+        new = self.client.get(reverse('shuttle_task.vbs'))
+        old = self.client.get(reverse('shuttle_task_legacy.vbs'))
+        self.assertTrue(reverse('shuttle_task_legacy.vbs').endswith('/download/file_exporter_task.vbs'))
+        self.assertEqual(new.status_code, 200)
+        self.assertEqual(old.content, new.content)
+
     def test_generic_unit(self):
         r = self.client.get(reverse('file_shuttle.service'))
         body = r.content.decode()

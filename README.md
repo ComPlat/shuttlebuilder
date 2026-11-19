@@ -30,7 +30,7 @@ Supported: Windows x64 and i386 (including Windows XP) and Linux x64. Installing
 
 1. Create the folder `C:\Program Files\Shuttle`.
 2. Copy `shuttle.exe` into it (for a zip: all files except `INSTALL.txt`).
-3. Download `shuttle_task.vbs` (link in the Shuttle documentation page of the app and in `INSTALL.txt`) and copy it into the startup folder: press **Windows key + R**, type `shell:startup`, press Enter.
+3. Download [shuttle_task.vbs](/sdc_view/main_app/download/shuttle_task.vbs) (also linked in the app's documentation page and in `INSTALL.txt`) and copy it into the startup folder: press **Windows key + R**, type `shell:startup`, press Enter.
 4. Restart the computer, or double-click `shuttle_task.vbs` once.
 
 The `.vbs` file starts `C:\Program Files\Shuttle\shuttle.exe` hidden at every login.
@@ -151,7 +151,7 @@ The image contains two Go toolchains: Go 1.26.11 (`GOROOT=/usr/local/go`, on `PA
 2. Every Shuttle instance is rebuilt on its next download. The Shuttle list shows the version each instance was last built with (`built_version`, "not built yet" otherwise); `INSTALL.txt` names it too.
 3. Labs download their zip again, replace the executable and restart Shuttle (Windows: end the running `shuttle.exe` in the Task Manager, replace the file, then restart the PC or double-click `shuttle_task.vbs`; Linux: replace the file, then `systemctl restart shuttle.service`).
 
-Announce the rollout first: **the first start of Shuttle 1.13 or newer sends every stable file in the source folder once** (see [docs/announcement-shuttle-1.14.md](docs/announcement-shuttle-1.14.md)).
+Announce the rollout first: **after an update from Shuttle 1.12 or older, the first start sends every stable file in the source folder once** (later updates keep `sent_register.json`) (see [docs/announcement-shuttle-1.14.md](docs/announcement-shuttle-1.14.md)).
 
 ### Smoke build and CI
 

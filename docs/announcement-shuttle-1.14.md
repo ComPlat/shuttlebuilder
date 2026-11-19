@@ -5,7 +5,7 @@ Hello,
 we are about to roll out Shuttle 1.14 (the changes started with 1.13). Please read this before you update a lab PC.
 
 **1. Everything is uploaded once more on the first start.**
-On its first start the new Shuttle sends every stable file that is already in the source folder, once. Plan for the extra traffic, and expect duplicates on the server for data that was transferred before. After that only new and changed files are sent. If a file in a folder changes, the whole folder is sent again.
+Labs that update from Shuttle 1.12 or older: on its first start the new Shuttle sends every stable file that is already in the source folder, once. Plan for the extra traffic, and expect duplicates on the server for data that was transferred before. After that only new and changed files are sent. If a file in a folder changes, the whole folder is sent again.
 
 **2. Self-signed WebDAV servers need the certificate.**
 Shuttle now verifies the server certificate. If your WebDAV server uses a self-signed or private certificate, add the certificate to your instance in ShuttleBuilder and download the zip again. It contains `server.crt`, which must stay next to the executable. Without it, uploads fail until it is set (the files wait and are sent afterwards).

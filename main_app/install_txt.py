@@ -98,7 +98,8 @@ def render_install_txt(instance, request):
         _('On the first start Shuttle sends every stable file that is already in the source folder once.'),
         _('To send everything again, stop Shuttle, delete %(register)s and start Shuttle again.')
         % {'register': register},
-        _('Shuttle exits on configuration errors; see the log. On Linux it stops cleanly on SIGTERM.'),
+        _('Shuttle exits on configuration errors and prints the reason to the console, not to the log '
+          '(Linux: journalctl -u shuttle.service). On Linux it stops cleanly on SIGTERM.'),
         '',
     ]
     return ('\r\n' if windows else '\n').join(lines)

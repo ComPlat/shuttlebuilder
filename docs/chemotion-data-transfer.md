@@ -62,7 +62,7 @@ SFTP on a real Windows XP machine has not been tested yet. Please test it before
 
 ## 6. Update Shuttle
 
-Download your Shuttle again from ShuttleBuilder, stop the running `shuttle.exe` (Linux: `systemctl stop shuttle.service`), replace the files, and start it again (restart the PC or double-click `shuttle_task.vbs`; Linux: `systemctl start shuttle.service`). Remember that the first start of a new version sends all stable files in the source folder again.
+Download your Shuttle again from ShuttleBuilder, stop the running `shuttle.exe` (Linux: `systemctl stop shuttle.service`), replace the files, and start it again (restart the PC or double-click `shuttle_task.vbs`; Linux: `systemctl start shuttle.service`). Shuttle keeps its list of sent files (`sent_register.json`) across updates, so files are not sent again, except when you update from Shuttle 1.12 or older: then the first start sends every stable file in the source folder once.
 
 ## 7. Preprocess scripts
 

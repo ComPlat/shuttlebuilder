@@ -80,8 +80,7 @@ SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
             <li>With a converter, Shuttle runs <code>ChemConverterApp convert -i &lt;path&gt; -o jcampzip</code> (Windows:
                 <code>ChemConverterApp.exe</code>) after the scripts and sends the converted file to the second
                 destination (<i>BagIt</i>, with the public link of the raw file).</li>
-            <li>The converter must be in the same folder as the Shuttle executable (the zip of a Windows 64 Bit or Ubuntu 64 Bit instance, the only architectures with a converter,
-                with converter contains it). On Linux it needs the execute bit, on Windows the extension <code>.exe</code>; otherwise
+            <li>The converter must be in the same folder as the Shuttle executable (the converter is only available for Windows 64 Bit and Ubuntu 64 Bit; their zip contains it). On Linux it needs the execute bit, on Windows the extension <code>.exe</code>; otherwise
                 it is not run.</li>
             <li><b>Converter missing at start:</b> Shuttle stops with
                 <code>startup check failed: converter executable does not exist: &lt;path&gt;: ...</code>. Copy the converter next to the
