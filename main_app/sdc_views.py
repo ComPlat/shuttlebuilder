@@ -55,7 +55,13 @@ class ShuttleInstanceEdit(SdcLoginRequiredMixin, SDCView):
 
     def get_content(self, request, *args, **kwargs):
         gitInstance = GitInstance.get_active()
-        return render(request, self.template_name, {'gitInstance': gitInstance})
+        cam_url = settings.CHEMASSISTENT_URL
+        if not cam_url.lower().startswith(('http://', 'https://')):
+            cam_url = ''  # only web links; also keeps javascript: out of the href
+        return render(request, self.template_name, {
+            'gitInstance': gitInstance,
+            'chemassistent_url': cam_url,
+        })
 
 
 class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
@@ -80,8 +86,8 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
 
     @staticmethod
     def _cert_bytes(instance):
-        """Bytes of the server certificate if it applies (WebDAV only), else None."""
-        if not instance.cert or instance.transfer != 'webdav':
+        """Bytes of the server certificate if it applies (WebDAV and ChemAssistent), else None."""
+        if not instance.cert or not instance.uses_tls():
             return None
         instance.cert.open('rb')
         try:

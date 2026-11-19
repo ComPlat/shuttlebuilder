@@ -252,6 +252,10 @@ Everything that users or admins read, aligned with Shuttle 1.13 and with M1–M5
 
 ## M7 – New transfer type: ChemAssistentManager upload
 
+**Status:** done (#9)
+
+**Decided (2026-11-19):** Shuttle 1.14.1 settled Shuttle M8: type `chemassistent`, the API key goes in `-pass` (option A: reuse `password`, `user` unused), `-preconvert` refused, `-dst` http(s) with `/api/jobs/trigger` appended when there is no path, also built for XP (TLS 1.2). **No per-instance upload limit:** `-maxUpload` has no placeholder, so every instance uses Shuttle's default 100 MB (documented). **WP 7.3:** `CHEMASSISTENT_URL` from the environment (empty = off).
+
 **Depends on:** Shuttle milestone M8, which adds `-transfer chemassistent`. The Shuttle owner decisions there (type name, token flag, `-dst` form, folder mode, preconvert) fix the details below; the proposed options are assumed here.
 
 **Goal:** a Shuttle instance can send its files to a ChemAssistentManager job (`POST <server>/api/jobs/trigger` with `Authorization: Bearer cam_…`). Each upload starts one run of that job's AI agent.
@@ -259,51 +263,51 @@ Everything that users or admins read, aligned with Shuttle 1.13 and with M1–M5
 ### WP 7.1 – Model, form and validation
 - **Files:** `main_app/models.py` (`TRANSFER_CHOISES`, `ShuttleInstance`), `main_app/forms.py`, a migration
 - **Tasks:**
-  - [ ] Add `('chemassistent', _('ChemAssistent job (HTTP upload)'))` to `TRANSFER_CHOISES`.
-  - [ ] **The API key:**
+  - [x] Add `('chemassistent', _('ChemAssistent job (HTTP upload)'))` to `TRANSFER_CHOISES`.
+  - [x] **The API key:**
     - with Shuttle M8 decision 2, option A: reuse the `password` field. When `transfer == chemassistent`, the form labels it "API key (cam_…)" and hides or clears `user`, since it's not used;
     - with option B: a new `api_token` field, passed as the `token` placeholder.
     - Either way, validate the `cam_` prefix and a reasonable length.
-  - [ ] `dst` validation for this type: `https://` (or `http://` for test setups) plus a host; a path is optional, because Shuttle appends `/api/jobs/trigger`. Reuse the M3 WP 3.4 validator.
-  - [ ] Settings that don't apply to this type:
+  - [x] `dst` validation for this type: `https://` (or `http://` for test setups) plus a host; a path is optional, because Shuttle appends `/api/jobs/trigger`. Reuse the M3 WP 3.4 validator.
+  - [x] Settings that don't apply to this type:
     - `host_key` is SSH only;
     - `cert`/`insecure` apply, as for WebDAV;
     - `with_converter` is rejected for this type, following Shuttle M8 decision 5.
 
     Hide the fields that don't apply in the form, and enforce the rules in `clean()`.
-  - [ ] `shuttle_type` hint for this type: `folder` sends the whole folder as **one** run, `zip`/`tar` one archive per run, and `file`/`flat_tar` one run per file. File names are flattened (`A/B/x.csv` → `A__B__x.csv`).
-  - [ ] Optional: a per-instance upload size limit (Shuttle `-maxUpload`, if Shuttle M8 adds it), defaulting to 100 MB to match the server's `JOB_MAX_UPLOAD_MB`.
+  - [x] `shuttle_type` hint for this type: `folder` sends the whole folder as **one** run, `zip`/`tar` one archive per run, and `file`/`flat_tar` one run per file. File names are flattened (`A/B/x.csv` → `A__B__x.csv`).
+  - [ ] (not done, owner decision: Shuttle's `-maxUpload` has no placeholder; the 100 MB default is documented) Optional: a per-instance upload size limit (Shuttle `-maxUpload`, if Shuttle M8 adds it), defaulting to 100 MB to match the server's `JOB_MAX_UPLOAD_MB`.
 
 ### WP 7.2 – Build configuration and packaging
 - **Files:** `main_app/models.py` (`_get_build_config`, `only_exe`), `main_app/sdc_views.py`
 - **Tasks:**
-  - [ ] Pass the type as `tType`, and the key as `password` (option A) or `token` (option B), escaped with the `go_str` helper from M1 WP 1.1. **An API key with `&` or `'` would otherwise be HTML-escaped**, the bug fixed in M1.
-  - [ ] `only_exe`: no WinSCP for this type on `win_i386`, since it's plain HTTPS, so download only the exe (plus `server.crt` if set, from M3 WP 3.2).
-  - [ ] XP note: Go 1.10 speaks at most TLS 1.2. The ChemAssistentManager server must offer TLS 1.2 for XP Shuttles; document this, and optionally warn in the form for `win_i386`.
+  - [x] Pass the type as `tType`, and the key as `password` (option A) or `token` (option B), escaped with the `go_str` helper from M1 WP 1.1. **An API key with `&` or `'` would otherwise be HTML-escaped**, the bug fixed in M1.
+  - [x] `only_exe`: no WinSCP for this type on `win_i386`, since it's plain HTTPS, so download only the exe (plus `server.crt` if set, from M3 WP 3.2).
+  - [x] XP note: Go 1.10 speaks at most TLS 1.2. The ChemAssistentManager server must offer TLS 1.2 for XP Shuttles; document this, and optionally warn in the form for `win_i386`.
 
 ### WP 7.3 – Linking to ChemAssistentManager (optional)
 - **Tasks:**
-  - [ ] A setting `CHEMASSISTENT_URL`: if set, the form pre-fills `dst` and shows a link "Create a job and an API key in ChemAssistentManager".
-  - [ ] Not part of this milestone: creating the key automatically through an API, since ChemAssistentManager has no such endpoint today.
+  - [x] A setting `CHEMASSISTENT_URL`: if set, the form pre-fills `dst` and shows a link "Create a job and an API key in ChemAssistentManager".
+  - [x] Not part of this milestone: creating the key automatically through an API, since ChemAssistentManager has no such endpoint today.
 
 ### WP 7.4 – Tests
 - **Tasks:**
-  - [ ] Form validation for the new type: `dst` forms, key format, rejected converter, ignored host key.
-  - [ ] `_get_build_config` for the type, including escaping of the key.
-  - [ ] Packaging: `win_i386` + `chemassistent` gives the exe only, without WinSCP.
-  - [ ] Build smoke test (M5 WP 5.2): one `chemassistent` instance per architecture.
+  - [x] Form validation for the new type: `dst` forms, key format, rejected converter, ignored host key.
+  - [x] `_get_build_config` for the type, including escaping of the key.
+  - [x] Packaging: `win_i386` + `chemassistent` gives the exe only, without WinSCP.
+  - [x] Build smoke test (M5 WP 5.2): one `chemassistent` instance per architecture.
 
 ### WP 7.5 – Documentation
 Part of M6, but listed here so it isn't forgotten.
 - **Tasks:**
-  - [ ] README and `basic_info.html`:
+  - [x] README and `basic_info.html`:
     - what the type does;
     - the steps: create a job with the "HTTP file upload" trigger in ChemAssistentManager, create an API key (shown once), create the Shuttle instance with the server URL and key;
     - one upload = one AI run;
     - the size limit and the TLS 1.2 note for XP;
     - a revoked key means files wait locally until the instance gets a new key and is rebuilt.
-  - [ ] Form help texts and the `ShuttleInstance` docstring (feeds `SDC_SKILL.md`): the new type and how the password/token field is used for it.
-  - [ ] The announcement (M6 WP 6.5): mention the new type.
+  - [x] Form help texts and the `ShuttleInstance` docstring (feeds `SDC_SKILL.md`): the new type and how the password/token field is used for it.
+  - [x] The announcement (M6 WP 6.5): mention the new type.
 
 ---
 

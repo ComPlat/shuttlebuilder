@@ -38,7 +38,7 @@
         <li><b>Generate Shuttle instance:</b>
             <p> In Shuttle list you will find a new button. With this button you can create a <a
                     class="navigation-links" href="/shuttle-instance-list/shuttle-instance-edit">new Shuttle</a>
-                instance adapted to an external WebDAV or SFTP server.</p></li>
+                instance adapted to an external WebDAV or SFTP server, or to a ChemAssistentManager job (see <i>ChemAssistent upload</i> below).</p></li>
         <li><b>Download Shuttle instance:</b>
             <p>After you have created a new Instance you can download the executable in the Shuttle list.</p>
         <li>
@@ -124,12 +124,35 @@
             seen on the first connection is trusted and stored in <code>known_hosts</code>; if the server later
             presents a different key, Shuttle refuses to connect. It is <b>required for Windows XP with SFTP</b> and
             applies to both SFTP destinations.</li>
-        <li><b>Server certificate</b> (WebDAV only): PEM file for self-signed servers. It is delivered as
+        <li><b>Server certificate</b> (WebDAV and ChemAssistent): PEM file for self-signed servers. It is delivered as
             <b>server.crt</b> inside a zip file next to the executable; keep it there. Shuttle verifies the server
             certificate with the system certificates plus this file. On Windows XP this file is the only way the
             server is verified. After adding a certificate, download the zip again.</li>
         <li><b>Disable verification (insecure)</b>: turns off TLS and SSH host key verification. Only for tests; such
             instances are marked in the Shuttle list and Shuttle logs a warning at start.</li>
+    </ul>
+    <h3>ChemAssistent upload</h3>
+    <p>The transfer type <b>ChemAssistent job (HTTP upload)</b> sends each file (or folder) to a ChemAssistentManager
+        job by HTTP POST. Every upload starts <b>one run</b> of the job's AI agent, which gets the files as input.</p>
+    <ol>
+        <li>In ChemAssistentManager create a job with the trigger <b>"HTTP file upload (API key)"</b> and create an
+            <b>API key</b> for it. The key is shown only once.</li>
+        <li>Create the Shuttle instance with the transfer type <i>ChemAssistent job (HTTP upload)</i>: enter the server
+            URL as destination and the API key (<code>cam_...</code>). The user, the SSH host key and the converter are
+            not used.</li>
+    </ol>
+    <ul>
+        <li>The destination is <code>http://</code> or <code>https://</code> with a host. Without a path (or with
+            <code>/</code>) <code>/api/jobs/trigger</code> is appended; any other path is used as the full trigger URL.</li>
+        <li>Runs: <code>file</code> and <code>flat_tar</code> one run per file, <code>zip</code> and <code>tar</code>
+            one run per archive, <code>folder</code> one run per folder. Folder paths are flattened into the file
+            names (<code>A/B/x.csv</code> becomes <code>A__B__x.csv</code>).</li>
+        <li>Uploads larger than 100 MB are not attempted and stay local. A file is deleted locally only after the
+            server confirmed the upload.</li>
+        <li>If the API key is revoked or the job is disabled, the files wait locally. Give the instance a new key,
+            build and download it again and replace the Shuttle on the PC.</li>
+        <li>Server certificate and <i>insecure</i> work as for WebDAV. Windows XP speaks at most TLS 1.2; the server
+            must offer TLS 1.2, and XP verifies the server only when a server certificate is given.</li>
     </ul>
     <h3>Shuttle version</h3>
     <p>The Git list shows the Shuttle version of every repository. The Shuttle list shows the version each instance was

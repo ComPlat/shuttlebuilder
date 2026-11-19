@@ -5,7 +5,14 @@
     <p>Git: {{ gitInstance }}</p>
     <div class="d-none">
         <div class="option-note note-host-key text-muted small">{% trans 'SFTP only. Required for Windows XP unless verification is disabled.' %}</div>
-        <div class="option-note note-cert text-muted small">{% trans 'WebDAV only. Shipped as server.crt next to the executable.' %}</div>
+        <div class="option-note note-cert text-muted small">{% trans 'WebDAV and ChemAssistent. Shipped as server.crt next to the executable.' %}</div>
+        <div class="option-note note-api-key-label">{% trans 'API key (cam_…)' %}</div>
+        {% if chemassistent_url %}
+        <div class="option-note note-chemassistent-link small">
+            <a href="{{ chemassistent_url }}" target="_blank" rel="noopener noreferrer">{% trans 'Create a job and an API key in ChemAssistentManager' %}</a>
+        </div>
+        {% endif %}
+        <div class="option-note note-xp-tls text-muted small">{% trans 'Windows XP speaks at most TLS 1.2; the server must offer TLS 1.2.' %}</div>
         <div class="option-note note-insecure small text-danger">
             <i class="bi bi-exclamation-triangle-fill"></i>
             {% trans 'Warning: this disables the verification of the TLS certificate and of the SSH host key. Data and credentials can be intercepted. Use only for tests.' %}

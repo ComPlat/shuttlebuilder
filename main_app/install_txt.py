@@ -83,7 +83,7 @@ def render_install_txt(instance, request):
             '     systemctl daemon-reload',
             '     systemctl enable --now shuttle.service',
         ]
-    if instance.cert and instance.transfer == 'webdav':
+    if instance.cert and instance.uses_tls():
         lines += [
             '',
             _('server.crt is the certificate of the server. It must stay next to %(exe)s.') % {'exe': exe},

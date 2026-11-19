@@ -19,7 +19,7 @@ from main_app.models import ShuttleInstance
 
 ARCHITECTURES = ('win_i386', 'win_64', 'ubuntu_64', 'raspberry_pi_6', 'raspberry_pi_7', 'raspberry_pi_64')
 CONVERTER_ARCHITECTURES = ('win_64', 'ubuntu_64')
-TRANSFERS = ('webdav', 'sftp')
+TRANSFERS = ('webdav', 'sftp', 'chemassistent')
 CERT = b"-----BEGIN CERTIFICATE-----\nDUMMY\n-----END CERTIFICATE-----\n"
 PROFILE = b'{"dummy": true}'
 WINSCP = ('license.txt', 'WinSCP.com', 'WinSCP.exe')
@@ -27,8 +27,8 @@ WINSCP = ('license.txt', 'WinSCP.com', 'WinSCP.exe')
 
 def combinations():
     for arch, transfer in itertools.product(ARCHITECTURES, TRANSFERS):
-        for converter in ((False, True) if arch in CONVERTER_ARCHITECTURES else (False,)):
-            for cert in ((False, True) if transfer == 'webdav' else (False,)):
+        for converter in ((False, True) if arch in CONVERTER_ARCHITECTURES and transfer != 'chemassistent' else (False,)):
+            for cert in ((False, True) if transfer in ('webdav', 'chemassistent') else (False,)):
                 yield arch, transfer, converter, cert
 
 
@@ -99,9 +99,9 @@ class PackagingMatrixTest(TestCase):
         return path
 
     def test_matrix_size(self):
-        # 4 archs without converter: webdav (2 cert states) + sftp (1) = 3 each;
-        # 2 archs with converter option: (webdav 2 + sftp 1) x 2 converter states = 6 each
-        self.assertEqual(len(list(combinations())), 4 * 3 + 2 * 6)
+        # 4 archs without converter: webdav (2 cert states) + sftp (1) + chemassistent (2) = 5 each;
+        # 2 archs with converter option: (webdav 2 + sftp 1) x 2 converter states + chemassistent 2 (no converter) = 8 each
+        self.assertEqual(len(list(combinations())), 4 * 5 + 2 * 8)
 
     def test_every_combination(self):
         for index, combo in enumerate(combinations()):
