@@ -1,0 +1,101 @@
+# Push2Deploy (p2d) stack of ShuttleBuilder, e.g. for Dokploy.
+#
+# Builds the image from this repository (Dockerfile) and runs PostgreSQL and Redis as separate services.
+# Configure it with environment variables (Dokploy: "Environment") or a .env file next to this file.
+# Required: ALLOWED_HOST, DJANGO_SECRET_KEY, POSTGRES_PASSWORD.
+# The broadcaster (LAN service discovery, host network) and pgAdmin of docker-compose.yml are not part of it.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    hostname: db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-shuttlebuilder}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the environment / .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - shuttle_db:/var/lib/postgresql/data/
+    networks:
+      - shuttle-internal
+
+  redis:
+    image: redis:8.8.0
+    restart: unless-stopped
+    hostname: redis # settings.py expects the channel layer at redis:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - shuttle-internal
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - MODE=prod
+      # Comma-separated URLs of the site, e.g. https://shuttle.example.org (also used for CSRF).
+      - ALLOWED_HOST=${ALLOWED_HOST:?Set ALLOWED_HOST (the URL of the site) in the environment / .env}
+      # Signs sessions and tokens. Generate one: python -c "import secrets; print(secrets.token_urlsafe(50))"
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY (a long random value) in the environment / .env}
+      - POSTGRES_DB=${POSTGRES_DB:-shuttlebuilder}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      # Optional
+      - ELN_URL=${ELN_URL:-}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-}
+      - EMAIL_HOST=${EMAIL_HOST:-}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - SDC_AI_PROVIDER=${SDC_AI_PROVIDER:-anthropic}
+      - SDC_AI_MODEL=${SDC_AI_MODEL:-claude-opus-5-5}
+      - SDC_AI_BASE_URL=${SDC_AI_BASE_URL:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - CHEMASSISTENT_URL=${CHEMASSISTENT_URL:-}
+      - SHUTTLE_BUILD_TIMEOUT=${SHUTTLE_BUILD_TIMEOUT:-600}
+    env_file:
+      - path: .env # see https://github.com/Dokploy/dokploy/issues/385
+        required: false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # Uploaded converter profiles and server certificates. The Shuttle checkout and the builds in
+      # /opt/projects are recreated on demand (the next download reloads the active GitInstance).
+      - shuttle_media:/opt/media
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    networks:
+      - shuttle-internal
+    labels:
+      # Dokploy adds dokploy-network for the domain; Traefik must reach the app through it.
+      - traefik.docker.network=dokploy-network
+    ports:
+      - 80
+
+networks:
+  shuttle-internal:
+
+volumes:
+  shuttle_db:
+  shuttle_media:

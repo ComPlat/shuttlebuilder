@@ -13,6 +13,15 @@ from django.core.exceptions import ImproperlyConfigured
 
 from ShuttleBuilder.base_settings import *
 
+# The key in base_settings.py is public (it is in the repository) and only fit for development.
+# Production: set DJANGO_SECRET_KEY to a long random value, e.g.
+#   python -c "import secrets; print(secrets.token_urlsafe(50))"
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or SECRET_KEY
+if not os.environ.get('DJANGO_SECRET_KEY') and os.environ.get('MODE') == 'prod':
+    import sys
+    print('WARNING: DJANGO_SECRET_KEY is not set; using the public development key. '
+          'Set DJANGO_SECRET_KEY in the environment.', file=sys.stderr)
+
 
 def _parse_allowed_host(value):
     # ALLOWED_HOST is a comma-separated list of site URLs, e.g. "https://example.com,https://www.example.com".
