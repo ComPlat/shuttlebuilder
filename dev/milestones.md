@@ -180,16 +180,20 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M5 – Tests and CI
 
+**Status:** done (#7)
+
+**Decided (2026-11-18):** GitHub Actions: checks and tests (Python + jest) on every PR and push; Docker image + six-architecture smoke build when the Dockerfile, build code, packaging or the smoke command change, and on manual trigger. `deploy.sh` runs the smoke build against the new image and aborts on failure.
+
 ### WP 5.1 – Unit tests (`main_app/tests.py` is empty)
 - **Tasks:**
-  - [ ] `_get_build_config`/`go_str` escaping (WP 1.1).
-  - [ ] Form validation: converter only on `win_64`/`ubuntu_64`, `dst` formats, duration, host key formats, cert PEM.
-  - [ ] Packaging matrix (`only_exe`, the zip contents per architecture, transfer, converter and cert), with the build mocked.
+  - [x] `_get_build_config`/`go_str` escaping (WP 1.1).
+  - [x] Form validation: converter only on `win_64`/`ubuntu_64`, `dst` formats, duration, host key formats, cert PEM.
+  - [x] Packaging matrix (`only_exe`, the zip contents per architecture, transfer, converter and cert), with the build mocked.
 
 ### WP 5.2 – Build smoke test
 - **Tasks:**
-  - [ ] A management command or CI job that builds one instance per architecture from the active `GitInstance` inside the Docker image, and checks that each binary exists, with `file` output matching the architecture.
-  - [ ] Run it in CI on every Dockerfile change, and before releasing a new image.
+  - [x] A management command or CI job that builds one instance per architecture from the active `GitInstance` inside the Docker image, and checks that each binary exists, with `file` output matching the architecture.
+  - [x] Run it in CI on every Dockerfile change, and before releasing a new image.
 
 ---
 

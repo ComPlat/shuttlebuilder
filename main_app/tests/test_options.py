@@ -95,6 +95,23 @@ class BuildConfigTest(SimpleTestCase):
         sf = self.inst(cert='certs/x.crt')._get_build_config()
         self.assertEqual(sf.get('crt'), '')
 
+    def test_keys_used_by_cmd_manager_and_str_values(self):
+        keys = ('src dst user password duration common_regex tType name crt type preconvert dst_converter '
+                'user_converter password_converter public hostkey insecure').split()
+        variants = [
+            self.inst(),
+            self.inst(transfer='webdav', cert='certs/x.crt', insecure=True, with_converter=True, dst_bagit='b/p',
+                      user_bagit='u2', passwort_bagit='p2', public_link='https://p.example/', duration=5),
+            self.inst(common_name_parts=None, dst_bagit=None, user_bagit=None, passwort_bagit=None,
+                      public_link=None),
+        ]
+        for i, inst in enumerate(variants):
+            ctx = inst._get_build_config()
+            for key in keys:
+                with self.subTest(variant=i, key=key):
+                    self.assertIn(key, ctx)
+                    self.assertIsInstance(ctx[key], str)
+
     def test_only_exe(self):
         self.assertTrue(self.inst(transfer='webdav', architecture='win_64').only_exe())
         self.assertFalse(self.inst(transfer='webdav', architecture='win_64', cert='certs/x.crt').only_exe())

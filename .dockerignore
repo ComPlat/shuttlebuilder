@@ -14,4 +14,4 @@ docker-compose.dev.yml
 media
 .devcontainer
 backup
-projects/
+projects/test_db.sqlite3

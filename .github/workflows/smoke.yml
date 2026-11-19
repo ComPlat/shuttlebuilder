@@ -1,0 +1,51 @@
+name: Build smoke test
+
+# Builds the Docker image and compiles Shuttle for all six architectures
+# (dev/smoke_build.sh -> manage.py shuttle_smoke_build), against ComPlat/shuttle main.
+on:
+  push:
+    branches: [master]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - pyproject.toml
+      - poetry.lock
+      - main_app/build.py
+      - main_app/models.py
+      - main_app/sdc_views.py
+      - main_app/management/commands/shuttle_smoke_build.py
+      - dev/smoke_build.sh
+      - .github/workflows/smoke.yml
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - pyproject.toml
+      - poetry.lock
+      - main_app/build.py
+      - main_app/models.py
+      - main_app/sdc_views.py
+      - main_app/management/commands/shuttle_smoke_build.py
+      - dev/smoke_build.sh
+      - .github/workflows/smoke.yml
+  workflow_dispatch:
+    inputs:
+      shuttle_branch:
+        description: Branch of ComPlat/shuttle to build
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t shuttlebuilder:ci .
+
+      - name: Smoke build (all architectures)
+        run: dev/smoke_build.sh shuttlebuilder:ci https://github.com/ComPlat/shuttle.git "${{ github.event.inputs.shuttle_branch || 'main' }}"

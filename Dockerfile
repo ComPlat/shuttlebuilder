@@ -41,7 +41,7 @@ ENV PYTHONUNBUFFERED=1
 RUN mkdir -p /srv/app
 RUN mkdir -p /srv/app/private_libs
 WORKDIR /srv/app
-RUN apt-get update && apt-get --assume-yes upgrade && apt-get install -y git nginx nodejs npm zip gzip tar wget libmagic1
+RUN apt-get update && apt-get --assume-yes upgrade && apt-get install -y git nginx nodejs npm zip gzip tar wget libmagic1 file
 
 # Go toolchains. Both tarballs are SHA256-pinned.
 # To bump modern Go: take the new version and the linux-amd64 sha256 from
