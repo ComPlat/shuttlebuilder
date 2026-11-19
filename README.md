@@ -109,7 +109,7 @@ The transfer type **ChemAssistent job (HTTP upload)** sends each file (or each f
 - **Size limit:** uploads larger than 100 MB are not attempted and stay local.
 - **Local files:** a file is deleted locally only after the server confirmed the upload (`202`).
 - **Revoked key or disabled job:** the files stay local and are sent when the problem is fixed. After a revoked key, give the instance a new key, build it and download it again, then replace the Shuttle on the PC.
-- **TLS:** the server certificate and *insecure* work as for WebDAV. Windows XP builds speak at most TLS 1.2, so the server must offer TLS 1.2.
+- **TLS:** the server certificate and *insecure* work as for WebDAV. Windows XP builds speak at most TLS 1.2, so the server must offer TLS 1.2. Like WebDAV, a Windows XP build verifies the server only when a server certificate is given.
 - **Not supported:** the converter (`ChemConverterApp`) cannot be combined with this transfer type.
 - **Zip or single file:** the download is the plain executable; with a server certificate it is a zip with `server.crt` and `INSTALL.txt` (no WinSCP).
 - The API key is never written to the Shuttle log or to `INSTALL.txt`.

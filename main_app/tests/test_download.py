@@ -305,8 +305,6 @@ class ShuttleDownloadZipTest(TestCase):
     def test_chemassistent_exe_only_without_cert_on_win_i386(self):
         inst = self._instance("zip-cam2", cert=False, transfer="chemassistent", user="", password="cam_" + "y" * 32,
                               architecture="win_i386")
-        if not hasattr(ShuttleInstance, "uses_tls"):
-            self.skipTest("ShuttleInstance.uses_tls() comes with worker A; run after the merge")
         self.assertTrue(inst.only_exe())
         self.client.force_login(self.owner)
         url = reverse("scd_view_shuttle_download", kwargs={"pk": inst.pk})
@@ -315,8 +313,6 @@ class ShuttleDownloadZipTest(TestCase):
         self.assertEqual(resp.content, b"BIN")
 
     def test_chemassistent_with_cert_is_not_exe_only(self):
-        if not hasattr(ShuttleInstance, "uses_tls"):
-            self.skipTest("ShuttleInstance.uses_tls() comes with worker A; run after the merge")
         inst = self._instance("zip-cam3", transfer="chemassistent", user="", password="cam_" + "z" * 32,
                               architecture="win_i386")
         self.assertFalse(inst.only_exe())

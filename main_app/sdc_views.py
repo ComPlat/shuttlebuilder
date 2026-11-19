@@ -13,7 +13,7 @@ from django.utils.html import escape
 from django.utils.translation import gettext as _
 
 from main_app.build import BuildError
-from main_app.install_txt import render_install_txt, uses_tls
+from main_app.install_txt import render_install_txt
 from main_app.models import GitInstance, ShuttleInstance, ElnConnection
 
 logger = logging.getLogger("main_app.build")
@@ -87,7 +87,7 @@ class ShuttleDownload(SdcLoginRequiredMixin, SDCView):
     @staticmethod
     def _cert_bytes(instance):
         """Bytes of the server certificate if it applies (WebDAV and ChemAssistent), else None."""
-        if not instance.cert or not uses_tls(instance):
+        if not instance.cert or not instance.uses_tls():
             return None
         instance.cert.open('rb')
         try:

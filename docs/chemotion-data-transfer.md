@@ -59,7 +59,7 @@ SFTP on a real Windows XP machine has not been tested yet. Please test it before
 
 - WebDAV and ChemAssistent: XP can only verify the server when the certificate (`server.crt`) is set; without it Shuttle does not verify and logs a warning.
 - SFTP: the server's host key is required (unless verification is disabled). WinSCP must be next to `shuttle.exe`.
-- ChemAssistent: XP speaks at most TLS 1.2, so the server must offer TLS 1.2. No WinSCP is needed.
+- ChemAssistent: XP speaks at most TLS 1.2, so the server must offer TLS 1.2, and it verifies the server only when a server certificate is given (as for WebDAV). No WinSCP is needed.
 
 ## 6. Update Shuttle
 
