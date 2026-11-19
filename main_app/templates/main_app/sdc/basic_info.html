@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 
 <div class="container">
     <h2>Welcome to the ShuttleBuilder</h2>
@@ -15,7 +16,7 @@
         In addition, users can register to create local accounts, or an administrator can create local users.
         (<a href="/admin/">Admin interface</a>)</p>
     </p>
-    <img src="{% static 'img/shuttle_builder.drawio.png' %}" alt="Diagram: Networg description">
+    <img src="{% static 'img/shuttle_builder.drawio.png' %}" alt="Diagram: network description">
 
     <p>
         The physical separation of laboratory PCs from public networks for security reasons significantly impacts the
@@ -32,7 +33,7 @@
         specific requirements. These instances can then be installed on the target lab system in just a few steps.</p>
     <h3>How to install Shuttle</h3>
     <p>The following section introduces the installation of the Shuttle. Note that the installation is <b>only</b>
-        intended for Windows x64 and i386 devices and Linux x64 devices.</p>
+        intended for Windows (x64, and i386 incl. Windows XP) and Linux (x64 and Raspberry Pi) devices.</p>
     <ol>
         <li><b>Generate Shuttle instance:</b>
             <p> In Shuttle list you will find a new button. With this button you can create a <a
@@ -44,7 +45,7 @@
             <b>Install Shuttle instance:</b>
             <ul>
                 <li><b>Install Shuttle instance:</b>
-                    <p>The installation is simple but require administration rights.</p>
+                    <p>The installation is simple but requires administration rights.</p>
                     <ol>
                         <li>Make a directory "C:\Program Files\Shuttle"</li>
                         <li>Copy the (on this server generated) <b>shuttle.exe</b> into "C:\Program Files\Shuttle" (a zip file contains an <b>INSTALL.txt</b> with these steps; copy all its files)
@@ -59,7 +60,11 @@
                 <li><b>(SPECIAL CASE) Install Shuttle with SFTP on Windows XP:</b>
                     <p> As above the installation requires administration rights. The "Download" button leads to a zip
                         file and
-                        not only to an executable file. This zipped file contains the executable file and WinSCP. </p>
+                        not only to an executable file. This zipped file contains the executable file and WinSCP.
+                        The <b>SSH host key</b> of the server is required for this case (see <i>Security options</i>);
+                        it is compiled into <b>shuttle.exe</b>. SFTP on Windows XP has not been tested on a real
+                        Windows XP machine yet. For WebDAV, XP verifies the server only if a
+                        <b>server certificate</b> is given.</p>
                     <ol>
                         <li>Make a directory "C:\Program Files\Shuttle"</li>
                         <li>Unzip the downloaded file <b>shuttle_sftp_winxp.zip</b></li>
@@ -91,22 +96,40 @@
                     </ol>
                 </li>
             </ul>
+            <h4>{% trans "First start, working folder and log" %}</h4>
             <p>Shuttle keeps its log (<code>shuttle_log.txt</code>), the list of sent files
-                (<code>sent_register.json</code>) and <code>known_hosts</code> in <code>~/shuttle/shuttle_&lt;name&gt;/</code>
-                (Windows: <code>%USERPROFILE%\shuttle\shuttle_&lt;name&gt;\</code>). On the first start it sends every
-                stable file already in the source folder once; delete <code>sent_register.json</code> to send everything
-                again.</p>
+                (<code>sent_register.json</code>) and <code>known_hosts</code> (SFTP) in <code>~/shuttle/shuttle_&lt;name&gt;/</code>
+                (Windows: <code>%USERPROFILE%\shuttle\shuttle_&lt;name&gt;\</code>). The user is the one who runs Shuttle
+                (Linux: <i>Linux user</i> of the instance). The log is also written to the standard output (on Linux
+                with systemd: <code>journalctl -u shuttle.service</code>).</p>
+            <ul>
+                <li>On the <b>first start</b> Shuttle sends every stable file already in the source folder (not changed
+                    for the configured duration) once. Plan for the traffic and for duplicates on the server.</li>
+                <li>Afterwards a file is sent when it is new or changed. A folder (types folder, zip, tar) that changed
+                    is sent again <b>completely</b>.</li>
+                <li>To send everything again, stop Shuttle, delete <code>sent_register.json</code> and start Shuttle again.</li>
+                <li>If the server cannot be reached (also right after booting the PC), the error is logged and the upload
+                    is retried with increasing waits. Files stay in the working folder until the upload is confirmed.</li>
+                <li>Update: download the Shuttle again, replace the executable and restart Shuttle. An existing
+                    <code>sent_register.json</code> is kept; when you update from Shuttle 1.12 or older, the data in the
+                    source folder is uploaded again.</li>
+            </ul>
         </li>
     </ol>
     <h3>Security options</h3>
     <ul>
         <li><b>SSH host key</b> (SFTP only): fingerprint of the server (<code>SHA256:...</code> or <code>MD5:aa:bb:...</code>),
             e.g. from WinSCP (Session, Server/Protocol Information) or <code>ssh-keyscan -p &lt;port&gt; &lt;host&gt; | ssh-keygen -lf -</code>.
-            It is <b>required for Windows XP with SFTP</b> and applies to both SFTP destinations.</li>
+            With a host key, Shuttle only connects to a server that presents exactly this key. Without it, the key
+            seen on the first connection is trusted and stored in <code>known_hosts</code>; if the server later
+            presents a different key, Shuttle refuses to connect. It is <b>required for Windows XP with SFTP</b> and
+            applies to both SFTP destinations.</li>
         <li><b>Server certificate</b> (WebDAV only): PEM file for self-signed servers. It is delivered as
-            <b>server.crt</b> inside a zip file next to the executable.</li>
+            <b>server.crt</b> inside a zip file next to the executable; keep it there. Shuttle verifies the server
+            certificate with the system certificates plus this file. On Windows XP this file is the only way the
+            server is verified. After adding a certificate, download the zip again.</li>
         <li><b>Disable verification (insecure)</b>: turns off TLS and SSH host key verification. Only for tests; such
-            instances are marked in the Shuttle list.</li>
+            instances are marked in the Shuttle list and Shuttle logs a warning at start.</li>
     </ul>
     <h3>Shuttle version</h3>
     <p>The Git list shows the Shuttle version of every repository. The Shuttle list shows the version each instance was
@@ -124,32 +147,123 @@
 
     <h3> Preprocess Scripts</h3>
 
-    <p>Shuttle supports preprocess scripts, which allow you to execute custom scripts before transferring files.</p>
+    <p>Shuttle supports preprocess scripts, which allow you to execute custom scripts before transferring files.
+        The rules (which files run, order, failures) are described on the page
+        <a class="navigation-links" href="/shuttle-scripts">Preprocess scripts</a>.</p>
     <ul>
-        <li> Windows: Scripts must be .exe files.</li>
-        <li> Linux: All executable file types are supported.</li>
+        <li> Windows: only regular files with the extension <code>.exe</code> are run (not .bat, .cmd or .sh).</li>
+        <li> Linux: every regular file with an execute bit is run, whatever its extension.</li>
+        <li> The folder is <code>~/shuttle/scripts</code> (Windows: <code>%USERPROFILE%\shuttle\scripts</code>); it is
+            created when Shuttle starts for the first time.</li>
     </ul>
-    <b>Preprocess script requirements:</b>
-    <p>The script files must be located in the directory:</p>
-    <p>See: <a class="navigation-links" href="/shuttle-scripts">Preprocess scripts</a></p>
-    <p>
-        If the shuttle has already been executed, the folder has already been created.
-    </p>
-
     <p>
         Such a script can manipulate the file before it is sent. The script is called for each file that will be sent.
-        The
-        script gets one argument with the absolute path to the file. The script should either overwrite the file or
-        write a
-        new copy of the file in the same folder
+        The script gets one argument with the absolute path to the file. The script should either overwrite the file or
+        write a new copy of the file in the same folder.
     </p>
     <h4>Large data files</h4>
     <p>
         If the data files are too large, it is possible to configure the shuttle to convert the data and only send the
         converted
         Bagit archive to Chemotion. The original raw file can then be sent to a different storage location for
-        archiving.
+        archiving. See <a class="navigation-links" href="/shuttle-scripts">Preprocess scripts</a> for the converter.
     </p>
+
+    <h3>{% trans "Troubleshooting" %}</h3>
+    <p>Start with the log: <code>shuttle_log.txt</code> in the working folder (see above). Lines starting with
+        <code>ERROR:</code> are problems, lines starting with <code>-&gt; INFO:</code> are information. Network
+        problems are never fatal: Shuttle retries with increasing waits (1 second, doubled after every failed cycle, at
+        most the configured duration) and no file is deleted before its upload is confirmed. Messages that make Shuttle
+        stop at start (<code>startup check failed</code> and invalid settings) are printed on the console / standard
+        error and are not written to <code>shuttle_log.txt</code>; on Linux look at <code>journalctl -u shuttle.service</code>.</p>
+    <table class="table table-sm table-bordered">
+        <thead>
+        <tr><th>Message in the log</th><th>Meaning and what to do</th></tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>Error connecting to destination (will retry): ...</code></td>
+            <td>The server could not be reached at start (e.g. the PC booted before the network was up). Nothing is
+                lost; Shuttle retries. If it persists, check destination, user, password, firewall and, for
+                WebDAV/TLS, the certificate.</td>
+        </tr>
+        <tr>
+            <td><code>transfer failed 3 cycle(s) in a row, waiting 4s</code></td>
+            <td>Uploads fail; Shuttle waits longer after every failed cycle. The error just above in the log tells why.</td>
+        </tr>
+        <tr>
+            <td><code>sending &lt;path&gt; was not confirmed</code></td>
+            <td>The server did not confirm the upload. The local copy is kept and sent again later.</td>
+        </tr>
+        <tr>
+            <td><code>SSH host key for &lt;host&gt; CHANGED (presented SHA256:...). If the server key was changed on purpose, remove the line for &lt;host&gt; from &lt;known_hosts&gt; or set -hostkey</code></td>
+            <td>The server presents another key than the one trusted on the first connection. Shuttle refuses to
+                connect. If the server was reinstalled on purpose, delete the line of the server from
+                <code>known_hosts</code> in the working folder, or enter the host key in the instance and download
+                Shuttle again. If you do not expect a change, ask the server admin before you continue.</td>
+        </tr>
+        <tr>
+            <td><code>SSH host key mismatch for &lt;host&gt;: expected "&lt;fingerprint&gt;", server presented SHA256:...</code></td>
+            <td>The host key entered in the instance does not match the server. Compare it with the fingerprint
+                from the server admin, correct the instance and download Shuttle again.</td>
+        </tr>
+        <tr>
+            <td><code>trusting new SSH host key SHA256:... for &lt;host&gt; (stored in &lt;known_hosts&gt;)</code></td>
+            <td>Information, not an error: no host key was given, so the key of the first connection is trusted.
+                Compare the fingerprint with the one of the server if you want to be sure.</td>
+        </tr>
+        <tr>
+            <td><code>WARNING: TLS certificate verification is DISABLED (-insecure)</code> and
+                <code>SSH host key verification is DISABLED (-insecure)</code></td>
+            <td>The instance has <i>Disable verification (insecure)</i> set. Use it only for tests.</td>
+        </tr>
+        <tr>
+            <td><code>WARNING: Windows XP build without -crt: TLS certificate verification is DISABLED. Pass the server certificate with -crt to enable it.</code></td>
+            <td>Windows XP, WebDAV, no certificate in the instance. Add the server certificate to the instance and
+                download the zip again.</td>
+        </tr>
+        <tr>
+            <td><code>WARNING: cannot read -crt file &lt;path&gt;: ...</code> or
+                <code>WARNING: no certificate found in -crt file &lt;path&gt;</code></td>
+            <td>The certificate <b>server.crt</b> is missing next to the executable or is not a PEM certificate.
+                Copy all files of the zip into the install folder. Uploads to a self-signed server fail until this works.</td>
+        </tr>
+        <tr>
+            <td><code>WinSCP.com not found, expected at &lt;path&gt;: ...</code></td>
+            <td>Windows XP with SFTP: <b>WinSCP.com</b> (and WinSCP.exe) must be in the same folder as shuttle.exe.</td>
+        </tr>
+        <tr>
+            <td><code>winscp failed: ...; output tail: ...</code></td>
+            <td>WinSCP could not upload; the end of its output follows. Typical: wrong host key, user or password,
+                or the server is not reachable. The password is not written to the log.</td>
+        </tr>
+        <tr>
+            <td><code>no -hostkey given; WinSCP must already know the server's host key (accept it once in WinSCP), otherwise every upload fails</code></td>
+            <td>Windows XP with SFTP and no host key. Enter the host key in the instance, or connect once with WinSCP on this PC and accept the key.</td>
+        </tr>
+        <tr>
+            <td><code>startup check failed: scripts folder &lt;path&gt; is not readable: ...</code></td>
+            <td>Shuttle stops. Make the folder <code>~/shuttle/scripts</code> readable for the user that runs Shuttle.</td>
+        </tr>
+        <tr>
+            <td><code>startup check failed: converter executable does not exist: &lt;path&gt;: ...</code></td>
+            <td>The instance uses the converter; Shuttle stops. <b>ChemConverterApp</b> (<b>ChemConverterApp.exe</b> on Windows) must be next to the Shuttle executable.</td>
+        </tr>
+        <tr>
+            <td><code>conversion skipped: ...</code></td>
+            <td>The converter could not be run for this file. The conversion is skipped, the raw data is still sent.</td>
+        </tr>
+        <tr>
+            <td><code>Sent register: 0 entries loaded, empty register: all stable files will be sent once</code></td>
+            <td>Information: first start (or the register was deleted). All stable files in the source folder are sent once.</td>
+        </tr>
+        <tr>
+            <td><code>sent register corrupt: ...</code></td>
+            <td>The register was damaged. It is moved aside as <code>sent_register.json.corrupt-&lt;time&gt;</code> and
+                Shuttle starts with an empty register, which sends all stable files once more.</td>
+        </tr>
+        </tbody>
+    </table>
     <br><br>
 
 </div>

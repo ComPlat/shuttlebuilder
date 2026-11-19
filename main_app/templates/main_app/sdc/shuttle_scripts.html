@@ -1,33 +1,56 @@
 {% load static %}
+{% load i18n %}
 
 <div class="flex-container justify-content-center">
     <div class="main-container">
         <h1>Shuttle scripts</h1>
         <p>
-            Files can be edited before sending. To use this logic, simply place the necessary executable file (in the
-            following script) in a folder reserved for this purpose.
+            Files can be edited before sending. To use this logic, simply place the necessary executable file (the
+            script) in a folder reserved for this purpose.
         </p>
         <ul>
             <li><b>Linux</b>: ~/shuttle/scripts</li>
             <li><b>Windows</b>: %USERPROFILE%\shuttle\scripts</li>
         </ul>
+        <p>
+            The folder is the home of the user who runs Shuttle. It is created automatically when Shuttle starts, and
+            it is shared by all Shuttle instances of that user. If it cannot be read, Shuttle does not start
+            (<code>startup check failed: scripts folder ... is not readable</code>).
+        </p>
 
+        <h3>{% trans "Which files are run" %}</h3>
+        <ul>
+            <li><b>Windows</b>: only regular files with the extension <code>.exe</code> (any case). <code>.bat</code>,
+                <code>.cmd</code> and <code>.sh</code> files are <b>not</b> run.</li>
+            <li><b>Linux</b>: every regular file with an execute bit (<code>chmod +x</code>), whatever its extension. A
+                symbolic link to such a file is run too; a dangling link is skipped
+                (<code>skipping script link ...</code> in the log).</li>
+            <li>Directories and hidden files (names starting with <code>.</code>) are never run; the <b>.env</b> file of
+                the renamer below is just read by the script.</li>
+            <li>The scripts run one after the other in alphabetical order of the file names. To control the order, name them
+                e.g. <code>01_first</code>, <code>02_second</code>.</li>
+        </ul>
+
+        <h3>{% trans "What a script gets" %}</h3>
         <p>
-            This folder can be created manually or is automatically generated when the shuttle is started for the first
-            time.
-        </p>
-        <p>
-            All executable files within this folder (Windows: .exe; Linux: any executable file) are executed in
-            alphabetical order.
-        </p>
-        <p>
-            When a script is executed, it receives the path of the file to be sent as an argument. <b>After all scripts
-            have completed, all files from the folder where the original file was located are uploaded to the
-            server.</b>
+            Shuttle copies the finished file (or folder) first and runs the scripts on the copy. Every script is started
+            with the folder <code>scripts</code> as working directory and receives the absolute path as its only
+            argument. <b>After all scripts have completed, all files from the folder where the original file was located
+            are uploaded to the server.</b>
             This means that the original file can be edited and overwritten, or new files can be created in the same
             folder.
         </p>
 
+        <h3>{% trans "When a script fails" %}</h3>
+        <ul>
+            <li>If a script cannot be started or ends with an error, the error (for example <code>exit status 1</code>) is
+                written to the log (<code>shuttle_log.txt</code>) and Shuttle continues with the next script. The file is
+                still sent, in the state the scripts left it.</li>
+            <li>The output of each script (standard output and standard error) is written to the log after the script has
+                finished, as <code>&lt;script name&gt; |-&gt; out: ... |-&gt; err: ...</code>. Use it to debug a script.</li>
+            <li>Scripts are not stopped after a time limit: a script that never ends blocks the preparation of the next
+                files.</li>
+        </ul>
 
         <div class="card mx-auto" style="width: 80%;">
             <div class="card-body">
@@ -50,7 +73,23 @@ SFC_NEW_NAME_RE=^Data File Name\s+(.+)$</pre>
         </div>
 
         <p>The following ChemConverter is not a Script. It must not be used in the script directory. However, it can be
-            set up as part of the shuttle in the instance edit/create form</p>
+            set up as part of the shuttle in the instance edit/create form (<i>With converter</i>).</p>
+
+        <h3>{% trans "Converter behaviour" %}</h3>
+        <ul>
+            <li>With a converter, Shuttle runs <code>ChemConverterApp convert -i &lt;path&gt; -o jcampzip</code> (Windows:
+                <code>ChemConverterApp.exe</code>) after the scripts and sends the converted file to the second
+                destination (<i>BagIt</i>, with the public link of the raw file).</li>
+            <li>The converter must be in the same folder as the Shuttle executable (the converter is only available for Windows 64 Bit and Ubuntu 64 Bit; their zip contains it). On Linux it needs the execute bit, on Windows the extension <code>.exe</code>; otherwise
+                it is not run.</li>
+            <li><b>Converter missing at start:</b> Shuttle stops with
+                <code>startup check failed: converter executable does not exist: &lt;path&gt;: ...</code>. Copy the converter next to the
+                executable. This message is printed on the console / standard error, not into <code>shuttle_log.txt</code>.</li>
+            <li><b>Converter missing or failing later</b> (for example deleted while Shuttle runs): the error is logged,
+                for a missing converter as <code>conversion skipped: converter executable does not exist: ...</code>. The conversion is
+                skipped; the raw data is still sent. A converter that ends with an error is logged like a failing script
+                (see above).</li>
+        </ul>
 
 
         <div class="card mx-auto" style="width: 80%;">
