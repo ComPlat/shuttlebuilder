@@ -180,7 +180,7 @@ Goal: ShuttleBuilder builds correct Shuttle 1.13 binaries for every architecture
 
 ## M5 – Tests and CI
 
-**Status:** in progress
+**Status:** done (#7)
 
 **Decided (2026-11-18):** GitHub Actions: checks and tests (Python + jest) on every PR and push; Docker image + six-architecture smoke build when the Dockerfile, build code, packaging or the smoke command change, and on manual trigger. `deploy.sh` runs the smoke build against the new image and aborts on failure.
 
