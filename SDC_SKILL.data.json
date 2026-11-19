@@ -350,7 +350,20 @@
      "handlers": [],
      "controller": "git-instance-list",
      "toggles": "modal",
-     "modal": true,
+     "server_calls": [
+      {
+       "via": "model-socket",
+       "controller": "git-instance-list",
+       "target": "GitInstance",
+       "function": "list_view",
+       "query": [
+        "__search_values"
+       ],
+       "args": [
+        "view_name"
+       ]
+      }
+     ],
      "result": "clicked"
     },
     {
@@ -593,7 +606,7 @@
       }
      ],
      "nav_idx": 0,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     }
    ],
    "external": [],
@@ -818,7 +831,7 @@
       }
      ],
      "nav_idx": 1,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     }
    ],
    "external": [],
@@ -973,7 +986,7 @@
       }
      ],
      "nav_idx": 0,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     }
    ],
    "external": [],
@@ -1030,6 +1043,7 @@
     "model": [
      "ElnConnection",
      "ElnUser",
+     "GitInstance",
      "SdcUser"
     ],
     "pk": [
@@ -1398,7 +1412,7 @@
       }
      ],
      "nav_idx": 0,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     },
     {
      "controller": "sdc-model-form",
@@ -1432,7 +1446,7 @@
       }
      ],
      "nav_idx": 1,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     }
    ],
    "external": [],
@@ -1756,7 +1770,7 @@
       }
      ],
      "nav_idx": 1,
-     "result": "not submitted (needs manual input)"
+     "result": "skipped by developer"
     }
    ],
    "external": [],
@@ -2175,7 +2189,10 @@
     },
     "detail": {
      "path": "/~sdc-detail-view~&model=GitInstance&pk=<id>",
-     "ok": [],
+     "ok": [
+      "anonymous",
+      "user teacher"
+     ],
      "denied": []
     },
     "create": {
@@ -2188,7 +2205,10 @@
     },
     "edit": {
      "path": "/~sdc-model-form~&model=GitInstance&pk=<id>",
-     "ok": [],
+     "ok": [
+      "anonymous",
+      "user teacher"
+     ],
      "denied": []
     }
    },

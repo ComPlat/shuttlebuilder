@@ -41,7 +41,7 @@ The app is a single page: the `sdc-navigator` shows nested views (SDC controller
 Generic views per model (`<id>`: the record's id). A view that opens does not mean the role may see or change the records: that depends on the model's permissions (see Data models).
 - `ElnConnection`: list `/~sdc-list-view~&model=ElnConnection` (opens for every crawled role); detail `/~sdc-detail-view~&model=ElnConnection&pk=<id>` (opens for every crawled role); create `/~sdc-model-form~&model=ElnConnection` (opens for every crawled role); edit `/~sdc-model-form~&model=ElnConnection&pk=<id>` (opens for every crawled role); delete: "Remove" in its list
 - `ElnUser`: list `/~sdc-list-view~&model=ElnUser` (opened as user teacher); detail `/~sdc-detail-view~&model=ElnUser&pk=<id>` (opened as user teacher); create `/~sdc-model-form~&model=ElnUser` (opened as user teacher); edit `/~sdc-model-form~&model=ElnUser&pk=<id>` (opened as user teacher); delete: "Remove" in its list
-- `GitInstance`: list `/~sdc-list-view~&model=GitInstance` (opens for every crawled role); detail `/~sdc-detail-view~&model=GitInstance&pk=<id>` (not verified); create `/~sdc-model-form~&model=GitInstance` (opens for every crawled role); edit `/~sdc-model-form~&model=GitInstance&pk=<id>` (not verified); delete: "Remove" in its list
+- `GitInstance`: list `/~sdc-list-view~&model=GitInstance` (opens for every crawled role); detail `/~sdc-detail-view~&model=GitInstance&pk=<id>` (opens for every crawled role); create `/~sdc-model-form~&model=GitInstance` (opens for every crawled role); edit `/~sdc-model-form~&model=GitInstance&pk=<id>` (opens for every crawled role); delete: "Remove" in its list
 - `ShuttleInstance`: list `/~sdc-list-view~&model=ShuttleInstance` (opened as user teacher); detail `/~sdc-detail-view~&model=ShuttleInstance&pk=<id>` (not verified); create `/~sdc-model-form~&model=ShuttleInstance` (opened as user teacher); edit `/~sdc-model-form~&model=ShuttleInstance&pk=<id>` (not verified); delete: "Remove" in its list
 - `SdcUser`: list `/~sdc-list-view~&model=SdcUser` (opened as user teacher); detail `/~sdc-detail-view~&model=SdcUser&pk=<id>` (opened as user teacher); create `/~sdc-model-form~&model=SdcUser` (opens for every crawled role); edit `/~sdc-model-form~&model=SdcUser&pk=<id>` (opened as user teacher); delete: "Remove" in its list
 
@@ -98,7 +98,7 @@ List of all linked git repositories (`GitInstance`) with Shuttle source code; th
   - "NEW" → `/~git-instance-list~git-insatnce-edit`
 - Buttons:
   - "Reload" in `git-instance-list` → no sdc_click handler — clicked; updates view: "Loading..."; bootstrap toggle `tooltip`; http call `/sdc_view/main_app/git_instance_list.activate_git(pk)`
-  - "(no label)" in `git-instance-list` → no sdc_click handler — clicked; opens a modal; bootstrap toggle `modal`
+  - "(no label)" in `git-instance-list` → no sdc_click handler — clicked; bootstrap toggle `modal`; model-socket `GitInstance.list_view(view_name)` filter `__search_values` from `git-instance-list`
   - "Close" in `git-instance-list` → no sdc_click handler — hidden (not clicked)
   - "Remove ComPlat/shuttle/Main" in `git-instance-list` → `removeInstance()` — hidden (not clicked)
 - Model socket (on load):
@@ -153,7 +153,7 @@ Login form (username and password) that starts a session for an `SdcUser`; the v
 - Buttons:
   - "Login" in `sdc-login` → no sdc_click handler — skipped (denylist / form submit)
 - Forms:
-  - in `sdc-login`: `username` (text, required), `password` (password, required); submit → `events.submit[".ajax-form"]()` — not submitted (needs manual input)
+  - in `sdc-login`: `username` (text, required), `password` (password, required); submit → `events.submit[".ajax-form"]()` — skipped by developer
 
 _app `sdc_user`, server view `sdc_user.sdc_views.SdcLogin`, Django URL `/sdc_view/sdc_user/sdc_login`_
 
@@ -204,7 +204,7 @@ Form to link a new git repository or edit an existing `GitInstance`.
 - Buttons:
   - "Save & Done" in `git-insatnce-edit` → no sdc_click handler — skipped (denylist / form submit)
 - Forms:
-  - in `git-insatnce-edit`: `name` (text, required), `url` (text, required), `branch` (text, required); submit → `submitModelFormDistributor()` — not submitted (needs manual input)
+  - in `git-insatnce-edit`: `name` (text, required), `url` (text, required), `branch` (text, required); submit → `submitModelFormDistributor()` — skipped by developer
 - Model socket (on load):
   - `git-insatnce-edit`: `GitInstance.connect()`; `GitInstance.create_form(id, pk)`; `GitInstance.connect()` filter `id`; `GitInstance.load()` filter `id`; `GitInstance.edit_form(id, pk)`
 
@@ -224,7 +224,7 @@ Registration form that creates a new `SdcUser` account; open it from the "Regist
 - Buttons:
   - "Create" in `register` → no sdc_click handler — skipped (denylist / form submit)
 - Forms:
-  - in `register`: `username` (text, required), `first_name` (text), `last_name` (text), `email` (email), `password1` (password, required), `password2` (password, required); submit → `submitModelFormDistributor()` — not submitted (needs manual input)
+  - in `register`: `username` (text, required), `first_name` (text), `last_name` (text), `email` (email), `password1` (password, required), `password2` (password, required); submit → `submitModelFormDistributor()` — skipped by developer
 - Model socket (on load):
   - `register`: `SdcUser.connect()`; `SdcUser.create_form(id, pk)`
 
@@ -238,7 +238,7 @@ Generic read-only view of one record of an SDC model, rendered with the model's 
 - The view refreshes automatically when the record changes on the server.
 - Usually reached via the "Detail" link of a `<sdc-list-view>` row; access depends on the model's server-side permissions.
 
-- Arguments: `model` (string, e.g. `ElnConnection`, `ElnUser`, `SdcUser`); `pk` (number, e.g. `1`)
+- Arguments: `model` (string, e.g. `ElnConnection`, `ElnUser`, `GitInstance`); `pk` (number, e.g. `1`)
 - Buttons:
   - "Remove" in `sdc-detail-view` → no sdc_click handler — skipped (denylist / form submit); bootstrap toggle `modal`
   - "Close" in `sdc-detail-view` → no sdc_click handler — hidden (not clicked)
@@ -310,8 +310,8 @@ Generic create/edit form for one record of an SDC model, generated from the mode
   - "Create" in `sdc-model-form` → no sdc_click handler — skipped (denylist / form submit)
   - "Save" in `sdc-model-form` → no sdc_click handler — skipped (denylist / form submit)
 - Forms:
-  - in `sdc-model-form`: `url` (url, required), `active` (checkbox), `token` (text), `device` (number, required); submit → `submitModelFormDistributor()` — not submitted (needs manual input)
-  - in `sdc-model-form`: `password_old` (password, required), `password1` (password, required), `password2` (password, required); submit → `submitModelFormDistributor()` — not submitted (needs manual input)
+  - in `sdc-model-form`: `url` (url, required), `active` (checkbox), `token` (text), `device` (number, required); submit → `submitModelFormDistributor()` — skipped by developer
+  - in `sdc-model-form`: `password_old` (password, required), `password1` (password, required), `password2` (password, required); submit → `submitModelFormDistributor()` — skipped by developer
 - Model socket (on load):
   - `sdc-model-form`: `ElnConnection.connect()`; `ElnConnection.create_form(id, pk)`; `ElnConnection.connect()` filter `id`; `ElnConnection.load()` filter `id`; `ElnConnection.edit_form(id, pk)`; `SdcUser.connect()` filter `id`; `SdcUser.load()` filter `id`; `SdcUser.edit_form(id, pk)`; `SdcUser.named_form(form_name, id, pk)`
 
@@ -336,7 +336,7 @@ Form to create, edit or copy a `ShuttleInstance` (the configuration of one Shutt
   - "Save & Done" in `shuttle-instance-edit` → no sdc_click handler — skipped (denylist / form submit)
   - "Close" in `shuttle-instance-edit` → no sdc_click handler — hidden (not clicked)
 - Forms:
-  - in `shuttle-instance-edit`: `name` (text, required), `transfer` (select, options: WebDAV/SFTP/ChemAssistent job (HTTP upload)), `user` (text), `password` (password, required), `src` (text, required), `dst` (text, required), `shuttle_type` (select, required, options: - Select an option -/File/Folder/ZIP/TAR/Flat TAR), `common_name_parts` (text), `testTextInput` (text), `duration` (number, required), `architecture` (select, options: Windows i386/Windows 64 Bit/Ubuntu 64 Bit/Raspberry Pi ARMv6/Raspberry Pi ARMv7/Raspberry Pi ARM 64 Bit), `with_converter` (checkbox), `dst_bagit` (text), `user_bagit` (text), `passwort_bagit` (password), `public_link` (url), `profile` (file), `host_key` (text), `cert` (file), `insecure` (checkbox), `linux_user` (text); submit → `submitModelFormDistributor()` — not submitted (needs manual input)
+  - in `shuttle-instance-edit`: `name` (text, required), `transfer` (select, options: WebDAV/SFTP/ChemAssistent job (HTTP upload)), `user` (text), `password` (password, required), `src` (text, required), `dst` (text, required), `shuttle_type` (select, required, options: - Select an option -/File/Folder/ZIP/TAR/Flat TAR), `common_name_parts` (text), `testTextInput` (text), `duration` (number, required), `architecture` (select, options: Windows i386/Windows 64 Bit/Ubuntu 64 Bit/Raspberry Pi ARMv6/Raspberry Pi ARMv7/Raspberry Pi ARM 64 Bit), `with_converter` (checkbox), `dst_bagit` (text), `user_bagit` (text), `passwort_bagit` (password), `public_link` (url), `profile` (file), `host_key` (text), `cert` (file), `insecure` (checkbox), `linux_user` (text); submit → `submitModelFormDistributor()` — skipped by developer
 - Model socket (on load):
   - `shuttle-instance-edit`: `ShuttleInstance.connect()`; `ShuttleInstance.create_form(id, pk)`
 

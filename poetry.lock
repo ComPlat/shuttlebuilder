@@ -2419,14 +2419,14 @@ idna = ["idna"]
 
 [[package]]
 name = "simpledomcontrol"
-version = "0.169.0"
+version = "0.171.0"
 description = "Simple DOM control -> a django MVC framework"
 optional = false
 python-versions = "<4.0,>=3.13"
 groups = ["main"]
 files = [
-    {file = "simpledomcontrol-0.169.0-py3-none-any.whl", hash = "sha256:af1f9058b243b836a422401b0c9899091e24e30e008ebdbc60517022b1ae5d56"},
-    {file = "simpledomcontrol-0.169.0.tar.gz", hash = "sha256:75738a8135a4e39499f4dd43509c25cc6df82035a41c4381295c59a2d4242923"},
+    {file = "simpledomcontrol-0.171.0-py3-none-any.whl", hash = "sha256:1486529c320926541a3c2ad0baa0973d1dacadf88f0b1248d9af892eb57c5a18"},
+    {file = "simpledomcontrol-0.171.0.tar.gz", hash = "sha256:164d1c5ad93fa624ab780a6881bbab159a6e4f8939625471102ed4a1aef9f935"},
 ]
 
 [package.dependencies]
@@ -3002,4 +3002,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "1854a86edcbd8df009d9bdb3d8afb9d06ae619a959cbe902ef6e1b369efec4d6"
+content-hash = "c938921cf9ff4ff75cbca290b27a903b5096557f73efb3c626bbb9ee38c0389d"

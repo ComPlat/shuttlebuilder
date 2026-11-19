@@ -38,7 +38,7 @@ The app is a single page: the `sdc-navigator` shows nested views (SDC controller
 Generic views per model (`<id>`: the record's id). A view that opens does not mean the role may see or change the records: that depends on the model's permissions (see Data models).
 - `ElnConnection`: list `/~sdc-list-view~&model=ElnConnection` (opens for every crawled role); detail `/~sdc-detail-view~&model=ElnConnection&pk=<id>` (opens for every crawled role); create `/~sdc-model-form~&model=ElnConnection` (opens for every crawled role); edit `/~sdc-model-form~&model=ElnConnection&pk=<id>` (opens for every crawled role); delete: "Remove" in its list
 - `ElnUser`: list `/~sdc-list-view~&model=ElnUser` (opened as user teacher); detail `/~sdc-detail-view~&model=ElnUser&pk=<id>` (opened as user teacher); create `/~sdc-model-form~&model=ElnUser` (opened as user teacher); edit `/~sdc-model-form~&model=ElnUser&pk=<id>` (opened as user teacher); delete: "Remove" in its list
-- `GitInstance`: list `/~sdc-list-view~&model=GitInstance` (opens for every crawled role); detail `/~sdc-detail-view~&model=GitInstance&pk=<id>` (not verified); create `/~sdc-model-form~&model=GitInstance` (opens for every crawled role); edit `/~sdc-model-form~&model=GitInstance&pk=<id>` (not verified); delete: "Remove" in its list
+- `GitInstance`: list `/~sdc-list-view~&model=GitInstance` (opens for every crawled role); detail `/~sdc-detail-view~&model=GitInstance&pk=<id>` (opens for every crawled role); create `/~sdc-model-form~&model=GitInstance` (opens for every crawled role); edit `/~sdc-model-form~&model=GitInstance&pk=<id>` (opens for every crawled role); delete: "Remove" in its list
 - `ShuttleInstance`: list `/~sdc-list-view~&model=ShuttleInstance` (opened as user teacher); detail `/~sdc-detail-view~&model=ShuttleInstance&pk=<id>` (not verified); create `/~sdc-model-form~&model=ShuttleInstance` (opened as user teacher); edit `/~sdc-model-form~&model=ShuttleInstance&pk=<id>` (not verified); delete: "Remove" in its list
 - `SdcUser`: list `/~sdc-list-view~&model=SdcUser` (opened as user teacher); detail `/~sdc-detail-view~&model=SdcUser&pk=<id>` (opened as user teacher); create `/~sdc-model-form~&model=SdcUser` (opens for every crawled role); edit `/~sdc-model-form~&model=SdcUser&pk=<id>` (opened as user teacher); delete: "Remove" in its list
 
@@ -93,7 +93,7 @@ List of all linked git repositories (`GitInstance`) with Shuttle source code; th
   - "NEW" → `/~git-instance-list~git-insatnce-edit`
 - Buttons:
   - "Reload" in `git-instance-list` — clicked; updates view: "Loading..."; bootstrap toggle `tooltip`
-  - "(no label)" in `git-instance-list` — clicked; opens a modal; bootstrap toggle `modal`
+  - "(no label)" in `git-instance-list` — clicked; bootstrap toggle `modal`
   - "Close" in `git-instance-list` — hidden (not clicked)
   - "Remove ComPlat/shuttle/Main" in `git-instance-list` → `removeInstance()` — hidden (not clicked)
 
@@ -142,7 +142,7 @@ Login form (username and password) that starts a session for an `SdcUser`; the v
 - Buttons:
   - "Login" in `sdc-login` — skipped (denylist / form submit)
 - Forms:
-  - in `sdc-login`: `username` (text, required), `password` (password, required) — not submitted (needs manual input)
+  - in `sdc-login`: `username` (text, required), `password` (password, required) — skipped by developer
 
 ### `<shuttle-instance-list>` — `/~shuttle-instance-list` — "List Shuttle Instances" _(login required; available to user teacher)_
 
@@ -185,7 +185,7 @@ Form to link a new git repository or edit an existing `GitInstance`.
 - Buttons:
   - "Save & Done" in `git-insatnce-edit` — skipped (denylist / form submit)
 - Forms:
-  - in `git-insatnce-edit`: `name` (text, required), `url` (text, required), `branch` (text, required) — not submitted (needs manual input)
+  - in `git-insatnce-edit`: `name` (text, required), `url` (text, required), `branch` (text, required) — skipped by developer
 
 ### `<register>` — `/~register~&1.model=SdcUser&1.next=..` _(available to anonymous)_
 
@@ -201,7 +201,7 @@ Registration form that creates a new `SdcUser` account; open it from the "Regist
 - Buttons:
   - "Create" in `register` — skipped (denylist / form submit)
 - Forms:
-  - in `register`: `username` (text, required), `first_name` (text), `last_name` (text), `email` (email), `password1` (password, required), `password2` (password, required) — not submitted (needs manual input)
+  - in `register`: `username` (text, required), `first_name` (text), `last_name` (text), `email` (email), `password1` (password, required), `password2` (password, required) — skipped by developer
 
 ### `<sdc-detail-view>` — `/~sdc-detail-view~&1.model=ElnConnection&1.pk=1` — "ElnConnection object (1)"
 
@@ -211,7 +211,7 @@ Generic read-only view of one record of an SDC model, rendered with the model's 
 - The view refreshes automatically when the record changes on the server.
 - Usually reached via the "Detail" link of a `<sdc-list-view>` row; access depends on the model's server-side permissions.
 
-- Arguments: `model` (string, e.g. `ElnConnection`, `ElnUser`, `SdcUser`); `pk` (number, e.g. `1`)
+- Arguments: `model` (string, e.g. `ElnConnection`, `ElnUser`, `GitInstance`); `pk` (number, e.g. `1`)
 - Buttons:
   - "Remove" in `sdc-detail-view` — skipped (denylist / form submit); bootstrap toggle `modal`
   - "Close" in `sdc-detail-view` — hidden (not clicked)
@@ -273,8 +273,8 @@ Generic create/edit form for one record of an SDC model, generated from the mode
   - "Create" in `sdc-model-form` — skipped (denylist / form submit)
   - "Save" in `sdc-model-form` — skipped (denylist / form submit)
 - Forms:
-  - in `sdc-model-form`: `url` (url, required), `active` (checkbox), `token` (text), `device` (number, required) — not submitted (needs manual input)
-  - in `sdc-model-form`: `password_old` (password, required), `password1` (password, required), `password2` (password, required) — not submitted (needs manual input)
+  - in `sdc-model-form`: `url` (url, required), `active` (checkbox), `token` (text), `device` (number, required) — skipped by developer
+  - in `sdc-model-form`: `password_old` (password, required), `password1` (password, required), `password2` (password, required) — skipped by developer
 
 ### `<shuttle-instance-edit>` — `/~shuttle-instance-list~shuttle-instance-edit` — "New Shuttle Instance" _(login required; available to user teacher)_
 
@@ -295,7 +295,7 @@ Form to create, edit or copy a `ShuttleInstance` (the configuration of one Shutt
   - "Save & Done" in `shuttle-instance-edit` — skipped (denylist / form submit)
   - "Close" in `shuttle-instance-edit` — hidden (not clicked)
 - Forms:
-  - in `shuttle-instance-edit`: `name` (text, required), `transfer` (select, options: WebDAV/SFTP/ChemAssistent job (HTTP upload)), `user` (text), `password` (password, required), `src` (text, required), `dst` (text, required), `shuttle_type` (select, required, options: - Select an option -/File/Folder/ZIP/TAR/Flat TAR), `common_name_parts` (text), `testTextInput` (text), `duration` (number, required), `architecture` (select, options: Windows i386/Windows 64 Bit/Ubuntu 64 Bit/Raspberry Pi ARMv6/Raspberry Pi ARMv7/Raspberry Pi ARM 64 Bit), `with_converter` (checkbox), `dst_bagit` (text), `user_bagit` (text), `passwort_bagit` (password), `public_link` (url), `profile` (file), `host_key` (text), `cert` (file), `insecure` (checkbox), `linux_user` (text) — not submitted (needs manual input)
+  - in `shuttle-instance-edit`: `name` (text, required), `transfer` (select, options: WebDAV/SFTP/ChemAssistent job (HTTP upload)), `user` (text), `password` (password, required), `src` (text, required), `dst` (text, required), `shuttle_type` (select, required, options: - Select an option -/File/Folder/ZIP/TAR/Flat TAR), `common_name_parts` (text), `testTextInput` (text), `duration` (number, required), `architecture` (select, options: Windows i386/Windows 64 Bit/Ubuntu 64 Bit/Raspberry Pi ARMv6/Raspberry Pi ARMv7/Raspberry Pi ARM 64 Bit), `with_converter` (checkbox), `dst_bagit` (text), `user_bagit` (text), `passwort_bagit` (password), `public_link` (url), `profile` (file), `host_key` (text), `cert` (file), `insecure` (checkbox), `linux_user` (text) — skipped by developer
 
 ## Embedded controllers
 
