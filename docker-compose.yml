@@ -1,7 +1,7 @@
 x-postgress-variables: &postgress-variables
   POSTGRES_DB: "${POSTGRES_DB:-postgres}"
   POSTGRES_USER: "${POSTGRES_USER:-postgres}"
-  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-q3opc3123§§!'urbn$5(#6}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
 
 x-envs: &envs
   MODE: prod
@@ -72,8 +72,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: asetvbj!nm345vawectr32
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:?Set PGADMIN_DEFAULT_EMAIL in .env}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in .env}"
     ports:
       - "8080:80"
     depends_on:

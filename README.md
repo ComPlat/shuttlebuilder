@@ -165,7 +165,7 @@ POSTGRES_HOST=db
 
 Compose files:
 
-- `docker-compose.yml`: the image from Docker Hub with PostgreSQL, Redis, the LAN broadcaster and pgAdmin. Uploaded converter profiles and server certificates are kept in the volume `shuttle_media` (`/opt/media`).
+- `docker-compose.yml`: the image from Docker Hub with PostgreSQL, Redis, the LAN broadcaster and pgAdmin. `POSTGRES_PASSWORD`, `PGADMIN_DEFAULT_EMAIL` and `PGADMIN_DEFAULT_PASSWORD` have no defaults and must be set in `.env` (see `.env.sample`). Uploaded converter profiles and server certificates are kept in the volume `shuttle_media` (`/opt/media`).
 - `docker-compose.p2d.yml`: **Push2Deploy** (e.g. Dokploy). It builds the image from this repository and runs PostgreSQL and Redis as separate services. `ALLOWED_HOST`, `DJANGO_SECRET_KEY` and `POSTGRES_PASSWORD` are required, the rest is optional (environment or `.env`). The app listens on container port 80 (Traefik on `dokploy-network`). The Shuttle checkout and the builds are not kept: after a redeploy the next download clones the active `GitInstance` again.
 - `docker-compose.dev.yml` and `docker-compose.db.yml`: local development.
 
