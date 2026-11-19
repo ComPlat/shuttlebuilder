@@ -190,6 +190,9 @@ GOPATH = os.environ.get('GOPATH')
 SHUTTLE_BUILD_TIMEOUT = int(os.environ.get('SHUTTLE_BUILD_TIMEOUT', 600))
 # Go 1.10.8 installation used for win_i386 (Windows XP) builds in GOPATH mode.
 XP_GOROOT = os.environ.get('XP_GOROOT', '/usr/local/go1.10.8')
+# Base URL of a ChemAssistentManager server. If set, the instance form pre-fills `dst` for the
+# ChemAssistent transfer type and links to it (to create a job and an API key). Empty: no prefill, no link.
+CHEMASSISTENT_URL = os.environ.get('CHEMASSISTENT_URL', '').strip()
 
 if DEBUG:
     ELN_URL = os.environ.get('ELN_URL', 'http://127.0.0.1:3000')

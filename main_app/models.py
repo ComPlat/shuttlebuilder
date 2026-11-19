@@ -294,6 +294,7 @@ SYSTEM_CHOISES = (
 TRANSFER_CHOISES = (
     ('webdav', _('WebDAV')),
     ('sftp', _('SFTP')),
+    ('chemassistent', _('ChemAssistent job (HTTP upload)')),
 )
 
 
