@@ -294,6 +294,19 @@ export default class ShuttleInstance extends SdcModel {
         "remote_field": null,
         "reverse_relation": false
       },
+      "linux_user": {
+        "type": "CharField",
+        "required": false,
+        "max_length": 32,
+        "is_relation": false,
+        "many_to_many": null,
+        "one_to_many": null,
+        "many_to_one": null,
+        "one_to_one": null,
+        "related_model": null,
+        "remote_field": null,
+        "reverse_relation": false
+      },
       "built_version": {
         "type": "CharField",
         "required": false,
@@ -347,6 +360,7 @@ export default class ShuttleInstance extends SdcModel {
     this._profile = null;
     this._last_update = null;
     this._last_build = null;
+    this._linux_user = null;
     this._built_version = null;
     this._owner = new SdcQuerySet('SdcUser');
     this.setValues(data || {});
@@ -419,6 +433,9 @@ export default class ShuttleInstance extends SdcModel {
     } catch {} 
     try {
       this.last_build = data.last_build ?? null;
+    } catch {} 
+    try {
+      this.linux_user = data.linux_user ?? null;
     } catch {} 
     try {
       this.built_version = data.built_version ?? null;
@@ -536,6 +553,11 @@ export default class ShuttleInstance extends SdcModel {
   set last_build(value){
     this.setlast_build(value);
     this._updateForm('last_build');
+  }
+
+  set linux_user(value){
+    this.setlinux_user(value);
+    this._updateForm('linux_user');
   }
 
   set built_version(value){
@@ -660,6 +682,11 @@ export default class ShuttleInstance extends SdcModel {
     this._last_build = this.parseValue(value, ShuttleInstance.fields.last_build);
   }
 
+  setlinux_user(value){
+    this.validate(value, ShuttleInstance.fields.linux_user);
+    this._linux_user = this.parseValue(value, ShuttleInstance.fields.linux_user);
+  }
+
   setbuilt_version(value){
     this.validate(value, ShuttleInstance.fields.built_version);
     this._built_version = this.parseValue(value, ShuttleInstance.fields.built_version);
@@ -757,6 +784,10 @@ export default class ShuttleInstance extends SdcModel {
 
   get last_build(){
     return this._last_build;
+  }
+
+  get linux_user(){
+    return this._linux_user;
   }
 
   get built_version(){
