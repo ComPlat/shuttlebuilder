@@ -300,17 +300,18 @@ TRANSFER_CHOISES = (
 
 class ShuttleInstance(models.Model, SdcModel):
     """
-    Configuration of one Shuttle: a small program for a lab PC that watches a folder and uploads new data (WebDAV or SFTP).
+    Configuration of one Shuttle: a small program for a lab PC that watches a folder and uploads new data (WebDAV, SFTP or an HTTP upload to a ChemAssistentManager job).
 
     Fields:
     - `name`: unique, cannot be changed later; also the name of the working folder `~/shuttle/shuttle_<name>/` on the lab PC. `owner`: the creating user. Logged-in users see and change only their own instances; staff and superusers see all.
     - `src`: folder to watch on the lab PC (entered plainly, no doubled backslashes); `duration`: seconds a file must stay unchanged before it is sent (default 300, at least 1; it is also the longest wait between retries).
-    - `transfer`: `webdav` or `sftp`; `dst`, `user`, `password`: target URL and credentials on the server. `dst` is checked: SFTP `host[:port]/path` (also `ssh://` or `sftp://`, port 22 by default), WebDAV `http(s)://host/path`.
+    - `transfer`: `webdav`, `sftp` or `chemassistent`; `dst`, `user`, `password`: target URL and credentials on the server. `dst` is checked: SFTP `host[:port]/path` (also `ssh://` or `sftp://`, port 22 by default), WebDAV `http(s)://host/path`.
+    - `chemassistent`: Shuttle uploads by HTTP POST to a ChemAssistentManager job (trigger "HTTP file upload (API key)"); one upload starts one AI run. `password` holds the API key (`cam_...`, 20 to 200 characters, created once in ChemAssistentManager; a key without the `cam_` prefix is rejected); `user` is not used (it is cleared). `dst` is `http(s)://host` of the ChemAssistentManager server (an empty path or `/` becomes `/api/jobs/trigger`) or the full trigger URL of the job. `with_converter` and `host_key` do not apply. `cert` and `insecure` work as for WebDAV. Per `shuttle_type`: `file` and `flat_tar` = one run per file, `folder` = one run per folder (nested names are flattened, `A/B/x.csv` becomes `A__B__x.csv`), `zip` / `tar` = one run per archive. At most 100 MB per upload (Shuttle default, not configurable here). A local file is deleted only after the server accepted it (HTTP 202); with a revoked key or a disabled job the files stay and wait for a rebuilt Shuttle with a new key. Built for every architecture; Windows XP speaks at most TLS 1.2, so the server must offer TLS 1.2.
     - `shuttle_type`: `file` (each file), `folder` (whole folder once complete), `zip` / `tar` (folder as an archive once complete) or `flat_tar` (files grouped by the `common_name_parts` regex into .tar.gz archives). A changed folder is sent again completely.
     - `architecture`: target system: `win_i386` (also Windows XP), `win_64`, `ubuntu_64`, `raspberry_pi_6`, `raspberry_pi_7` or `raspberry_pi_64`. Windows i386 is built with Go 1.10.8, everything else with Go 1.26.11.
     - `with_converter`: also convert data with ChemConverterApp to a BagIt archive, sent to `dst_bagit` with `user_bagit`/`passwort_bagit`; needs a JSON `profile`, `public_link` is the URL prefix of the raw files. The converter ships in the zip (Windows x64, Linux); a failing conversion is skipped and the raw data is still sent.
     - `host_key` (SFTP only): expected SSH host key fingerprint of the server, `SHA256:<base64>` (optionally `ssh-ed25519 255 SHA256:...` as shown by WinSCP) or MD5 `aa:bb:...`. It applies to both SFTP destinations, so with a converter both must be the same server. Required for `win_i386` + SFTP unless `insecure` is set. Otherwise empty means trust on first use: Shuttle stores the key of the first connection in `known_hosts` and refuses a changed key later.
-    - `cert` (WebDAV only): PEM server certificate (`.crt`, `.pem`, `.cer`), needed for self-signed servers and the only way TLS is verified on Windows XP. It is built in as `server.crt` and shipped next to the executable (the download becomes a zip).
+    - `cert` (WebDAV and ChemAssistent only): PEM server certificate (`.crt`, `.pem`, `.cer`), needed for self-signed servers and the only way TLS is verified on Windows XP. It is built in as `server.crt` and shipped next to the executable (the download becomes a zip).
     - `insecure`: WARNING, disables TLS certificate **and** SSH host key verification. Any user may set it; use it only for tests. It is flagged ("Verification disabled") in the instance list and Shuttle logs a warning at start.
     - `linux_user`: the Linux user that runs the service; used in the systemd unit of the instance. Empty: the unit contains `User=CHANGE_ME` to replace by hand. Ignored for Windows architectures.
     - `built_version`: Shuttle version of the last successful build, shown next to the download button (empty: not built yet). The active `GitInstance` version may be newer; the next download then rebuilds. `last_build`, `last_update`: set by the system.
@@ -319,7 +320,7 @@ class ShuttleInstance(models.Model, SdcModel):
 
     Download and installation:
     - Downloading compiles the executable from the active `GitInstance` (slow on first download or after changes); deleting also removes the build files.
-    - The download is the bare executable, or a zip when a certificate (WebDAV), a converter, or Windows XP + SFTP (with WinSCP) applies. Every zip contains `INSTALL.txt` with the install steps for the instance: install folder `C:\\Program Files\\Shuttle` (Windows, plus `shuttle_task.vbs` in `shell:startup`) or `/opt/Shuttle` (Linux), working folder and log (`shuttle_log.txt`), the sent register (`sent_register.json`; the first start sends every stable file in `src` once) and `known_hosts`. `INSTALL.txt` contains no secrets.
+    - The download is the bare executable, or a zip when a certificate (WebDAV or ChemAssistent), a converter, or Windows XP + SFTP (with WinSCP) applies. Every zip contains `INSTALL.txt` with the install steps for the instance: install folder `C:\\Program Files\\Shuttle` (Windows, plus `shuttle_task.vbs` in `shell:startup`) or `/opt/Shuttle` (Linux), working folder and log (`shuttle_log.txt`), the sent register (`sent_register.json`; the first start sends every stable file in `src` once) and `known_hosts`. `INSTALL.txt` contains no secrets.
     - Linux: the instance list has a "systemd unit" button (per-instance `shuttle.service`, owner/staff only); install it as `/etc/systemd/system/shuttle.service`, then `systemctl daemon-reload` and `systemctl enable --now shuttle.service`. A generic unit without user exists for old links.
     - Listed in `<shuttle-instance-list>`, created/edited/copied in `<shuttle-instance-edit>`.
     """
@@ -331,15 +332,15 @@ class ShuttleInstance(models.Model, SdcModel):
     name = models.CharField(help_text=_('Unique name of the Shuttle instance. This name cannot be changed!'),
                             max_length=50,
                             unique=True)
-    user = models.CharField(help_text=_("WebDAV or SFTP user"), max_length=50, default="")
-    password = models.CharField(help_text=_("WebDAV or SFTP password"), max_length=100)
+    user = models.CharField(help_text=_("WebDAV or SFTP user (not used for ChemAssistent)"), max_length=50, default="")
+    password = models.CharField(help_text=_("WebDAV or SFTP password; for ChemAssistent the API key of the job (cam_...)"), max_length=100)
     transfer = models.CharField(_('Transfer protocol'),
-                                help_text=_("Upload with the WebDAV protocol (HTTP/HTTPS) or the SFTP protocol (SSH)."),
+                                help_text=_("Upload with the WebDAV protocol (HTTP/HTTPS), the SFTP protocol (SSH) or an HTTP upload to a ChemAssistentManager job (API key, one AI run per upload)."),
                                 max_length=255, choices=TRANSFER_CHOISES, default=TRANSFER_CHOISES[0][0])
     src = models.CharField(help_text=_(
         "Source directory to monitor on the lab PC (absolute path). Enter it as it is, a backslash does not have to be doubled."),
         max_length=255)
-    dst = models.CharField(help_text=_("""WebDAV or SFTP destination URL. Accepted: SFTP <code>host[:port]/path</code>, also <code>ssh://</code> or <code>sftp://</code> (port 22 by default); WebDAV <code>https://...</code> or <code>http://...</code>. If the destination is on the lsdf, the URL should be as follows:<br>
+    dst = models.CharField(help_text=_("""WebDAV, SFTP or ChemAssistent destination URL. Accepted: SFTP <code>host[:port]/path</code>, also <code>ssh://</code> or <code>sftp://</code> (port 22 by default); WebDAV <code>https://...</code> or <code>http://...</code>; ChemAssistent <code>https://host</code> (the path <code>/api/jobs/trigger</code> is added) or the full trigger URL of the job. If the destination is on the lsdf, the URL should be as follows:<br>
         <span style="margin-left: 20px; font-weight: 800;">SFTP</span>: os-login.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
         <span style="margin-left: 20px; font-weight: 800;">WebDAV</span>: https://os-webdav.lsdf.kit.edu/[OE]/[inst]/projects/[PROJECT_PATH]/<br>
 
@@ -349,7 +350,7 @@ class ShuttleInstance(models.Model, SdcModel):
                     <span style="margin-left: 30px;">[PROJECT_PATH]-Path (directory) within the LSDF</span>"""),
                            max_length=255)
     shuttle_type = models.CharField(_('Type'), help_text=_(
-        "Type must be 'file', 'folder', 'tar', 'zip' or 'flat_tar'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' and 'zip' send a folder as a .tar.gz or zip archive, only when all files in a folder are ready. The 'flat_tar' option groups files by the common name regex and sends each group as a .tar.gz archive. If a folder changes, it is sent again completely. On the first start every stable file already in the source folder is sent once."),
+        "Type must be 'file', 'folder', 'tar', 'zip' or 'flat_tar'. The 'file' option means that each file is handled individually, the 'folder' option means that entire folders are transmitted only when all files in them are ready. The options 'tar' and 'zip' send a folder as a .tar.gz or zip archive, only when all files in a folder are ready. The 'flat_tar' option groups files by the common name regex and sends each group as a .tar.gz archive. If a folder changes, it is sent again completely. On the first start every stable file already in the source folder is sent once. With the ChemAssistent transfer 'file' and 'flat_tar' start one AI run per file, 'folder' one run per folder (nested names are flattened, A/B/x.csv becomes A__B__x.csv), 'tar' and 'zip' one run per archive."),
                                     max_length=255, choices=TYPE_CHOISES)
     common_name_parts = models.CharField(_('Common name regex'), blank=True, max_length=255, default="^[A-Za-z]{1,4}",
                                          help_text=_(
@@ -361,9 +362,9 @@ class ShuttleInstance(models.Model, SdcModel):
                                 help_text=_("SFTP only: SSH host key fingerprint of the server; Shuttle then only connects to a server presenting this key. If empty, the key of the first connection is trusted and stored in known_hosts (a changed key is refused later). Formats: SHA256:<base64> (optionally preceded by the algorithm and bits, e.g. ssh-ed25519 255 SHA256:...) or MD5 aa:bb:...:ff. Get it in WinSCP (Session, Server/Protocol Information) or with: ssh-keyscan -p <port> <host> | ssh-keygen -lf - . Required for Windows XP (Windows i386) with SFTP (not tested on real hardware yet). Applies to both SFTP destinations."))
     cert = models.FileField(_('Server certificate'), upload_to='certs/', null=True, blank=True,
                             validators=[FileExtensionValidator(allowed_extensions=['crt', 'pem', 'cer'])],
-                            help_text=_("WebDAV only: PEM certificate of the server (.crt, .pem or .cer), needed for self-signed servers. On Windows XP it is the only way TLS is verified. It is shipped as server.crt next to the executable (the download becomes a zip); keep it there."))
+                            help_text=_("WebDAV and ChemAssistent only: PEM certificate of the server (.crt, .pem or .cer), needed for self-signed servers. On Windows XP it is the only way TLS is verified. It is shipped as server.crt next to the executable (the download becomes a zip); keep it there."))
     insecure = models.BooleanField(_('Disable verification (insecure)'), default=False,
-                                   help_text=_("WARNING: disables the TLS certificate AND the SSH host key verification, so the connection can be intercepted. Only for tests; Shuttle logs a warning at every start."))
+                                   help_text=_("WARNING: disables the TLS certificate (WebDAV, ChemAssistent) AND the SSH host key verification (SFTP), so the connection can be intercepted. Only for tests; Shuttle logs a warning at every start."))
     architecture = models.CharField(_('System architecture'),
                                     help_text=_(
                                         "Architecture and operating system of the lab PC where Shuttle runs: Windows i386 (incl. Windows XP), Windows 64 bit, Ubuntu 64 bit or Raspberry Pi (ARMv6, ARMv7, ARM 64 bit)."),
@@ -420,10 +421,15 @@ class ShuttleInstance(models.Model, SdcModel):
         os.makedirs(file_paths, exist_ok=True)
         return file_paths
 
+    def uses_tls(self):
+        """WebDAV and ChemAssistent talk HTTP(S): `cert` and `insecure` apply to them."""
+        return self.transfer in ('webdav', 'chemassistent')
+
     def _get_build_config(self):
+        chem = self.transfer == 'chemassistent'
         return make_context({"src": go_str(self.src),
                              "dst": go_str(self.dst),
-                             "user": go_str(self.user),
+                             "user": "" if chem else go_str(self.user),
                              "password": go_str(self.password),
                              "duration": go_str(self.duration),
                              "common_regex": go_str(self.common_name_parts),
@@ -433,21 +439,23 @@ class ShuttleInstance(models.Model, SdcModel):
                              "hostkey": go_str(self.host_key.strip()) if self.transfer == 'sftp' else "",
                              "insecure": "1" if self.insecure else "",
                              "type": go_str(self.shuttle_type),
-                             "preconvert": "T" if self.with_converter else "N",
-                             "dst_converter": go_str(self.dst_bagit),
-                             "user_converter": go_str(self.user_bagit),
-                             "password_converter": go_str(self.passwort_bagit),
-                             "public": go_str(self.public_link)})
+                             "preconvert": "T" if self.with_converter and not chem else "N",
+                             "dst_converter": "" if chem else go_str(self.dst_bagit),
+                             "user_converter": "" if chem else go_str(self.user_bagit),
+                             "password_converter": "" if chem else go_str(self.passwort_bagit),
+                             "public": "" if chem else go_str(self.public_link)})
 
     def _cert_applies(self):
-        """A certificate is bundled (as `server.crt`) only for WebDAV."""
-        return bool(self.cert) and self.transfer == 'webdav'
+        """A certificate is bundled (as `server.crt`) for WebDAV and ChemAssistent."""
+        return bool(self.cert) and self.uses_tls()
 
     def only_exe(self):
         if self._cert_applies():
             return False
         if self.architecture == 'win_i386' and self.transfer == 'sftp':
             return False
+        if self.transfer == 'chemassistent':
+            return True  # no converter, no WinSCP
         return not self.with_converter
 
     def build(self):

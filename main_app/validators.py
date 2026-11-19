@@ -37,9 +37,12 @@ def validate_destination(value, transfer):
             parts = urlsplit(value)
             host = parts.hostname
             port = parts.port
-        elif transfer == 'webdav':
+        elif transfer in ('webdav', 'chemassistent'):
             parts = urlsplit(value)
             if parts.scheme.lower() not in ('http', 'https'):
+                if transfer == 'chemassistent':
+                    raise ValidationError(_('A ChemAssistent destination must start with http:// or https://.'),
+                                          code='invalid_destination')
                 raise ValidationError(_('A WebDAV destination must start with http:// or https://.'),
                                       code='invalid_destination')
             host = parts.hostname
@@ -53,6 +56,19 @@ def validate_destination(value, transfer):
         raise ValidationError(_('The destination has no host.'), code='invalid_destination')
     if port is not None and not 1 <= port <= 65535:
         raise ValidationError(_('The port must be between 1 and 65535.'), code='invalid_destination')
+
+
+def validate_api_key(value):
+    """ChemAssistentManager API key: `cam_` prefix, 20 to 200 characters, no whitespace or control characters.
+    Shuttle only warns about a missing prefix; the form is stricter because a wrong key only fails later in the lab."""
+    value = value or ''
+    if not value.startswith('cam_'):
+        raise ValidationError(_('The API key must start with "cam_".'), code='invalid_api_key')
+    if not 20 <= len(value) <= 200:
+        raise ValidationError(_('The API key must be 20 to 200 characters long.'), code='invalid_api_key')
+    if any(c.isspace() or not c.isprintable() for c in value):
+        raise ValidationError(_('The API key must not contain whitespace or control characters.'),
+                              code='invalid_api_key')
 
 
 def destination_host_port(value, transfer):

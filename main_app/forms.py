@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from cryptography import x509
 
-from main_app.validators import validate_host_key, validate_destination, destination_host_port, LINUX_USER_RE
+from main_app.validators import validate_host_key, validate_destination, validate_api_key, destination_host_port, LINUX_USER_RE
 
 from main_app.models import ShuttleInstance
 from main_app.models import GitInstance
@@ -59,6 +59,8 @@ class ShuttleInstanceForm(ModelForm):
         instance = self.instance
         if instance and instance.pk:
             self.fields['name'].widget.attrs['readonly'] = True
+        # required for WebDAV/SFTP in clean(); not used for ChemAssistent
+        self.fields['user'].required = False
 
     def clean_name(self):
         instance = getattr(self, 'instance', None)
@@ -109,7 +111,10 @@ class ShuttleInstanceForm(ModelForm):
             self._errors.pop('linux_user', None)
             cleaned_data['linux_user'] = ''
         with_converter = cleaned_data.get('with_converter')
-        if with_converter:
+        if transfer == 'chemassistent' and with_converter:
+            self.add_error('with_converter', ValidationError(
+                _('The converter is not supported with the ChemAssistent transfer type.')))
+        elif with_converter:
             if cleaned_data.get('architecture') not in ['win_64', 'ubuntu_64']:
                 self.add_error('with_converter', ValidationError(_('Converter can only be used for Architecture Windows 64 Bit and Ubuntu 64 Bit')))
             needed_fields_for_converter = ['dst_bagit', 'user_bagit', 'passwort_bagit', 'public_link', 'profile']
@@ -129,6 +134,24 @@ class ShuttleInstanceForm(ModelForm):
             except re.error:
                 self.add_error('common_name_parts', ValidationError(_('Common name regex must be a compilable regular expression send type is set to flat_tar')))
 
+        if transfer in ('webdav', 'sftp') and not (cleaned_data.get('user') or '').strip() and 'user' not in self.errors:
+            self.add_error('user', ValidationError(_('This field is required.'), code='required'))
+        if transfer == 'chemassistent':
+            cleaned_data['user'] = ''
+            cleaned_data['host_key'] = ''
+            self._errors.pop('host_key', None)
+            password = cleaned_data.get('password')
+            if password and 'password' not in self.errors:
+                try:
+                    validate_api_key(password)
+                except ValidationError as e:
+                    self.add_error('password', e)
+            dst = cleaned_data.get('dst')
+            if dst and 'dst' not in self.errors:
+                try:
+                    validate_destination(dst, 'chemassistent')
+                except ValidationError as e:
+                    self.add_error('dst', e)
         if transfer in ('webdav', 'sftp'):
             dst_ok = {}
             for field, active in (('dst', True), ('dst_bagit', bool(with_converter))):
@@ -145,7 +168,7 @@ class ShuttleInstanceForm(ModelForm):
                 cleaned_data['host_key'] = ''
             else:
                 if cleaned_data.get('cert'):
-                    self.add_error('cert', ValidationError(_('The certificate is only used for WebDAV.')))
+                    self.add_error('cert', ValidationError(_('The certificate is only used for WebDAV and ChemAssistent.')))
                 insecure = cleaned_data.get('insecure')
                 if (cleaned_data.get('architecture') == 'win_i386' and not host_key and not insecure
                         and 'host_key' not in self.errors):
