@@ -33,8 +33,6 @@ services:
     hostname: db
     expose:
       - 5432
-    ports:
-      - ${PROJECT_POSTGRES_PORT:-65432}:5432
     environment:
       <<: *postgress-variables
     volumes:
@@ -74,8 +72,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:?Set PGADMIN_DEFAULT_EMAIL in .env}"
       PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in .env}"
-    ports:
-      - "8080:80"
+    # No published port. To use it: docker compose run --rm -p 127.0.0.1:8080:80 pgadmin
+    # (then an SSH tunnel to port 8080 of the server).
     depends_on:
       - db
 
