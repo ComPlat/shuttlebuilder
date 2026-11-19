@@ -35,6 +35,13 @@ NASTY = {
     'common_name_parts': r'^<a>\d+',
 }
 
+# ChemAssistent: the API key is the password (a secret, never printed); no user, no host key.
+CAM_FIELDS = {
+    'password': 'cam_' + 'Kq7' * 10 + 'ab',  # cam_ + 32 characters
+    'user': '',
+    'dst': 'https://cam.example.invalid',
+}
+
 # architecture -> expected start of the output of `file <binary>`
 FILE_EXPECT = {
     'ubuntu_64': 'ELF 64-bit LSB executable, x86-64',
@@ -59,6 +66,9 @@ CASES = [
     ('win_i386', 'win_i386', 'webdav', {}, False),
     ('ubuntu_64+insecure', 'ubuntu_64', 'sftp', {'host_key': HOST_KEY, 'insecure': True}, False),
     ('ubuntu_64+cert', 'ubuntu_64', 'webdav', {}, True),
+    ('ubuntu_64', 'ubuntu_64', 'chemassistent', CAM_FIELDS, False),
+    ('win_64', 'win_64', 'chemassistent', CAM_FIELDS, False),
+    ('win_i386', 'win_i386', 'chemassistent', CAM_FIELDS, False),
 ]
 
 

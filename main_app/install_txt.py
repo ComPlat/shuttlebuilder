@@ -12,6 +12,14 @@ LINUX_DIR = '/opt/Shuttle'
 _CONTROL = re.compile(r'[\x00-\x1f\x7f]+')
 
 
+def uses_tls(instance):
+    """True if a server certificate can apply (WebDAV, ChemAssistent); `ShuttleInstance.uses_tls()` if present."""
+    method = getattr(instance, 'uses_tls', None)
+    if callable(method):
+        return bool(method())
+    return instance.transfer in ('webdav', 'chemassistent')
+
+
 def _clean(value):
     """One line of plain text: control characters (and so line breaks) become a space."""
     return _CONTROL.sub(' ', str(value)).strip()
@@ -83,7 +91,7 @@ def render_install_txt(instance, request):
             '     systemctl daemon-reload',
             '     systemctl enable --now shuttle.service',
         ]
-    if instance.cert and instance.transfer == 'webdav':
+    if instance.cert and uses_tls(instance):
         lines += [
             '',
             _('server.crt is the certificate of the server. It must stay next to %(exe)s.') % {'exe': exe},

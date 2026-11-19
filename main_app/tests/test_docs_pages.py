@@ -26,3 +26,9 @@ class DocsPagesTest(SimpleTestCase):
         for text in ['.exe', 'execute bit', 'alphabetical order', 'hidden files', 'conversion skipped',
                      'converter executable does not exist']:
             self.assertIn(text, html)
+
+    def test_basic_info_documents_chemassistent(self):
+        html = render_to_string('main_app/sdc/basic_info.html')
+        for text in ['ChemAssistent upload', 'HTTP file upload (API key)', '/api/jobs/trigger', 'A__B__x.csv',
+                     '100 MB', 'TLS 1.2']:
+            self.assertIn(text, html)

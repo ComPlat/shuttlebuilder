@@ -16,6 +16,9 @@ Without a host key, Shuttle trusts the server key it sees on the first connectio
 **4. Windows XP with SFTP is untested on real hardware.**
 It has not been run on a real Windows XP machine yet. Please try it on one PC first and tell us the result.
 
+**5. New transfer type: ChemAssistent.**
+Shuttle can now upload files to a ChemAssistentManager job (HTTP upload with an API key); every upload starts one run of the job's AI agent. It is optional and changes nothing for existing WebDAV and SFTP instances. See the data transfer documentation for the steps.
+
 **How to update**
 1. In ShuttleBuilder download your Shuttle again (a zip with `INSTALL.txt`).
 2. Stop the running Shuttle (Windows: end `shuttle.exe` in the Task Manager; Linux: `systemctl stop shuttle.service`).
